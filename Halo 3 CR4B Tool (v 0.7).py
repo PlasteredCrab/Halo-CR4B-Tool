@@ -8,13 +8,23 @@ import struct
 import ntpath
 import sys
 import mathutils
+import os.path
 from mathutils import Matrix
-#from bitstring import ConstBitStream
-
 # for some profiling
 from time import perf_counter
 import cProfile
 import pstats
+
+#Dependant modules
+#import scipy
+#import pillow
+import numpy as np
+#from PIL import Image
+#import py360convert
+
+#from bitstring import ConstBitStream
+
+
 
 #LOOPS THROUGH ALL OBJECTS IN BLEND FILE
 # if bpy.context.selected_objects == []:
@@ -28,6 +38,13 @@ import pstats
                     #[HARD CODED DATA AREA]#
 
 
+#DEPENDANCIES NEEDED
+# pip install cube2sphere  for python 3.0+
+# https://github.com/Xyene/cube2sphere
+
+# pip install py360convert  
+# https://github.com/sunset1995/py360convert
+
 #MUST SPECIFY THE ROOT FOLDER OF YOUR TAGS FOR HALO 3 HERE!!!!!
 Tag_Root = "D:/Halo 3/Halo 3 Tag Data/h3 all bitmaps and shaders/tags/"        
      
@@ -37,7 +54,7 @@ Export_Root = "C:/Users/jeffr/Downloads/H3 Material Tool/Test Objects"
   
 DEFAULT_BITMAP_DIR = "shaders/default_bitmaps/bitmaps/"
 IMAGE_EXTENSION = ".png"
-Preferred_Blend = 'BLEND'    #Either 'BLEND' or 'HASHED'
+Preferred_Blend = 'HASHED'    #Either 'BLEND' or 'HASHED'
 
 
 #some global variables
@@ -1867,7 +1884,9 @@ def apply_group_values(NodeGroup, ShaderItem, category):
             #invert_mask?
         elif(ShaderItem.bump_mapping_option == 4): #H3Category: bump_mapping - detail_plus_detail_masked
             NodeGroup.inputs.get("bump_detail_coefficient").default_value = ShaderItem.bump_detail_coefficient
-            #bump_detail_masked_coefficient           
+            #bump_detail_masked_coefficient  
+        #elif(ShaderItem.bump_mapping_option == 5): #H3Category: bump_mapping - detail_unorm
+            #NodeGroup.inputs.get("bump_detail_coefficient").default_value = ShaderItem.bump_detail_coefficient            
         
     #environment map group    
     elif(category == "env map"):
@@ -5433,6 +5452,11 @@ for idx, i in enumerate(pymat):
         BumpGroup = apply_group_values(BumpGroup, ShaderItem, "bump")
         ShaderGroupList.append("bump")
         ShaderGroupList.append("bump")
+    elif(Shader_Type == 0 and ShaderItem.bump_mapping_option == 5): #H3Category: bump_mapping - detail_unorm
+        BumpGroup = instantiate_group(i.node_tree.nodes, "H3Category: bump_mapping - detail")
+        BumpGroup = apply_group_values(BumpGroup, ShaderItem, "bump")
+        ShaderGroupList.append("bump")
+        ShaderGroupList.append("bump")
         
         
                         #############################
@@ -5477,7 +5501,7 @@ for idx, i in enumerate(pymat):
         ShaderOutputCount = ShaderOutputCount + 1
         ShaderGroupList.append("material")
     elif(Shader_Type == 0 and ShaderItem.material_model_option == 3): #H3Category: material_model - foliage                           #Using Diffuse Only FOR NOW FIX LATER
-        MatModelGroup = instantiate_group(i.node_tree.nodes, "H3Category: material_model - diffuse only")
+        MatModelGroup = instantiate_group(i.node_tree.nodes, "H3Category: material_model - diffuse_only")
         MatModelGroup = apply_group_values(MatModelGroup, ShaderItem, "mat model")
         ShaderOutputCount = ShaderOutputCount + 1
         ShaderGroupList.append("material")    
@@ -5705,7 +5729,7 @@ for idx, i in enumerate(pymat):
     ###############
     
     #CONNECT "ALBEDO GROUP" TO "MATERIAL MODEL" GROUP
-    if(Shader_Type == 0 and ShaderItem.material_model_option != 0 and ShaderItem.material_model_option != 4): #every option but "diffuse_only"
+    if(Shader_Type == 0 and ShaderItem.material_model_option != 0 and ShaderItem.material_model_option != 4 and ShaderItem.material_model_option != 3): #every option but "diffuse_only"
         i.node_tree.links.new(MatModelGroup.inputs["albedo.rgb"], AlbedoGroup.outputs["albedo.rgb"])
         i.node_tree.links.new(MatModelGroup.inputs["albedo.a"], AlbedoGroup.outputs["albedo.a"])
     
@@ -5971,6 +5995,11 @@ for idx, i in enumerate(pymat):
                     directory = Export_Root
                 
                 try:
+                    #CUBEMAP CONVERSION CODE TESTING
+                    #if (ShaderItem.bitmap_list[bitm].type == "environment_map"):
+                        #convert texture to equirectangular map
+                        #os.system("python convert_cube.py " + ShaderItem.bitmap_list[bitm].directory + IMAGE_EXTENSION + " " + IMAGE_EXTENSION)
+                    #else:
                     ImageTextureNodeList[bitm + 1].image = bpy.data.images.load(directory + '/' + ShaderItem.bitmap_list[bitm].directory + IMAGE_EXTENSION)
                     print("Created type: " + ShaderItem.bitmap_list[bitm].type)
                 except: 
@@ -6480,7 +6509,7 @@ for idx, i in enumerate(pymat):
                                    
                 #BASE_MAP
                 #print("before base")
-                if(Shader_Type == 0 and ShaderItem.bitmap_list[bitm].type == "base_map" and ShaderGroupList[bitm + 1] == "albedo"):
+                if(Shader_Type == 0 and ShaderItem.bitmap_list[bitm].type == "base_map"): # and ShaderGroupList[bitm + 1] == "albedo"):
                     #if albedo option = constant_color
                     print("  trying to link base_map")
                     if (ShaderItem.albedo_option == 2):
@@ -6517,7 +6546,7 @@ for idx, i in enumerate(pymat):
                             i.node_tree.links.new(AlbedoGroup.inputs[1], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                 #print("before detail map")
                 #DETAIL_MAP
-                if(Shader_Type == 0 and ShaderItem.bitmap_list[bitm].type == "detail_map" and ShaderGroupList[bitm + 1] == "albedo"):
+                if(Shader_Type == 0 and ShaderItem.bitmap_list[bitm].type == "detail_map"): # and ShaderGroupList[bitm + 1] == "albedo"):
                     print("  trying to link detail_map")
                     #if albedo option is not constant color
                     if (ShaderItem.albedo_option != 2 and ShaderItem.material_model_option != 0):
@@ -6595,7 +6624,7 @@ for idx, i in enumerate(pymat):
                 
                 if(Shader_Type == 1):
                     #MATERIAL 0 LINK
-                    if(ShaderItem.bitmap_list[bitm].type == "base_map_m_0"):
+                    if(ShaderItem.bitmap_list[bitm].type == "base_map_m_0" and ShaderItem.material_0_option != 2):
                         print("  trying to link base_map_m_0")
                         #- rgb node
                         #if curve uses Gamma
@@ -6605,7 +6634,7 @@ for idx, i in enumerate(pymat):
                         else:
                             #link base_map_m_0 to terrain group m0
                             i.node_tree.links.new(TerrainGroupM0.inputs["base_map"], ImageTextureNodeList[bitm + 1].outputs["Color"])
-                    elif(ShaderItem.bitmap_list[bitm].type == "detail_map_m_0"):
+                    elif(ShaderItem.bitmap_list[bitm].type == "detail_map_m_0" and ShaderItem.material_0_option != 2):
                         print("  trying to link detail_map_m_0")
                         #- rgb node
                         #if curve uses Gamma
@@ -6615,7 +6644,7 @@ for idx, i in enumerate(pymat):
                         else:
                             #link detail_map_m_0 to terrain group m0
                             i.node_tree.links.new(TerrainGroupM0.inputs["detail_map"], ImageTextureNodeList[bitm + 1].outputs["Color"])
-                    elif(ShaderItem.bitmap_list[bitm].type == "bump_map_m_0"):
+                    elif(ShaderItem.bitmap_list[bitm].type == "bump_map_m_0" and ShaderItem.material_0_option != 2):
                         print("  trying to link bump_map_m_0")
                         #- rgb node
                         #if curve uses Gamma
@@ -6625,7 +6654,7 @@ for idx, i in enumerate(pymat):
                         else:
                             #link bump_map_m_0 to terrain group m0
                             i.node_tree.links.new(TerrainGroupM0.inputs["bump_map"], ImageTextureNodeList[bitm + 1].outputs["Color"])
-                    elif(ShaderItem.bitmap_list[bitm].type == "detail_bump_map_m_0"):
+                    elif(ShaderItem.bitmap_list[bitm].type == "detail_bump_map_m_0" and ShaderItem.material_0_option != 2):
                         print("  trying to link detail_bump_map_m_0")
                         #- rgb node
                         #if curve uses Gamma
@@ -6637,7 +6666,7 @@ for idx, i in enumerate(pymat):
                             i.node_tree.links.new(TerrainGroupM0.inputs["detail_bump"], ImageTextureNodeList[bitm + 1].outputs["Color"])
                     
                     #MATERIAL 1 LINK
-                    if(ShaderItem.bitmap_list[bitm].type == "base_map_m_1"):
+                    if(ShaderItem.bitmap_list[bitm].type == "base_map_m_1" and ShaderItem.material_1_option != 2):
                         print("  trying to link base_map_m_1")
                         #- rgb node
                         #if curve uses Gamma
@@ -6647,7 +6676,7 @@ for idx, i in enumerate(pymat):
                         else:
                             #link base_map_m_1 to terrain group M1
                             i.node_tree.links.new(TerrainGroupM1.inputs["base_map"], ImageTextureNodeList[bitm + 1].outputs["Color"])
-                    elif(ShaderItem.bitmap_list[bitm].type == "detail_map_m_1"):
+                    elif(ShaderItem.bitmap_list[bitm].type == "detail_map_m_1" and ShaderItem.material_1_option != 2):
                         print("  trying to link detail_map_m_1")
                         #- rgb node
                         #if curve uses Gamma
@@ -6657,7 +6686,7 @@ for idx, i in enumerate(pymat):
                         else:
                             #link detail_map_m_1 to terrain group M1
                             i.node_tree.links.new(TerrainGroupM1.inputs["detail_map"], ImageTextureNodeList[bitm + 1].outputs["Color"])
-                    elif(ShaderItem.bitmap_list[bitm].type == "bump_map_m_1"):
+                    elif(ShaderItem.bitmap_list[bitm].type == "bump_map_m_1" and ShaderItem.material_1_option != 2):
                         print("  trying to link bump_map_m_1")
                         #- rgb node
                         #if curve uses Gamma
@@ -6667,7 +6696,7 @@ for idx, i in enumerate(pymat):
                         else:
                             #link bump_map_m_1 to terrain group M1
                             i.node_tree.links.new(TerrainGroupM1.inputs["bump_map"], ImageTextureNodeList[bitm + 1].outputs["Color"])
-                    elif(ShaderItem.bitmap_list[bitm].type == "detail_bump_map_m_1"):
+                    elif(ShaderItem.bitmap_list[bitm].type == "detail_bump_map_m_1" and ShaderItem.material_1_option != 2):
                         print("  trying to link detail_bump_map_m_1")
                         #- rgb node
                         #if curve uses Gamma
@@ -6679,7 +6708,7 @@ for idx, i in enumerate(pymat):
                             i.node_tree.links.new(TerrainGroupM1.inputs["detail_bump"], ImageTextureNodeList[bitm + 1].outputs["Color"])                
 
                     #MATERIAL 2 LINK
-                    if(ShaderItem.bitmap_list[bitm].type == "base_map_m_2"):
+                    if(ShaderItem.bitmap_list[bitm].type == "base_map_m_2" and ShaderItem.material_2_option != 2):
                         print("  trying to link base_map_m_2")
                         #- rgb node
                         #if curve uses Gamma
@@ -6689,7 +6718,7 @@ for idx, i in enumerate(pymat):
                         else:
                             #link base_map_m_2 to terrain group M2
                             i.node_tree.links.new(TerrainGroupM2.inputs["base_map"], ImageTextureNodeList[bitm + 1].outputs["Color"])
-                    elif(ShaderItem.bitmap_list[bitm].type == "detail_map_m_2"):
+                    elif(ShaderItem.bitmap_list[bitm].type == "detail_map_m_2" and ShaderItem.material_2_option != 2):
                         print("  trying to link detail_map_m_2")
                         #- rgb node
                         #if curve uses Gamma
@@ -6699,7 +6728,7 @@ for idx, i in enumerate(pymat):
                         else:
                             #link detail_map_m_2 to terrain group M2
                             i.node_tree.links.new(TerrainGroupM2.inputs["detail_map"], ImageTextureNodeList[bitm + 1].outputs["Color"])
-                    elif(ShaderItem.bitmap_list[bitm].type == "bump_map_m_2"):
+                    elif(ShaderItem.bitmap_list[bitm].type == "bump_map_m_2" and ShaderItem.material_2_option != 2):
                         print("  trying to link bump_map_m_2")
                         #- rgb node
                         #if curve uses Gamma
@@ -6709,7 +6738,7 @@ for idx, i in enumerate(pymat):
                         else:
                             #link bump_map_m_2 to terrain group M2
                             i.node_tree.links.new(TerrainGroupM2.inputs["bump_map"], ImageTextureNodeList[bitm + 1].outputs["Color"])
-                    elif(ShaderItem.bitmap_list[bitm].type == "detail_bump_map_m_2"):
+                    elif(ShaderItem.bitmap_list[bitm].type == "detail_bump_map_m_2" and ShaderItem.material_2_option != 2):
                         print("  trying to link detail_bump_map_m_2")
                         #- rgb node
                         #if curve uses Gamma
@@ -6721,7 +6750,7 @@ for idx, i in enumerate(pymat):
                             i.node_tree.links.new(TerrainGroupM2.inputs["detail_bump"], ImageTextureNodeList[bitm + 1].outputs["Color"]) 
 
                     #MATERIAL 3 LINK
-                    if(ShaderItem.bitmap_list[bitm].type == "base_map_m_3"):
+                    if(ShaderItem.bitmap_list[bitm].type == "base_map_m_3" and ShaderItem.material_3_option != 0):
                         print("  trying to link base_map_m_3")
                         #- rgb node
                         #if curve uses Gamma
@@ -6731,7 +6760,7 @@ for idx, i in enumerate(pymat):
                         else:
                             #link base_map_m_3 to terrain group M3
                             i.node_tree.links.new(TerrainGroupM3.inputs["base_map"], ImageTextureNodeList[bitm + 1].outputs["Color"])
-                    elif(ShaderItem.bitmap_list[bitm].type == "detail_map_m_3"):
+                    elif(ShaderItem.bitmap_list[bitm].type == "detail_map_m_3" and ShaderItem.material_3_option != 0):
                         print("  trying to link detail_map_m_3")
                         #- rgb node
                         #if curve uses Gamma
@@ -6741,7 +6770,7 @@ for idx, i in enumerate(pymat):
                         else:
                             #link detail_map_m_3 to terrain group M3
                             i.node_tree.links.new(TerrainGroupM3.inputs["detail_map"], ImageTextureNodeList[bitm + 1].outputs["Color"])
-                    elif(ShaderItem.bitmap_list[bitm].type == "bump_map_m_3"):
+                    elif(ShaderItem.bitmap_list[bitm].type == "bump_map_m_3" and ShaderItem.material_3_option != 0):
                         print("  trying to link bump_map_m_3")
                         #- rgb node
                         #if curve uses Gamma
@@ -6752,7 +6781,7 @@ for idx, i in enumerate(pymat):
                             #link bump_map_m_3 to terrain group M3
                             i.node_tree.links.new(TerrainGroupM3.inputs["bump_map"], ImageTextureNodeList[bitm + 1].outputs["Color"])
                     elif(ShaderItem.bitmap_list[bitm].type == "detail_bump_map_m_3"):
-                        print("  trying to link detail_bump_map_m_3")
+                        print("  trying to link detail_bump_map_m_3" and ShaderItem.material_3_option != 0)
                         #- rgb node
                         #if curve uses Gamma
                         if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
