@@ -1,5 +1,4 @@
-Video on getting this sucker to work:
-
+Video on getting this sucker to work: Coming Soon
 For now to get this to work in text format:
 
 -----Install------
