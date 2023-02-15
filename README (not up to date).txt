@@ -1,5 +1,4 @@
-Video on getting this sucker to work:
-
+Video on getting this sucker to work: Coming Soon
 For now to get this to work in text format:
 
 -----Install------
@@ -14,9 +13,9 @@ For now to get this to work in text format:
 TAG_ROOT: the root directory of the "tags" folder of the Halo 3/ODST Editing Kit
 EXPORT_ROOT: the directory to where you are exporting your models and textures from Reclaimer
 
-7: move the "shaders" folder to your EXPORT_ROOT folder (this is to make sure the tool has all default textures to use)
+7: move the "shaders" folder included in the GitHub repo to your EXPORT_ROOT folder (this is to make sure the tool has all default textures to use)
 
 Visit The Halo Archive for reaching out about this tool: https://discord.gg/haloarchive
 
-Thanks to Chiefster and Soulburnin for big help with the making of the Shaders that this runs on
+Thanks to Chiefster and Soulburnin for big help with the making of the Shaders that this runs on 
 Thanks to Gravemind for making Reclaimer which is a kickass tool that makes this possible!
