@@ -7055,10 +7055,10 @@ def Start_CR4B_Tool():
                                         #################################
                 if(Shader_Type == 1 and ShaderItem.environment_map_option != 0):
                     if(ShaderItem.environment_map_option == 1): #per pixel
-                        TerrainEnvGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: environment_mapping - per_pixel")
+                        TerrainEnvGroup = instantiate_group(TerrainEnvGroup, "H3Category: environment_mapping - per_pixel")
                         TerrainEnvGroup = apply_group_values(TerrainEnvGroup, ShaderItem, "env map")
                     if(ShaderItem.environment_map_option == 2): #dynamic
-                        TerrainEnvGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: environment_mapping - dynamic")
+                        TerrainEnvGroup = instantiate_group(TerrainEnvGroup, "H3Category: environment_mapping - dynamic")
                         TerrainEnvGroup = apply_group_values(TerrainEnvGroup, ShaderItem, "env map")
                     
                     TerrainEnvGroup.location.x = end_group_x
