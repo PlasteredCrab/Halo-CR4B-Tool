@@ -7350,7 +7350,7 @@ def Start_CR4B_Tool():
                             pymat_copy.node_tree.links.new(AdditiveGroup.inputs["Shader"], Add3Group.outputs["Shader"])                
                             pymat_copy.node_tree.links.new(material_output.inputs["Surface"], AdditiveGroup.outputs["Shader"])
                         elif(ShaderItem.blend_mode_option == 3):
-                            pymat_copy.node_tree.links.new(AlphaBlendGroup.inputs["Shader"], AddShader.outputs["Shader"])
+                            pymat_copy.node_tree.links.new(AlphaBlendGroup.inputs["Shader"], Add3Group.outputs["Shader"])
                             pymat_copy.node_tree.links.new(material_output.inputs["Surface"], AlphaBlendGroup.outputs["Shader"])            
                         else:
                             pymat_copy.node_tree.links.new(material_output.inputs["Surface"], Add3Group.outputs["Shader"])            
@@ -7360,7 +7360,7 @@ def Start_CR4B_Tool():
                             pymat_copy.node_tree.links.new(AdditiveGroup.inputs["Shader"], AlphaTestGroup.outputs["Shader"])                
                             pymat_copy.node_tree.links.new(material_output.inputs["Surface"], AdditiveGroup.outputs["Shader"]) 
                         elif(ShaderItem.blend_mode_option == 3):
-                            pymat_copy.node_tree.links.new(AlphaBlendGroup.inputs["Shader"], AddShader.outputs["Shader"])
+                            pymat_copy.node_tree.links.new(AlphaBlendGroup.inputs["Shader"], Add3Group.outputs["Shader"])
                             pymat_copy.node_tree.links.new(material_output.inputs["Surface"], AlphaBlendGroup.outputs["Shader"])            
                         else:
                             pymat_copy.node_tree.links.new(material_output.inputs["Surface"], AlphaTestGroup.outputs["Shader"])
