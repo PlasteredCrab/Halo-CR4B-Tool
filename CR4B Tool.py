@@ -7723,8 +7723,8 @@ def Start_CR4B_Tool():
 
 
                 #prep the area for textures
-                last_texture_x = last_node_x - TEXTURE_NODE_HORIZONTAL_PLACEMENT
-                last_texture_y = last_node_y + TEXTURE_NODE_VERTICAL_PLACEMENT
+                last_texture_x = alb_group_x - TEXTURE_NODE_HORIZONTAL_PLACEMENT
+                last_texture_y = alb_group_y + TEXTURE_NODE_VERTICAL_PLACEMENT
                 MIRROR_PADDING = 0
 
 
@@ -7747,6 +7747,9 @@ def Start_CR4B_Tool():
                     #correct texture node placement when there is no texture made
                     before_no_tex_x = last_texture_x
                     before_no_tex_y = last_texture_y
+                    
+                    print("last_texture_x: " + str(last_texture_x))
+                    print("last_texture_y: " + str(last_texture_y))
                     
                     gamma_node_made = 0
                     texture_node_made = 0
@@ -8435,6 +8438,7 @@ def Start_CR4B_Tool():
                                     #link to texture node
                                     #pymat_copy.node_tree.links.new(ImageTextureNodeList[bitm + 1].inputs["Vector"], MappingNode.outputs["Vector"])
                             
+                                print("Wrap Option: " + str(ShaderItem.bitmap_list[bitm].wrap_option))
                                 if (ShaderItem.bitmap_list[bitm].wrap_option == 3 or ShaderItem.bitmap_list[bitm].wrap_option == 13 or ShaderItem.bitmap_list[bitm].wrap_option == 2):
                                     print("making mirror map for " + ShaderItem.bitmap_list[bitm].type)
                                     
@@ -8488,7 +8492,7 @@ def Start_CR4B_Tool():
                             #if no scale or translation data found BUT it is mirrored
                             else:
                                 print("No scaling values found. Might make Mirror Node anyways")
-                                #print("Wrap Option: " + str(ShaderItem.bitmap_list[bitm].wrap_option))
+                                print("Wrap Option: " + str(ShaderItem.bitmap_list[bitm].wrap_option))
                                 if(ShaderItem.bitmap_list[bitm].wrap_option == 3 or ShaderItem.bitmap_list[bitm].wrap_option == 13 or ShaderItem.bitmap_list[bitm].wrap_option == 2):
                                     print("making mirror map for " + ShaderItem.bitmap_list[bitm].type)
                                     #create scaling node
@@ -8539,6 +8543,8 @@ def Start_CR4B_Tool():
                                     trans_node_made = 1
                                 elif (ShaderItem.bitmap_list[bitm].wrap_option == 9 or ShaderItem.bitmap_list[bitm].wrap_option == 8):
                                     print("making mirror map for " + ShaderItem.bitmap_list[bitm].type)
+                                    
+                                    #if 
                                     #create scaling node
                                     TexCoordNode = pymat_copy.node_tree.nodes.new('ShaderNodeTexCoord')
                                     
