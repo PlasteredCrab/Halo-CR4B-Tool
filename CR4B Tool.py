@@ -192,6 +192,8 @@ def Start_CR4B_Tool():
         name = ""
         directory = ""
         curve_option = 0
+        width = 0
+        height = 0
         type = ""
         has_scale_x = False
         has_scale_y = False
@@ -986,7 +988,52 @@ def Start_CR4B_Tool():
                 print("  Right Function Option: " + get_periodic_option(function_object.right_function_option))   
                 print("  Right Min: " + str(function_object.right_min_value))
                 print("  Right Max: " + str(function_object.right_max_value))
+    
+    def get_bitmap_resolution(directory, choice):
+        width = 0
+        height = 0
         
+        #open bitmap file in raw binary
+        try:    
+            bitmapfile = open(directory, "rb")
+        except:
+            curve_option = 6
+            print("Resolution Error")
+            return 6
+       
+        bitmap = bitmapfile.read()
+        Res_Offset_Difference = 0x30
+        Res_Offset = 0x0            
+            
+        #find pattern and save it to variable
+        try: 
+            Resolution_Offset = bitmap.index(b'\x00\x00\x00\x00\x61\x64\x67\x74\x00\x00\x00\x00\x00\x00\x00\x00\x6C\x62\x67\x74')
+        except ValueError:
+            print("Bitmap Curve Options not found!")
+
+        if (Resolution_Offset != 0):
+            Res_Offset = Resolution_Offset - Res_Offset_Difference
+            
+            bitmapfile.seek(Res_Offset)
+            
+            width = int.from_bytes(bitmapfile.read(2), 'little')
+            height = int.from_bytes(bitmapfile.read(2), 'little')
+            
+            #print("curve_option: " + str(curve_option))
+            bitmapfile.close()
+            
+            print("Texture Width: " + str(width))
+            print("Texture Height: " + str(height))
+        else:
+            print("Resolution Offset Not Found!")
+            
+        if (choice == "width"):
+            return width
+        elif (choice == "height"):
+            return height
+        else: 
+            "Error setting Resolution"
+            return 0  
         
     def get_bitmap_curve (directory):
         curve_option = 0 
@@ -1024,6 +1071,10 @@ def Start_CR4B_Tool():
             print("Curve Options Pre Offset Not Found!")
         return curve_option
 
+    def shift_mirror_wrap(Mirror_Group):
+        Mirror_Group.inputs.get("Location").default_value = [0, 3, 0]
+        
+        return Mirror_Group
 
     def test_find(offset, shaderfile, type):
         type_byte_pattern = bytes(type, 'utf-8')
@@ -3848,6 +3899,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, BaseMap_Offset + 0x18 + 0x1) 
@@ -3860,6 +3913,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except ValueError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -3881,6 +3938,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, DetailMap_Offset + 0x1A + 0x1)
@@ -3922,6 +3981,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except ValueError:
                             print("Bitmap Directory not referenced. Please use Default Data")
 
@@ -3941,6 +4004,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, DetailMap2_Offset + 0x1B + 0x1)
@@ -3955,6 +4020,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                    
@@ -3974,6 +4043,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, DetailMap3_Offset + 0x1B + 0x1)
@@ -3988,6 +4059,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except ValueError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                    
@@ -4006,6 +4081,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, SpecularMaskTexture_Offset + 0x25 + 0x1)
@@ -4020,6 +4097,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                    
@@ -4038,6 +4119,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, ChangeColorMap_Offset + 0x20 + 0x1)
@@ -4052,6 +4135,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                    
@@ -4070,6 +4157,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, BumpMap_Offset + 0x18 + 0x1)
@@ -4086,6 +4175,10 @@ def Start_CR4B_Tool():
                             try:
                                 #get Curve for bitmap
                                 Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                                
+                                #Get Resolution of bitmap
+                                Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                                Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                             except OSError:
                                 print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -4105,6 +4198,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, BumpDetailMap_Offset + 0x1F + 0x1)
@@ -4122,6 +4217,10 @@ def Start_CR4B_Tool():
                             try:
                                 #get Curve for bitmap
                                 Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                                
+                                #Get Resolution of bitmap
+                                Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                                Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                             except OSError:
                                 print("Bitmap Directory not referenced. Please use Default Data")
                         
@@ -4140,6 +4239,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, EnvironmentMap_Offset + 0x1F + 0x1)
@@ -4164,6 +4265,8 @@ def Start_CR4B_Tool():
                             Bitmap.directory = ""
                             Bitmap.type = ""
                             Bitmap.curve_option = 0
+                            Bitmap.width = 0
+                            Bitmap.height = 0
                             
                             #save current data
                             Bitmap.directory = get_dir(shaderfile, FlatEnvironmentMap_Offset + 0x24 + 0x1)
@@ -4183,6 +4286,10 @@ def Start_CR4B_Tool():
                                     try:
                                         #get Curve for bitmap
                                         Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                                        
+                                        #Get Resolution of bitmap
+                                        Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                                        Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                                     except OSError:
                                         print("Bitmap Directory not referenced. Please use Default Data")
                                
@@ -4194,6 +4301,10 @@ def Start_CR4B_Tool():
                             try:
                                 #get Curve for bitmap
                                 Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                                
+                                #Get Resolution of bitmap
+                                Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                                Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                             except OSError:
                                 print("Bitmap Directory not referenced. Please use Default Data")
                         
@@ -4213,6 +4324,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, SelfIllumMap_Offset + 0x1E + 0x1)
@@ -4228,6 +4341,10 @@ def Start_CR4B_Tool():
                             try:
                                 #get Curve for bitmap
                                 Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                                
+                                #Get Resolution of bitmap
+                                Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                                Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                             except OSError:
                                 print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -4247,6 +4364,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, SelfIllumDetailMap_Offset + 0x25 + 0x1)
@@ -4261,6 +4380,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -4282,6 +4405,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, AlphaTestMap_Offset + 0x1E + 0x1)
@@ -4298,6 +4423,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -4328,6 +4457,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, Blend_Map_Offset + 0x10 + 0x9 + 0x1)
@@ -4342,6 +4473,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -4363,6 +4498,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, Base_Map_M_0_Offset + 0x10 + 0xC + 0x1)
@@ -4377,6 +4514,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -4397,6 +4538,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, Detail_Map_M_0_Offset + 0x10 + 0xE + 0x1)
@@ -4411,6 +4554,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -4431,6 +4578,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, Bump_Map_M_0_Offset + 0x10 + 0xC + 0x1)
@@ -4445,6 +4594,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -4465,6 +4618,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, Detail_Bump_M_0_Offset + 0x10 + 0xF + 0x1)
@@ -4479,6 +4634,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -4499,6 +4658,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, Base_Map_M_1_Offset + 0x10 + 0xC + 0x1)
@@ -4513,6 +4674,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -4533,6 +4698,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, Detail_Map_M_1_Offset + 0x10 + 0xE + 0x1)
@@ -4547,6 +4714,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -4567,6 +4738,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, Bump_Map_M_1_Offset + 0x10 + 0xC + 0x1)
@@ -4581,6 +4754,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -4601,6 +4778,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, Detail_Bump_M_1_Offset + 0x10 + 0xF + 0x1)
@@ -4615,6 +4794,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -4635,6 +4818,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, Base_Map_M_2_Offset + 0x10 + 0xC + 0x1)
@@ -4649,6 +4834,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -4669,6 +4858,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, Detail_Map_M_2_Offset + 0x10 + 0xE + 0x1)
@@ -4683,6 +4874,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -4703,6 +4898,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, Bump_Map_M_2_Offset + 0x10 + 0xC + 0x1)
@@ -4717,6 +4914,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -4737,6 +4938,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, Detail_Bump_M_3_Offset + 0x10 + 0xF + 0x1)
@@ -4751,6 +4954,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -4771,6 +4978,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, Base_Map_M_3_Offset + 0x10 + 0xC + 0x1)
@@ -4785,6 +4994,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -4805,6 +5018,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, Detail_Map_M_3_Offset + 0x10 + 0xE + 0x1)
@@ -4819,6 +5034,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -4839,6 +5058,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, Bump_Map_M_3_Offset + 0x10 + 0xC + 0x1)
@@ -4853,6 +5074,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -4873,6 +5098,8 @@ def Start_CR4B_Tool():
                     Bitmap.directory = ""
                     Bitmap.type = ""
                     Bitmap.curve_option = 0
+                    Bitmap.width = 0
+                    Bitmap.height = 0
                     
                     #save current data
                     Bitmap.directory = get_dir(shaderfile, Detail_Bump_M_3_Offset + 0x10 + 0xF + 0x1)
@@ -4887,6 +5114,10 @@ def Start_CR4B_Tool():
                         try:
                             #get Curve for bitmap
                             Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                            
+                            #Get Resolution of bitmap
+                            Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                            Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
                         except OSError:
                             print("Bitmap Directory not referenced. Please use Default Data")
                     
@@ -8204,7 +8435,7 @@ def Start_CR4B_Tool():
                                     #link to texture node
                                     #pymat_copy.node_tree.links.new(ImageTextureNodeList[bitm + 1].inputs["Vector"], MappingNode.outputs["Vector"])
                             
-                                if (ShaderItem.bitmap_list[bitm].wrap_option == 3 or ShaderItem.bitmap_list[bitm].wrap_option == 13):
+                                if (ShaderItem.bitmap_list[bitm].wrap_option == 3 or ShaderItem.bitmap_list[bitm].wrap_option == 13 or ShaderItem.bitmap_list[bitm].wrap_option == 2):
                                     print("making mirror map for " + ShaderItem.bitmap_list[bitm].type)
                                     
                                     #link texture to mirror group node
@@ -8214,6 +8445,11 @@ def Start_CR4B_Tool():
                                     #link mapping to mirror group node
                                     pymat_copy.node_tree.links.new(MirrorGroup.inputs["Vector"], MappingNode.outputs["Vector"])
                                 
+                                    #works for current iteration of the Mirror Nodes being at 47 meters in both X and Y
+                                    #Check for extra shift due to texture resolution ratio
+                                    if(ShaderItem.bitmap_list[bitm].width / ShaderItem.bitmap_list[bitm].height == (2/2)): #if the ratio is 1:1 then shift down Y by 3 meters
+                                        MirrorGroup = shift_mirror_wrap(MirrorGroup)
+                                    
                                     mirror_node_made = 1
                                 elif (ShaderItem.bitmap_list[bitm].wrap_option == 4 or ShaderItem.bitmap_list[bitm].wrap_option == 5):
                                     print("making mirror map for " + ShaderItem.bitmap_list[bitm].type)
@@ -8225,6 +8461,10 @@ def Start_CR4B_Tool():
                                     #link mapping to mirror group node
                                     pymat_copy.node_tree.links.new(MirrorGroup.inputs["Vector"], MappingNode.outputs["Vector"])                    
                                 
+                                    #Check for extra shift due to texture resolution ratio
+                                    if(ShaderItem.bitmap_list[bitm].width / ShaderItem.bitmap_list[bitm].height == (2/2)): #if the ratio is 1:1 then shift down Y by 3 meters
+                                        MirrorGroup = shift_mirror_wrap(MirrorGroup)
+                                        
                                     mirror_node_made = 1
                                 elif (ShaderItem.bitmap_list[bitm].wrap_option == 9):
                                     print("making mirror map for " + ShaderItem.bitmap_list[bitm].type)
@@ -8235,7 +8475,11 @@ def Start_CR4B_Tool():
                                     
                                     #link mapping to mirror group node
                                     pymat_copy.node_tree.links.new(MirrorGroup.inputs["Vector"], MappingNode.outputs["Vector"]) 
-                                
+                                    
+                                    #Check for extra shift due to texture resolution ratio
+                                    if(ShaderItem.bitmap_list[bitm].width / ShaderItem.bitmap_list[bitm].height == (2/2)): #if the ratio is 1:1 then shift down Y by 3 meters
+                                        MirrorGroup = shift_mirror_wrap(MirrorGroup)
+                                        
                                     mirror_node_made = 1
                                 else:    
                                     #link to texture node
@@ -8243,8 +8487,9 @@ def Start_CR4B_Tool():
                             
                             #if no scale or translation data found BUT it is mirrored
                             else:
-                                print("No scaling values found. Making Mirror Node anyways")
-                                if(ShaderItem.bitmap_list[bitm].wrap_option == 3 or ShaderItem.bitmap_list[bitm].wrap_option == 13):
+                                print("No scaling values found. Might make Mirror Node anyways")
+                                #print("Wrap Option: " + str(ShaderItem.bitmap_list[bitm].wrap_option))
+                                if(ShaderItem.bitmap_list[bitm].wrap_option == 3 or ShaderItem.bitmap_list[bitm].wrap_option == 13 or ShaderItem.bitmap_list[bitm].wrap_option == 2):
                                     print("making mirror map for " + ShaderItem.bitmap_list[bitm].type)
                                     #create scaling node
                                     TexCoordNode = pymat_copy.node_tree.nodes.new('ShaderNodeTexCoord')
@@ -8262,6 +8507,10 @@ def Start_CR4B_Tool():
                                     #link mapping to mirror group node
                                     pymat_copy.node_tree.links.new(MirrorGroup.inputs["Vector"], MappingNode.outputs["Vector"])       
                               
+                                    #Check for extra shift due to texture resolution ratio
+                                    if(ShaderItem.bitmap_list[bitm].width / ShaderItem.bitmap_list[bitm].height == (2/2)): #if the ratio is 1:1 then shift down Y by 3 meters
+                                        MirrorGroup = shift_mirror_wrap(MirrorGroup)
+                                        
                                     mirror_node_made = 1
                                     trans_node_made = 1
                                 elif(ShaderItem.bitmap_list[bitm].wrap_option == 4 or ShaderItem.bitmap_list[bitm].wrap_option == 5):
@@ -8282,6 +8531,10 @@ def Start_CR4B_Tool():
                                     #link mapping to mirror group node
                                     pymat_copy.node_tree.links.new(MirrorGroup.inputs["Vector"], MappingNode.outputs["Vector"])                      
                                 
+                                    #Check for extra shift due to texture resolution ratio
+                                    if(ShaderItem.bitmap_list[bitm].width / ShaderItem.bitmap_list[bitm].height == (2/2)): #if the ratio is 1:1 then shift down Y by 3 meters
+                                        MirrorGroup = shift_mirror_wrap(MirrorGroup)
+                                        
                                     mirror_node_made = 1
                                     trans_node_made = 1
                                 elif (ShaderItem.bitmap_list[bitm].wrap_option == 9):
@@ -8302,6 +8555,10 @@ def Start_CR4B_Tool():
                                     #link mapping to mirror group node
                                     pymat_copy.node_tree.links.new(MirrorGroup.inputs["Vector"], MappingNode.outputs["Vector"])        
                  
+                                    #Check for extra shift due to texture resolution ratio
+                                    if(ShaderItem.bitmap_list[bitm].width / ShaderItem.bitmap_list[bitm].height == (2/2)): #if the ratio is 1:1 then shift down Y by 3 meters
+                                        MirrorGroup = shift_mirror_wrap(MirrorGroup)
+                                        
                                     mirror_node_made = 1
                                     trans_node_made = 1
                             
