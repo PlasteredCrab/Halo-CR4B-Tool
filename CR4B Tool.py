@@ -8466,7 +8466,7 @@ def Start_CR4B_Tool():
                                         MirrorGroup = shift_mirror_wrap(MirrorGroup)
                                         
                                     mirror_node_made = 1
-                                elif (ShaderItem.bitmap_list[bitm].wrap_option == 9):
+                                elif (ShaderItem.bitmap_list[bitm].wrap_option == 9 or ShaderItem.bitmap_list[bitm].wrap_option == 8):
                                     print("making mirror map for " + ShaderItem.bitmap_list[bitm].type)
                                     
                                     #link texture to mirror group node
@@ -8537,7 +8537,7 @@ def Start_CR4B_Tool():
                                         
                                     mirror_node_made = 1
                                     trans_node_made = 1
-                                elif (ShaderItem.bitmap_list[bitm].wrap_option == 9):
+                                elif (ShaderItem.bitmap_list[bitm].wrap_option == 9 or ShaderItem.bitmap_list[bitm].wrap_option == 8):
                                     print("making mirror map for " + ShaderItem.bitmap_list[bitm].type)
                                     #create scaling node
                                     TexCoordNode = pymat_copy.node_tree.nodes.new('ShaderNodeTexCoord')
