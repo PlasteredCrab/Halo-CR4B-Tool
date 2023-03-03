@@ -2852,7 +2852,7 @@ def Start_CR4B_Tool():
         ShaderName = i.name + ".shader"                        # Shader_Type = 0
         ShaderName_Terrain_Shader = i.name + ".shader_terrain" # Shader_Type = 1
         ShaderName_Foliage_Shader = i.name + ".shader_foliage" # Shader_Type = 2
-        #ShaderName_Halogram_Shader = i.name + ".shader_halogram" # Shader_Type = 3
+        ShaderName_Halogram_Shader = i.name + ".shader_halogram" # Shader_Type = 3
         ShaderPath = ""
         ShaderItem = shader() 
         Shader_Type = 0   #resets Shader_Type back to 0
@@ -2877,10 +2877,10 @@ def Start_CR4B_Tool():
                 ShaderName = ShaderName_Foliage_Shader
                 Shader_Type = 2
                 print("Foliage Shader Found!")
-            # elif (ShaderName_Halogram_Shader in files):
-                # ShaderName = ShaderName_Halogram_Shader
-                # Shader_Type = 3
-                # print("Halogram Shader Found!")
+            elif (ShaderName_Halogram_Shader in files):
+                ShaderName = ShaderName_Halogram_Shader
+                Shader_Type = 3
+                print("Halogram Shader Found!")
             
 
             if (ShaderName in files):
@@ -7740,9 +7740,14 @@ def Start_CR4B_Tool():
                 #loop through all bitmaps and create new image texture nodes for each one and scaling nodes        
                 for bitm in range(ShaderItem.bitmap_count): 
                  
+                 
                     #adjust location     
                     last_texture_x = last_texture_x
                     last_texture_y = last_texture_y - TEXTURE_GROUP_VERTICAL_SPACING - MIRROR_PADDING
+                
+                    #fix texture start position if it is too high up
+                    if(last_texture_y > 400):
+                        last_texture_y = 100
                 
                     #correct texture node placement when there is no texture made
                     before_no_tex_x = last_texture_x
@@ -8706,9 +8711,9 @@ def Start_CR4B_Tool():
                                 if (ShaderItem.self_illumination_option == 1 or ShaderItem.self_illumination_option == 2 or ShaderItem.self_illumination_option == 5 or ShaderItem.self_illumination_option == 7 or ShaderItem.self_illumination_option == 8 or ShaderItem.self_illumination_option == 9 or ShaderItem.self_illumination_option == 10 or ShaderItem.self_illumination_option == 11):
                                     #if bitmap curve data uses Gamma then connect that
                                     if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
-                                        pymat_copy.node_tree.links.new(SelfIllumGroup.inputs["self_illum_map"], GammaNode_SelfIllum.outputs[0])
+                                        pymat_copy.node_tree.links.new(SelfIllumGroup.inputs["self_illum_map.rgb"], GammaNode_SelfIllum.outputs[0])
                                     else:
-                                        pymat_copy.node_tree.links.new(SelfIllumGroup.inputs["self_illum_map"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(SelfIllumGroup.inputs["self_illum_map.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
                             
                             #SELF ILLUM DETAIL MAP
                             
