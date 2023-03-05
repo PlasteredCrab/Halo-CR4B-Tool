@@ -2594,8 +2594,39 @@ def Start_CR4B_Tool():
         # ImageTexNode.name = "[" + BitmapType + "]  " + ImageTexNode.name
         # return ImageTexNode
 
+
+    def is_texture_needed(ShaderItem, texture_type):
+        if texture_type in ShaderItem.needed_bitmaps:
+            return True
+        else:
+            return False
+
+    def correct_default_dir(bitmap_type):
+        default_dir = ""
+        
+        if(uses_gray_50(bitmap_type) == True):
+            default_dir = "shaders/default_bitmaps/bitmaps/gray_50_percent"
+        elif(uses_color_white(bitmap_type) == True):
+            default_dir = "shaders/default_bitmaps/bitmaps/color_white"
+        elif(uses_default_vector(bitmap_type) == True):
+            default_dir = "shaders/default_bitmaps/bitmaps/default_vector"
+        elif(uses_reference_grids(bitmap_type) == True):    
+            default_dir = "shaders/default_bitmaps/bitmaps/reference_grids"
+        elif(uses_default_alpha_test(bitmap_type) == True):    
+            default_dir = "shaders/default_bitmaps/bitmaps/default_alpha_test"
+        elif(uses_default_dynamic_cube_map(bitmap_type) == True):    
+            default_dir =  "shaders/default_bitmaps/bitmaps/default_dynamic_cube_map"
+        elif(uses_color_red(bitmap_type) == True):    
+            default_dir = "shaders/default_bitmaps/bitmaps/color_red"
+        elif(uses_monochrome_alpha_grid(bitmap_type) == True):    
+            default_dir = "shaders/default_bitmaps/bitmaps/monochrome_alpha_grid"
+        else:
+            default_dir = "shaders/default_bitmaps/bitmaps/default_detail"
+        
+        return default_dir
+
     #function to check if certain NodeGroup has what it needs for default textures
-    def create_needed_defaults(NodeGroup, ShaderItem, Shader_Type):
+    def build_texture_list(ShaderItem, Shader_Type):
         #check needed bitmaps for the used categories
     
         ShaderItem.needed_bitmaps = []
@@ -2606,226 +2637,172 @@ def Start_CR4B_Tool():
 #.shader files
 ##############
 
-    #albedo options
-        if(ShaderItem.albedo_option == 0): #H3Category: albedo - default 
-            ShaderItem.needed_bitmaps.append("base_map")
-            ShaderItem.needed_bitmaps.append("detail_map")
-        elif(ShaderItem.albedo_option == 1): #H3Category: albedo - detail_blend
-            ShaderItem.needed_bitmaps.append("base_map")
-            ShaderItem.needed_bitmaps.append("detail_map")
-            ShaderItem.needed_bitmaps.append("detail_map2")
-        elif(ShaderItem.albedo_option == 2): #H3Category: albedo - constant_color
-            print("constant color doesn't need bitmaps")
-        elif(ShaderItem.albedo_option == 3): #H3Category: albedo - two_change_color
-            ShaderItem.needed_bitmaps.append("base_map")
-            ShaderItem.needed_bitmaps.append("detail_map")
-            ShaderItem.needed_bitmaps.append("change_color_map")
-        elif(ShaderItem.albedo_option == 4): #H3Category: albedo - four_change_color
-            ShaderItem.needed_bitmaps.append("base_map")
-            ShaderItem.needed_bitmaps.append("detail_map")
-            ShaderItem.needed_bitmaps.append("change_color_map")
-        elif(ShaderItem.albedo_option == 5): #H3Category: albedo - three_detail_blend
-            ShaderItem.needed_bitmaps.append("base_map")
-            ShaderItem.needed_bitmaps.append("detail_map")
-            ShaderItem.needed_bitmaps.append("detail_map2")
-            ShaderItem.needed_bitmaps.append("detail_map3")
-        elif(ShaderItem.albedo_option == 6): #H3Category: albedo - two_detail_overlay
-            ShaderItem.needed_bitmaps.append("base_map")
-            ShaderItem.needed_bitmaps.append("detail_map")
-            ShaderItem.needed_bitmaps.append("detail_map2")
-            ShaderItem.needed_bitmaps.append("detail_overlay")
-        elif(ShaderItem.albedo_option == 7): #H3Category: albedo - two_detail
-            ShaderItem.needed_bitmaps.append("base_map")
-            ShaderItem.needed_bitmaps.append("detail_map")
-            ShaderItem.needed_bitmaps.append("detail_map2")
-        elif(ShaderItem.albedo_option == 8): #H3Category: albedo - color_mask    
-            ShaderItem.needed_bitmaps.append("base_map")
-            ShaderItem.needed_bitmaps.append("detail_map")
-            ShaderItem.needed_bitmaps.append("color_mask")
-        elif(ShaderItem.albedo_option == 17): #H3Category: albedo - custom_cube
-            ShaderItem.needed_bitmaps.append("base_map")
-            ShaderItem.needed_bitmaps.append("custom_cube")
-        elif(ShaderItem.albedo_option == 18): #H3Category: albedo - two_color
-            ShaderItem.needed_bitmaps.append("base_map")
-            ShaderItem.needed_bitmaps.append("blend_map")
-        elif(ShaderItem.albedo_option == 21): #H3Category: albedo - scrolling_texture_uv
-            ShaderItem.needed_bitmaps.append("base_map")
-            ShaderItem.needed_bitmaps.append("color_texture")
-        elif(ShaderItem.albedo_option == 22): #H3Category: albedo - texture_from_misc
-            ShaderItem.needed_bitmaps.append("base_map")
-            ShaderItem.needed_bitmaps.append("color_texture")
-    #bump_map group
-        #if(ShaderItem.bump_mapping_option == 1): #H3Category: bump_mapping - standard
-            #no values needed?        
-        if(ShaderItem.bump_mapping_option == 2): #H3Category: bump_mapping - detail
-            NodeGroup.inputs.get("bump_detail_coefficient").default_value = ShaderItem.bump_detail_coefficient
-        elif(ShaderItem.bump_mapping_option == 3): #H3Category: bump_mapping - detail_masked
-            NodeGroup.inputs.get("albedo_color").default_value = ShaderItem.albedo_color
-            #invert_mask?
-        elif(ShaderItem.bump_mapping_option == 4): #H3Category: bump_mapping - detail_plus_detail_masked
-            NodeGroup.inputs.get("bump_detail_coefficient").default_value = ShaderItem.bump_detail_coefficient
-            #bump_detail_masked_coefficient  
-        #elif(ShaderItem.bump_mapping_option == 5): #H3Category: bump_mapping - detail_unorm
-            #NodeGroup.inputs.get("bump_detail_coefficient").default_value = ShaderItem.bump_detail_coefficient            
-        
-    #environment map group    
-        if(ShaderItem.environment_mapping_option == 1 or ShaderItem.environment_map_option == 1): #H3Category: environment_mapping - per_pixel
-            NodeGroup.inputs.get("env_tint_color").default_value = ShaderItem.env_tint_color
-        elif(ShaderItem.environment_mapping_option == 2 or ShaderItem.environment_map_option == 2): #H3Category: environment_mapping - dynamic
-            NodeGroup.inputs.get("env_tint_color").default_value = ShaderItem.env_tint_color        
-            NodeGroup.inputs.get("env_roughness_scale").default_value = ShaderItem.env_roughness_scale  
+        if(Shader_Type == 0):
+        #albedo options
+            if(ShaderItem.albedo_option == 0): #H3Category: albedo - default 
+                ShaderItem.needed_bitmaps.append("base_map")
+                ShaderItem.needed_bitmaps.append("detail_map")
+            elif(ShaderItem.albedo_option == 1): #H3Category: albedo - detail_blend
+                ShaderItem.needed_bitmaps.append("base_map")
+                ShaderItem.needed_bitmaps.append("detail_map")
+                ShaderItem.needed_bitmaps.append("detail_map2")
+            elif(ShaderItem.albedo_option == 2): #H3Category: albedo - constant_color
+                print("constant color doesn't need bitmaps")
+            elif(ShaderItem.albedo_option == 3): #H3Category: albedo - two_change_color
+                ShaderItem.needed_bitmaps.append("base_map")
+                ShaderItem.needed_bitmaps.append("detail_map")
+                ShaderItem.needed_bitmaps.append("change_color_map")
+            elif(ShaderItem.albedo_option == 4): #H3Category: albedo - four_change_color
+                ShaderItem.needed_bitmaps.append("base_map")
+                ShaderItem.needed_bitmaps.append("detail_map")
+                ShaderItem.needed_bitmaps.append("change_color_map")
+            elif(ShaderItem.albedo_option == 5): #H3Category: albedo - three_detail_blend
+                ShaderItem.needed_bitmaps.append("base_map")
+                ShaderItem.needed_bitmaps.append("detail_map")
+                ShaderItem.needed_bitmaps.append("detail_map2")
+                ShaderItem.needed_bitmaps.append("detail_map3")
+            elif(ShaderItem.albedo_option == 6): #H3Category: albedo - two_detail_overlay
+                ShaderItem.needed_bitmaps.append("base_map")
+                ShaderItem.needed_bitmaps.append("detail_map")
+                ShaderItem.needed_bitmaps.append("detail_map2")
+                ShaderItem.needed_bitmaps.append("detail_overlay")
+            elif(ShaderItem.albedo_option == 7): #H3Category: albedo - two_detail
+                ShaderItem.needed_bitmaps.append("base_map")
+                ShaderItem.needed_bitmaps.append("detail_map")
+                ShaderItem.needed_bitmaps.append("detail_map2")
+            elif(ShaderItem.albedo_option == 8): #H3Category: albedo - color_mask    
+                ShaderItem.needed_bitmaps.append("base_map")
+                ShaderItem.needed_bitmaps.append("detail_map")
+                ShaderItem.needed_bitmaps.append("color_mask")
+            elif(ShaderItem.albedo_option == 9): #H3Category: albedo - two_detail_black_point    
+                ShaderItem.needed_bitmaps.append("base_map")
+                ShaderItem.needed_bitmaps.append("detail_map")
+                ShaderItem.needed_bitmaps.append("detail_map2")
+            elif(ShaderItem.albedo_option == 17): #H3Category: albedo - custom_cube
+                ShaderItem.needed_bitmaps.append("base_map")
+                ShaderItem.needed_bitmaps.append("custom_cube")
+            elif(ShaderItem.albedo_option == 18): #H3Category: albedo - two_color
+                ShaderItem.needed_bitmaps.append("base_map")
+                ShaderItem.needed_bitmaps.append("blend_map")
+            elif(ShaderItem.albedo_option == 21): #H3Category: albedo - scrolling_texture_uv
+                ShaderItem.needed_bitmaps.append("base_map")
+                ShaderItem.needed_bitmaps.append("color_texture")
+            elif(ShaderItem.albedo_option == 22): #H3Category: albedo - texture_from_misc
+                ShaderItem.needed_bitmaps.append("base_map")
+                ShaderItem.needed_bitmaps.append("color_texture")
+        #bump_map group
+            if(ShaderItem.bump_mapping_option == 1): #H3Category: bump_mapping - standard
+                ShaderItem.needed_bitmaps.append("bump_map")       
+            if(ShaderItem.bump_mapping_option == 2): #H3Category: bump_mapping - detail
+                ShaderItem.needed_bitmaps.append("bump_map")
+                ShaderItem.needed_bitmaps.append("bump_detail_map")
+            elif(ShaderItem.bump_mapping_option == 3): #H3Category: bump_mapping - detail_masked
+                ShaderItem.needed_bitmaps.append("bump_map")
+                ShaderItem.needed_bitmaps.append("bump_detail_map")
+                ShaderItem.needed_bitmaps.append("bump_detail_mask_map")
+            elif(ShaderItem.bump_mapping_option == 4): #H3Category: bump_mapping - detail_plus_detail_masked
+                ShaderItem.needed_bitmaps.append("bump_map")
+                ShaderItem.needed_bitmaps.append("bump_detail_map")
+                ShaderItem.needed_bitmaps.append("bump_detail_mask_map")
+                ShaderItem.needed_bitmaps.append("bump_detail_masked_map")
+            #elif(ShaderItem.bump_mapping_option == 5): #H3Category: bump_mapping - detail_unorm
+                #NodeGroup.inputs.get("bump_detail_coefficient").default_value = ShaderItem.bump_detail_coefficient            
             
-    #material model group        
-        #if(ShaderItem.material_model_option == 0): #H3Category: mateiral_model - diffuse_only
-            #no values needed
-        if(ShaderItem.material_model_option == 1): #H3Category: material_model - cook_torrance
-            NodeGroup.inputs.get("diffuse_coefficient").default_value = ShaderItem.diffuse_coefficient
-            NodeGroup.inputs.get("specular_coefficient").default_value = ShaderItem.specular_coefficient
-            NodeGroup.inputs.get("specular_tint").default_value = ShaderItem.specular_tint
-            NodeGroup.inputs.get("fresnel_color").default_value = ShaderItem.fresnel_color
-            NodeGroup.inputs.get("roughness").default_value = ShaderItem.roughness
-            NodeGroup.inputs.get("environment_map_specular_contribution").default_value = ShaderItem.environment_map_specular_contribution
-            NodeGroup.inputs.get("use_material_texture").default_value = ShaderItem.use_material_texture
-            NodeGroup.inputs.get("albedo_blend").default_value = ShaderItem.albedo_blend            
-            NodeGroup.inputs.get("analytical_specular_contribution").default_value = ShaderItem.analytical_specular_contribution
-        elif(ShaderItem.material_model_option == 2): #H3Category: material_model - two_lobe_phong
-            NodeGroup.inputs.get("diffuse_coefficient").default_value = ShaderItem.diffuse_coefficient   
-            NodeGroup.inputs.get("specular_coefficient").default_value = ShaderItem.specular_coefficient
-            NodeGroup.inputs.get("normal_specular_power").default_value = ShaderItem.normal_specular_power
-            NodeGroup.inputs.get("normal_specular_tint").default_value = ShaderItem.normal_specular_tint
-            NodeGroup.inputs.get("glancing_specular_power").default_value = ShaderItem.glancing_specular_power
-            NodeGroup.inputs.get("glancing_specular_tint").default_value = ShaderItem.glancing_specular_tint
-            NodeGroup.inputs.get("fresnel_curve_steepness").default_value = ShaderItem.fresnel_curve_steepness
-            NodeGroup.inputs.get("environment_map_specular_contribution").default_value = ShaderItem.environment_map_specular_contribution
-            NodeGroup.inputs.get("albedo_specular_tint_blend").default_value = ShaderItem.albedo_specular_tint_blend   
-            NodeGroup.inputs.get("analytical_specular_contribution").default_value = ShaderItem.analytical_specular_contribution            
-        elif(ShaderItem.material_model_option == 5): #H3Category: material_model - glass
-            NodeGroup.inputs.get("diffuse_coefficient").default_value = ShaderItem.diffuse_coefficient   
-            NodeGroup.inputs.get("specular_coefficient").default_value = ShaderItem.specular_coefficient
-            NodeGroup.inputs.get("roughness").default_value = ShaderItem.roughness
-            NodeGroup.inputs.get("fresnel_coefficient").default_value = ShaderItem.fresnel_coefficient              
-            NodeGroup.inputs.get("fresnel_curve_steepness").default_value = ShaderItem.fresnel_curve_steepness
-            NodeGroup.inputs.get("fresnel_curve_bias").default_value = ShaderItem.fresnel_curve_bias                
-            NodeGroup.inputs.get("analytical_specular_contribution").default_value = ShaderItem.analytical_specular_contribution            
-        elif(ShaderItem.material_model_option == 7): #H3Category: material_model - single_lobe_phong
-            NodeGroup.inputs.get("diffuse_coefficient").default_value = ShaderItem.diffuse_coefficient
-            NodeGroup.inputs.get("specular_coefficient").default_value = ShaderItem.specular_coefficient        
-            NodeGroup.inputs.get("specular_tint").default_value = ShaderItem.specular_tint    
-            NodeGroup.inputs.get("roughness").default_value = ShaderItem.roughness            
-            NodeGroup.inputs.get("environment_map_specular_contribution").default_value = ShaderItem.environment_map_specular_contribution
-            NodeGroup.inputs.get("analytical_specular_contribution").default_value = ShaderItem.analytical_specular_contribution
+        #environment map group    
+            if(ShaderItem.environment_mapping_option == 1 or ShaderItem.environment_map_option == 1): #H3Category: environment_mapping - per_pixel
+                ShaderItem.needed_bitmaps.append("environment_map")
+            elif(ShaderItem.environment_mapping_option == 2 or ShaderItem.environment_map_option == 2): #H3Category: environment_mapping - dynamic
+                print("dynamic env group needs no textures")
                 
-    #self illum group
-        if(ShaderItem.self_illumination_option == 1): #H3Category: self_illumination - simple
-            NodeGroup.inputs.get("self_illum_color").default_value = ShaderItem.self_illum_color
-            NodeGroup.inputs.get("self_illum_intensity").default_value = ShaderItem.self_illum_intensity            
-        elif(ShaderItem.self_illumination_option == 2): #H3Category: self_illumination - 3_channel_self_illum
-            NodeGroup.inputs.get("channel_a").default_value = ShaderItem.channel_a
-            NodeGroup.inputs.get("channel_a_alpha").default_value = ShaderItem.channel_a_alpha
-            NodeGroup.inputs.get("channel_b").default_value = ShaderItem.channel_b
-            NodeGroup.inputs.get("channel_b_alpha").default_value = ShaderItem.channel_b_alpha
-            NodeGroup.inputs.get("channel_c").default_value = ShaderItem.channel_c
-            NodeGroup.inputs.get("channel_c_alpha").default_value = ShaderItem.channel_c_alpha            
-        elif(ShaderItem.self_illumination_option == 3): #H3Category: self_illumination - plasma
-            NodeGroup.inputs.get("color_wide").default_value = ShaderItem.color_wide
-            NodeGroup.inputs.get("color_wide_alpha").default_value = ShaderItem.color_wide_alpha
-            NodeGroup.inputs.get("color_sharp").default_value = ShaderItem.color_sharp
-            NodeGroup.inputs.get("color_sharp_alpha").default_value = ShaderItem.color_sharp_alpha
-            NodeGroup.inputs.get("color_medium").default_value = ShaderItem.color_medium
-            NodeGroup.inputs.get("color_medium_alpha").default_value = ShaderItem.color_medium_alpha
-            NodeGroup.inputs.get("self_illum_intensity").default_value = ShaderItem.self_illum_intensity
-            NodeGroup.inputs.get("thinness_medium").default_value = ShaderItem.thinness_medium
-            NodeGroup.inputs.get("thinness_wide").default_value = ShaderItem.thinness_wide
-            NodeGroup.inputs.get("thinness_sharp").default_value = ShaderItem.thinness_sharp
-        elif(ShaderItem.self_illumination_option == 4): #H3Category: self_illumination - from_diffuse
-            NodeGroup.inputs.get("self_illum_color").default_value = ShaderItem.self_illum_color
-            NodeGroup.inputs.get("self_illum_intensity").default_value = ShaderItem.self_illum_intensity
-        elif(ShaderItem.self_illumination_option == 5): #H3Category: self_illumination - illum_detail
-            NodeGroup.inputs.get("self_illum_color").default_value = ShaderItem.self_illum_color
-            NodeGroup.inputs.get("self_illum_intensity").default_value = ShaderItem.self_illum_intensity
-        elif(ShaderItem.self_illumination_option == 6): #H3Category: self_illumination - meter
-            NodeGroup.inputs.get("meter_color_off").default_value = ShaderItem.meter_color_off
-            NodeGroup.inputs.get("meter_color_on").default_value = ShaderItem.meter_color_on
-            NodeGroup.inputs.get("meter_value").default_value = ShaderItem.meter_value
-        elif(ShaderItem.self_illumination_option == 7): #H3Category: self_illumination - self_illum_times_diffuse
-            NodeGroup.inputs.get("self_illum_color").default_value = ShaderItem.self_illum_color
-            NodeGroup.inputs.get("self_illum_intensity").default_value = ShaderItem.self_illum_intensity
-            NodeGroup.inputs.get("primary_change_color_blend").default_value = ShaderItem.primary_change_color_blend
-        elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 8): #H3Category: self_illumination - multilayer_additive
-            #add these in later
-            print("self_illumination - multilayer_additive")
-        elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 9): #H3Category: self_illumination - scope_blur
-            #add these in later
-            print("self_illumination - scope_blur")
-        elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 10): #H3Category: self_illumination - ml_add_four_change_color
-            #add these in later
-            print("self_illumination - ml_add_four_change_color")
-        elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 11): #H3Category: self_illumination - ml_add_five_change_color
-            #add these in later
-            print("self_illumination - ml_add_five_change_color")
-        elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 12): #H3Category: self_illumination - plasma_wide_and_sharp_five_change_color
-            #add these in later
-            print("self_illumination - plasma_wide_and_sharp_five_change_color")
-        elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 13): #H3Category: self_illumination - self_illum_holograms
-            #add these in later
-            print("self_illumination - self_illum_holograms")
-    
+        #material model group        
+            #if(ShaderItem.material_model_option == 0): #H3Category: mateiral_model - diffuse_only
+                #no values needed
+            if(ShaderItem.material_model_option == 6): #H3Category: material_model - organism
+                ShaderItem.needed_bitmaps.append("specular_map")
+                ShaderItem.needed_bitmaps.append("subsurface_map")
+                ShaderItem.needed_bitmaps.append("transparence_map")
+            #elif(ShaderItem.material_model_option == 2): #H3Category: material_model - two_lobe_phong
+                          
+            #elif(ShaderItem.material_model_option == 5): #H3Category: material_model - glass
+                          
+            #elif(ShaderItem.material_model_option == 7): #H3Category: material_model - single_lobe_phong
+                
+                    
+        #self illum group
+            if(ShaderItem.self_illumination_option == 1): #H3Category: self_illumination - simple
+                ShaderItem.needed_bitmaps.append("self_illum_map")
+            elif(ShaderItem.self_illumination_option == 2): #H3Category: self_illumination - 3_channel_self_illum
+                ShaderItem.needed_bitmaps.append("self_illum_map")           
+            elif(ShaderItem.self_illumination_option == 3): #H3Category: self_illumination - plasma
+                ShaderItem.needed_bitmaps.append("noise_map_a")
+                ShaderItem.needed_bitmaps.append("noise_map_b")
+                ShaderItem.needed_bitmaps.append("alpha_mask_map")
+            #elif(ShaderItem.self_illumination_option == 4): #H3Category: self_illumination - from_diffuse
+                
+            elif(ShaderItem.self_illumination_option == 5): #H3Category: self_illumination - illum_detail
+                ShaderItem.needed_bitmaps.append("self_illum_map")
+                ShaderItem.needed_bitmaps.append("self_illum_detail_map")
+            elif(ShaderItem.self_illumination_option == 6): #H3Category: self_illumination - meter
+                ShaderItem.needed_bitmaps.append("meter_map")
+            elif(ShaderItem.self_illumination_option == 7): #H3Category: self_illumination - self_illum_times_diffuse
+                ShaderItem.needed_bitmaps.append("self_illum_map")
+            elif(ShaderItem.self_illumination_option == 8): #H3Category: self_illumination - simple_with_alpha_mask    
+                ShaderItem.needed_bitmaps.append("self_illum_map")
+               
         
-    ##############    
-    #terrain group
-    ##############
-    
-    #Halo3TerrainCategory - material - diffuse_only
+            
+        ##############    
+        #terrain group
+        ##############
+        
+        if(Shader_Type == 1):
+            ShaderItem.needed_bitmaps.append("blend_map")
+            
+            ShaderItem.needed_bitmaps.append("base_map_m_0")
+            ShaderItem.needed_bitmaps.append("detail_map_m_0")
+            ShaderItem.needed_bitmaps.append("bump_map_m_0")
+            ShaderItem.needed_bitmaps.append("detail_bump_m_0")
+            
+            ShaderItem.needed_bitmaps.append("base_map_m_1")
+            ShaderItem.needed_bitmaps.append("detail_map_m_1")
+            ShaderItem.needed_bitmaps.append("bump_map_m_1")
+            ShaderItem.needed_bitmaps.append("detail_bump_m_1")
+            
+            ShaderItem.needed_bitmaps.append("base_map_m_2")
+            ShaderItem.needed_bitmaps.append("detail_map_m_2")
+            ShaderItem.needed_bitmaps.append("bump_map_m_2")
+            ShaderItem.needed_bitmaps.append("detail_bump_m_2")
 
+            ShaderItem.needed_bitmaps.append("base_map_m_3")
+            ShaderItem.needed_bitmaps.append("detail_map_m_3")
+            ShaderItem.needed_bitmaps.append("bump_map_m_3")
+            ShaderItem.needed_bitmaps.append("detail_bump_m_3")
 
-    #Halo3TerrainCategory - material - diffuse_plus_specular
-    #all materials
+        #######################
+        #.shader_halogram files
+        #######################
 
-        NodeGroup.inputs.get("diffuse_coefficient_m_0").default_value = ShaderItem.diffuse_coefficient_m_0
-        NodeGroup.inputs.get("specular_coefficient_m_0").default_value = ShaderItem.specular_coefficient_m_0
-        NodeGroup.inputs.get("specular_power_m_0").default_value = ShaderItem.specular_power_m_0
-        NodeGroup.inputs.get("specular_tint_m_0").default_value = ShaderItem.specular_tint_m_0
-        NodeGroup.inputs.get("analytical_specular_contribution_m_0").default_value = ShaderItem.analytical_specular_contribution_m_0
-        NodeGroup.inputs.get("fresnel_curve_steepness_m_0").default_value = ShaderItem.fresnel_curve_steepness_m_0
-        NodeGroup.inputs.get("environment_specular_contribution_m_0").default_value = ShaderItem.environment_specular_contribution_m_0
-        NodeGroup.inputs.get("albedo_specular_tint_blend_m_0").default_value = ShaderItem.albedo_specular_tint_blend_m_0
-        NodeGroup.inputs.get("diffuse_coefficient_m_1").default_value = ShaderItem.diffuse_coefficient_m_1
-        NodeGroup.inputs.get("specular_coefficient_m_1").default_value = ShaderItem.specular_coefficient_m_1
-        NodeGroup.inputs.get("specular_power_m_1").default_value = ShaderItem.specular_power_m_1
-        NodeGroup.inputs.get("specular_tint_m_1").default_value = ShaderItem.specular_tint_m_1
-        NodeGroup.inputs.get("analytical_specular_contribution_m_1").default_value = ShaderItem.analytical_specular_contribution_m_1
-        NodeGroup.inputs.get("fresnel_curve_steepness_m_1").default_value = ShaderItem.fresnel_curve_steepness_m_1
-        NodeGroup.inputs.get("environment_specular_contribution_m_1").default_value = ShaderItem.environment_specular_contribution_m_1
-        NodeGroup.inputs.get("albedo_specular_tint_blend_m_1").default_value = ShaderItem.albedo_specular_tint_blend_m_1    
-        NodeGroup.inputs.get("diffuse_coefficient_m_2").default_value = ShaderItem.diffuse_coefficient_m_2
-        NodeGroup.inputs.get("specular_coefficient_m_2").default_value = ShaderItem.specular_coefficient_m_2
-        NodeGroup.inputs.get("specular_power_m_2").default_value = ShaderItem.specular_power_m_2
-        NodeGroup.inputs.get("specular_tint_m_2").default_value = ShaderItem.specular_tint_m_2
-        NodeGroup.inputs.get("analytical_specular_contribution_m_2").default_value = ShaderItem.analytical_specular_contribution_m_2
-        NodeGroup.inputs.get("fresnel_curve_steepness_m_2").default_value = ShaderItem.fresnel_curve_steepness_m_2
-        NodeGroup.inputs.get("environment_specular_contribution_m_2").default_value = ShaderItem.environment_specular_contribution_m_2
-        NodeGroup.inputs.get("albedo_specular_tint_blend_m_2").default_value = ShaderItem.albedo_specular_tint_blend_m_2    
-        NodeGroup.inputs.get("diffuse_coefficient_m_3").default_value = ShaderItem.diffuse_coefficient_m_3
-        NodeGroup.inputs.get("specular_coefficient_m_3").default_value = ShaderItem.specular_coefficient_m_3
-        NodeGroup.inputs.get("specular_power_m_3").default_value = ShaderItem.specular_power_m_3
-        NodeGroup.inputs.get("specular_tint_m_3").default_value = ShaderItem.specular_tint_m_3
-        NodeGroup.inputs.get("analytical_specular_contribution_m_3").default_value = ShaderItem.analytical_specular_contribution_m_3
-        NodeGroup.inputs.get("fresnel_curve_steepness_m_3").default_value = ShaderItem.fresnel_curve_steepness_m_3
-        NodeGroup.inputs.get("environment_specular_contribution_m_3").default_value = ShaderItem.environment_specular_contribution_m_3
-        NodeGroup.inputs.get("albedo_specular_tint_blend_m_3").default_value = ShaderItem.albedo_specular_tint_blend_m_3
-
-        #disable certain values if materials are off or are certain values
-        if(ShaderItem.material_0_option == 0 or ShaderItem.material_0_option == 2 or ShaderItem.material_0_option == 3): #if off or diffuse only
-            NodeGroup.inputs.get("specular_coefficient_m_0").default_value = 0.00
-        elif(ShaderItem.material_1_option == 0 or ShaderItem.material_1_option == 2 or ShaderItem.material_1_option == 3): #if off or diffuse only
-            NodeGroup.inputs.get("specular_coefficient_m_1").default_value = 0.00            
-        elif(ShaderItem.material_2_option == 0 or ShaderItem.material_2_option == 2 or ShaderItem.material_2_option == 3): #if off or diffuse only
-            NodeGroup.inputs.get("specular_coefficient_m_2").default_value = 0.00
-        elif(ShaderItem.material_3_option == 0 or ShaderItem.material_3_option == 1): #if off or diffuse only
-            NodeGroup.inputs.get("specular_coefficient_m_3").default_value = 0.00
-
-
-
+        if(Shader_Type == 3):        
+            if(ShaderItem.self_illumination_option == 8): #H3Category: self_illumination - multilayer_additive
+                #add these in later
+                print("self_illumination - multilayer_additive")
+            elif(ShaderItem.self_illumination_option == 9): #H3Category: self_illumination - scope_blur
+                #add these in later
+                print("self_illumination - scope_blur")
+            elif(ShaderItem.self_illumination_option == 10): #H3Category: self_illumination - ml_add_four_change_color
+                #add these in later
+                print("self_illumination - ml_add_four_change_color")
+            elif(ShaderItem.self_illumination_option == 11): #H3Category: self_illumination - ml_add_five_change_color
+                #add these in later
+                print("self_illumination - ml_add_five_change_color")
+            elif(ShaderItem.self_illumination_option == 12): #H3Category: self_illumination - plasma_wide_and_sharp_five_change_color
+                #add these in later
+                print("self_illumination - plasma_wide_and_sharp_five_change_color")
+            elif(ShaderItem.self_illumination_option == 13): #H3Category: self_illumination - self_illum_holograms
+                #add these in later
+                print("self_illumination - self_illum_holograms")
+        
+        return ShaderItem
 
 
     #Apply values from ShaderItem to Shader 
@@ -4186,7 +4163,8 @@ def Start_CR4B_Tool():
 
 
 
-
+                #Gather needed texture list
+                ShaderItem = build_texture_list(ShaderItem, Shader_Type)
 
                                         #############
                                         #TEXTURE DATA
@@ -4236,7 +4214,26 @@ def Start_CR4B_Tool():
                     ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
                     ShaderItem.bitmap_list.append(Bitmap)
                     DefaultNeeded = 0
-
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "base_map")):
+                        print("")
+                        print("[base_map]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "base_map"
+                        Bitmap.directory = correct_default_dir("base_map")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
+                        
                 if (DetailMap_Offset != 0):
                     #print("detail_map offset: " + str(DetailMap_Offset))
                     print("")
@@ -4282,7 +4279,7 @@ def Start_CR4B_Tool():
                             Bitmap.directory = "shaders/default_bitmaps/bitmaps/monochrome_alpha_grid"
                         else:
                             Bitmap.directory = "shaders/default_bitmaps/bitmaps/default_detail"
-
+                
 
 
 
@@ -4302,6 +4299,26 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (DetailMap_Offset + 0x1A + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0
+                
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "detail_map")):
+                        print("")
+                        print("[detail_map]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "detail_map"
+                        Bitmap.directory = correct_default_dir("detail_map")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
                 
                 if (DetailMap2_Offset != 0):
                     #print("detail_map2 offset: " + str(DetailMap2_Offset)) 
@@ -4340,7 +4357,27 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (DetailMap2_Offset + 0x1B + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0
-
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "detail_map2")):
+                        print("")
+                        print("[detail_map2]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "detail_map2"
+                        Bitmap.directory = correct_default_dir("detail_map2")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
+                
+                
                 #print("detail_map_overlay offset: " + str())
                 if (DetailMap3_Offset != 0):
                     #print("detail_map3 offset: " + str(DetailMap3_Offset))
@@ -4379,6 +4416,25 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (DetailMap3_Offset + 0x1B + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "detail_map3")):
+                        print("")
+                        print("[detail_map3]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "detail_map3"
+                        Bitmap.directory = correct_default_dir("detail_map3")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
 
                 if (SpecularMaskTexture_Offset != 0):
                     #print("specular_mask_texture offset: " + str(SpecularMaskTexture_Offset))
@@ -4417,7 +4473,26 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (SpecularMaskTexture_Offset + 0x25 + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0
-
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "specular_mask_texture")):
+                        print("")
+                        print("[specular_mask_texture]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "specular_mask_texture"
+                        Bitmap.directory = correct_default_dir("specular_mask_texture")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
+    
                 if (ChangeColorMap_Offset != 0):
                     #print("change_color_map offset: " + str(ChangeColorMap_Offset))
                     print("")
@@ -4455,6 +4530,25 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (ChangeColorMap_Offset + 0x20 + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "change_color_map")):
+                        print("")
+                        print("[change_color_map]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "change_color_map"
+                        Bitmap.directory = correct_default_dir("change_color_map")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
 
                 if (BumpMap_Offset != 0):
                     #print("bump_map offset: " + str(BumpMap_Offset))
@@ -4496,6 +4590,25 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (BumpMap_Offset + 0x18 + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "bump_map")):
+                        print("")
+                        print("[bump_map]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "bump_map"
+                        Bitmap.directory = correct_default_dir("bump_map")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
 
                 if (BumpDetailMap_Offset != 0):
                     #print("bump_detail_map offset: " + str(BumpDetailMap_Offset))
@@ -4537,6 +4650,25 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (BumpDetailMap_Offset + 0x1F + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "bump_detail_map")):
+                        print("")
+                        print("[bump_detail_map]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "bump_detail_map"
+                        Bitmap.directory = correct_default_dir("bump_detail_map")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
 
                 if (EnvironmentMap_Offset != 0):
                     #print("environment_map offset: " + str(EnvironmentMap_Offset))
@@ -4662,7 +4794,26 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (SelfIllumMap_Offset + 0x1E + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0
-
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "self_illum_map")):
+                        print("")
+                        print("[self_illum_map]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "self_illum_map"
+                        Bitmap.directory = correct_default_dir("self_illum_map")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
+                
                 if (SelfIllumDetailMap_Offset != 0):
                     #print("self_illum_detail_map offset: " + str(SelfIllumDetailMap_Offset))
                     print("")
@@ -4701,7 +4852,25 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (SelfIllumDetailMap_Offset + 0x25 + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0
-
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "self_illum_detail_map")):
+                        print("")
+                        print("[self_illum_detail_map]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "self_illum_detail_map"
+                        Bitmap.directory = correct_default_dir("self_illum_detail_map")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
 
                 #ALPHA_TEST_MAP
                 if (AlphaTestMap_Offset != 0):
@@ -4794,7 +4963,25 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (Blend_Map_Offset + 0x10 + 0x9 + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0
-                
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "blend_map")):
+                        print("")
+                        print("[blend_map]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "blend_map"
+                        Bitmap.directory = correct_default_dir("blend_map")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
                 
                 #BASE_MAP_M_0 OFFSET
                 if (Base_Map_M_0_Offset != 0):
@@ -4835,6 +5022,25 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (Base_Map_M_0_Offset + 0x10 + 0xC + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0            
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "base_map_m_0")):
+                        print("")
+                        print("[base_map_m_0]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "base_map_m_0"
+                        Bitmap.directory = correct_default_dir("base_map_m_0")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
                 
                 #DETAIL_MAP_M_0 OFFSET
                 if (Detail_Map_M_0_Offset != 0):
@@ -4875,6 +5081,25 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (Detail_Map_M_0_Offset + 0x10 + 0xE + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0             
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "detail_map_m_0")):
+                        print("")
+                        print("[detail_map_m_0]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "detail_map_m_0"
+                        Bitmap.directory = correct_default_dir("detail_map_m_0")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
                 
                 #BUMP_MAP_M_0 OFFSET
                 if (Bump_Map_M_0_Offset != 0):
@@ -4915,7 +5140,26 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (Bump_Map_M_0_Offset + 0x10 + 0xC + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0  
-                    
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "bump_map_m_0")):
+                        print("")
+                        print("[bump_map_m_0]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "bump_map_m_0"
+                        Bitmap.directory = correct_default_dir("bump_map_m_0")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
+                
                 #Detail_Bump_M_0_Offset OFFSET
                 if (Detail_Bump_M_0_Offset != 0):
                     #print("self_illum_map offset: " + str(SelfIllumMap_Offset))
@@ -4955,6 +5199,25 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (Detail_Bump_M_0_Offset + 0x10 + 0xF + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0 
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "detail_bump_m_0")):
+                        print("")
+                        print("[detail_bump_m_0]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "detail_bump_m_0"
+                        Bitmap.directory = correct_default_dir("detail_bump_m_0")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
 
                 #BASE_MAP_M_1 OFFSET
                 if (Base_Map_M_1_Offset != 0):
@@ -4995,6 +5258,25 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (Base_Map_M_1_Offset + 0x10 + 0xC + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0            
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "base_map_m_1")):
+                        print("")
+                        print("[base_map_m_1]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "base_map_m_1"
+                        Bitmap.directory = correct_default_dir("base_map_m_1")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
                 
                 #DETAIL_MAP_M_1 OFFSET
                 if (Detail_Map_M_1_Offset != 0):
@@ -5035,6 +5317,25 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (Detail_Map_M_1_Offset + 0x10 + 0xE + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0             
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "detail_map_m_1")):
+                        print("")
+                        print("[detail_map_m_1]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "detail_map_m_1"
+                        Bitmap.directory = correct_default_dir("detail_map_m_1")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
                 
                 #BUMP_MAP_M_1 OFFSET
                 if (Bump_Map_M_1_Offset != 0):
@@ -5075,7 +5376,26 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (Bump_Map_M_1_Offset + 0x10 + 0xC + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0  
-                    
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "bump_map_m_1")):
+                        print("")
+                        print("[bump_map_m_1]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "bump_map_m_1"
+                        Bitmap.directory = correct_default_dir("bump_map_m_1")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
+                
                 #Detail_Bump_M_1_Offset OFFSET
                 if (Detail_Bump_M_1_Offset != 0):
                     #print("self_illum_map offset: " + str(SelfIllumMap_Offset))
@@ -5115,6 +5435,25 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (Detail_Bump_M_1_Offset + 0x10 + 0xF + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0 
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "detail_bump_m_1")):
+                        print("")
+                        print("[detail_bump_m_1]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "detail_bump_m_1"
+                        Bitmap.directory = correct_default_dir("detail_bump_m_1")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
                 
                 #BASE_MAP_M_2 OFFSET
                 if (Base_Map_M_2_Offset != 0):
@@ -5155,6 +5494,25 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (Base_Map_M_2_Offset + 0x10 + 0xC + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0            
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "base_map_m_2")):
+                        print("")
+                        print("[base_map_m_2]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "base_map_m_2"
+                        Bitmap.directory = correct_default_dir("base_map_m_2")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
                 
                 #DETAIL_MAP_M_2 OFFSET
                 if (Detail_Map_M_2_Offset != 0):
@@ -5195,6 +5553,25 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (Detail_Map_M_2_Offset + 0x10 + 0xE + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0             
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "detail_map_m_2")):
+                        print("")
+                        print("[detail_map_m_2]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "detail_map_m_2"
+                        Bitmap.directory = correct_default_dir("detail_map_m_2")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
                 
                 #BUMP_MAP_M_2 OFFSET
                 if (Bump_Map_M_2_Offset != 0):
@@ -5235,7 +5612,26 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (Bump_Map_M_2_Offset + 0x10 + 0xC + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0  
-                    
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "bump_map_m_2")):
+                        print("")
+                        print("[bump_map_m_2]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "bump_map_m_2"
+                        Bitmap.directory = correct_default_dir("bump_map_m_2")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
+                
                 #Detail_Bump_M_3_Offset OFFSET
                 if (Detail_Bump_M_3_Offset != 0):
                     #print("self_illum_map offset: " + str(SelfIllumMap_Offset))
@@ -5275,7 +5671,26 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (Detail_Bump_M_3_Offset + 0x10 + 0xF + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0 
-                    
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "detail_bump_m_3")):
+                        print("")
+                        print("[detail_bump_m_3]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "detail_bump_m_3"
+                        Bitmap.directory = correct_default_dir("detail_bump_m_3")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
+                
                 #BASE_MAP_M_3 OFFSET
                 if (Base_Map_M_3_Offset != 0):
                     #print("self_illum_map offset: " + str(SelfIllumMap_Offset))
@@ -5315,6 +5730,25 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (Base_Map_M_3_Offset + 0x10 + 0xC + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0            
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "base_map_m_3")):
+                        print("")
+                        print("[base_map_m_3]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "base_map_m_3"
+                        Bitmap.directory = correct_default_dir("base_map_m_3")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
                 
                 #DETAIL_MAP_M_3 OFFSET
                 if (Detail_Map_M_3_Offset != 0):
@@ -5355,6 +5789,25 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (Detail_Map_M_3_Offset + 0x10 + 0xE + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0             
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "detail_map_m_3")):
+                        print("")
+                        print("[detail_map_m_3]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "detail_map_m_3"
+                        Bitmap.directory = correct_default_dir("detail_map_m_3")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
                 
                 #BUMP_MAP_M_3 OFFSET
                 if (Bump_Map_M_3_Offset != 0):
@@ -5395,7 +5848,26 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (Bump_Map_M_3_Offset + 0x10 + 0xC + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0  
-                    
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "bump_map_m_3")):
+                        print("")
+                        print("[bump_map_m_3]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "bump_map_m_3"
+                        Bitmap.directory = correct_default_dir("bump_map_m_3")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
+                
                 #Detail_Bump_M_3_Offset OFFSET
                 if (Detail_Bump_M_3_Offset != 0):
                     #print("self_illum_map offset: " + str(SelfIllumMap_Offset))
@@ -5435,6 +5907,25 @@ def Start_CR4B_Tool():
                     Bitmap = get_scale(shaderfile, (Detail_Bump_M_3_Offset + 0x10 + 0xF + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     DefaultNeeded = 0 
+                else:
+                    #bitmap not referenced but might be needed
+                    if(is_texture_needed(ShaderItem, "detail_bump_m_3")):
+                        print("")
+                        print("[detail_bump_m_3]")
+                        #DirOffset = shaderfile.tell()
+                        
+                        #clear old bitmap data
+                        Bitmap = bitmap()
+                        Bitmap.directory = ""
+                        Bitmap.type = ""
+                        Bitmap.curve_option = 0
+                        Bitmap.width = 0
+                        Bitmap.height = 0
+                        
+                        Bitmap.type = "detail_bump_m_3"
+                        Bitmap.directory = correct_default_dir("detail_bump_m_3")
+                        ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                        ShaderItem.bitmap_list.append(Bitmap)
 
                                                     ##############
                                                     #COLORS/VALUES
@@ -8134,7 +8625,9 @@ def Start_CR4B_Tool():
 
 
 
-
+                #fix texture location for terrain files
+                if (Shader_Type == 1):
+                    last_texture_x = last_texture_x - 400
 
 
 
@@ -8154,9 +8647,6 @@ def Start_CR4B_Tool():
                     if(last_texture_y > 400):
                         last_texture_y = 100
                 
-                    #fix texture location for terrain files
-                    if (Shader_Type == 1):
-                        last_texture_x = last_texture_x - 150
                 
                     #correct texture node placement when there is no texture made
                     before_no_tex_x = last_texture_x
