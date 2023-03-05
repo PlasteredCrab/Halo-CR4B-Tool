@@ -9922,7 +9922,7 @@ def Start_CR4B_Tool():
                                         pymat_copy.node_tree.links.new(TerrainGroup.inputs["detail_bump_m_3"], GammaNode_Detail_Bump_M3.outputs[0])
                                     else:
                                         #link detail_bump_m_3 to terrain group M3
-                                        pymat_copy.node_tree.links.new(TerrainGroup.inputs["detail_bump_m_3"], ImageTextureNodeList[bitm + 1].outputs["Color"])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 "], ImageTextureNodeList[bitm + 1].outputs["Color"]) 
+                                        pymat_copy.node_tree.links.new(TerrainGroup.inputs["detail_bump_m_3"], ImageTextureNodeList[bitm + 1].outputs["Color"])
 
                             
                                                 #########################
