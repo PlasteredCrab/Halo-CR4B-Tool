@@ -359,12 +359,33 @@ def Start_CR4B_Tool():
         distortion_option = 0
         soft_fade_option = 0
 
+        #used for default textures
+        #texture reference offsets
+        BaseMap_Offset = 0x0
+        DetailMap_Offset = 0x0
+        DetailMap2_Offset = 0x0
+        DetailMap3_Offset = 0x0
+        SpecularMaskTexture_Offset = 0x0
+        ChangeColorMap_Offset = 0x0
+        BumpMap_Offset = 0x0
+        BumpDetailMap_Offset = 0x0
+        EnvironmentMap_Offset = 0x0
+        FlatEnvironmentMap_Offset = 0x0
+        SelfIllumMap_Offset = 0x0
+        SelfIllumDetailMap_Offset = 0x0
+        
+        #offset for Alpha_Test_Map
+        AlphaTestMap_Offset = 0x0
 
 
+
+        needed_bitmaps = []
         env_tint_color_offset_list = []
         bitmap_list = []      #list of bitmap class objects for each bitmap used by the shader
         function_list = []
         wrap_mode_list = []
+        
+        
         
     #some global variables
     ShaderList = []   #list of all shader information
@@ -2135,6 +2156,39 @@ def Start_CR4B_Tool():
         else:
             return "ERROR"
             
+    #get halogram options
+    def get_halogram_self_illumination_option(option):
+        if (option == 0):
+            return "off"
+        elif (option == 1):
+            return "simple" 
+        elif (option == 2):
+            return "3_channel_self_illum" 
+        elif (option == 3):
+            return "plasma" 
+        elif (option == 4):
+            return "from_diffuse" 
+        elif (option == 5):
+            return "illum_detail" 
+        elif (option == 6):
+            return "meter" 
+        elif (option == 7):
+            return "self_illum_times_diffuse" 
+        elif (option == 8):
+            return "multilayer_additive" 
+        elif (option == 9):
+            return "scope_blur"         
+        elif (option == 10):
+            return "ml_add_four_change_color"     
+        elif (option == 11):
+            return "ml_add_five_change_color" 
+        elif (option == 12):
+            return "plasma_wide_and_sharp_five_change_color"     
+        elif (option == 13):
+            return "self_illum_holograms" 
+        else:
+            return "ERROR"     
+            
     def get_blend_mode_option(option):
         if (option == 0):
             return "opaque"
@@ -2338,38 +2392,6 @@ def Start_CR4B_Tool():
             return "Error getting Material_3 option"
 
 
-    #get halogram options
-    def get_halogram_self_illumination_option(option):
-        if (option == 0):
-            return "off"
-        elif (option == 1):
-            return "simple" 
-        elif (option == 2):
-            return "3_channel_self_illum" 
-        elif (option == 3):
-            return "plasma" 
-        elif (option == 4):
-            return "from_diffuse" 
-        elif (option == 5):
-            return "illum_detail" 
-        elif (option == 6):
-            return "meter" 
-        elif (option == 7):
-            return "self_illum_times_diffuse" 
-        elif (option == 8):
-            return "multilayer_additive" 
-        elif (option == 9):
-            return "scope_blue"         
-        elif (option == 10):
-            return "ml_add_four_change_color"     
-        elif (option == 11):
-            return "ml_add_five_change_color" 
-        elif (option == 12):
-            return "plasma_wide_and_sharp_five_change_color"     
-        elif (option == 13):
-            return "self_illum_holograms" 
-        else:
-            return "ERROR"
             
     def get_warp_option(option):
         if (option == 0):
@@ -2572,6 +2594,240 @@ def Start_CR4B_Tool():
         # ImageTexNode.name = "[" + BitmapType + "]  " + ImageTexNode.name
         # return ImageTexNode
 
+    #function to check if certain NodeGroup has what it needs for default textures
+    def create_needed_defaults(NodeGroup, ShaderItem, Shader_Type):
+        #check needed bitmaps for the used categories
+    
+        ShaderItem.needed_bitmaps = []
+
+        
+
+##############
+#.shader files
+##############
+
+    #albedo options
+        if(ShaderItem.albedo_option == 0): #H3Category: albedo - default 
+            ShaderItem.needed_bitmaps.append("base_map")
+            ShaderItem.needed_bitmaps.append("detail_map")
+        elif(ShaderItem.albedo_option == 1): #H3Category: albedo - detail_blend
+            ShaderItem.needed_bitmaps.append("base_map")
+            ShaderItem.needed_bitmaps.append("detail_map")
+            ShaderItem.needed_bitmaps.append("detail_map2")
+        elif(ShaderItem.albedo_option == 2): #H3Category: albedo - constant_color
+            print("constant color doesn't need bitmaps")
+        elif(ShaderItem.albedo_option == 3): #H3Category: albedo - two_change_color
+            ShaderItem.needed_bitmaps.append("base_map")
+            ShaderItem.needed_bitmaps.append("detail_map")
+            ShaderItem.needed_bitmaps.append("change_color_map")
+        elif(ShaderItem.albedo_option == 4): #H3Category: albedo - four_change_color
+            ShaderItem.needed_bitmaps.append("base_map")
+            ShaderItem.needed_bitmaps.append("detail_map")
+            ShaderItem.needed_bitmaps.append("change_color_map")
+        elif(ShaderItem.albedo_option == 5): #H3Category: albedo - three_detail_blend
+            ShaderItem.needed_bitmaps.append("base_map")
+            ShaderItem.needed_bitmaps.append("detail_map")
+            ShaderItem.needed_bitmaps.append("detail_map2")
+            ShaderItem.needed_bitmaps.append("detail_map3")
+        elif(ShaderItem.albedo_option == 6): #H3Category: albedo - two_detail_overlay
+            ShaderItem.needed_bitmaps.append("base_map")
+            ShaderItem.needed_bitmaps.append("detail_map")
+            ShaderItem.needed_bitmaps.append("detail_map2")
+            ShaderItem.needed_bitmaps.append("detail_overlay")
+        elif(ShaderItem.albedo_option == 7): #H3Category: albedo - two_detail
+            ShaderItem.needed_bitmaps.append("base_map")
+            ShaderItem.needed_bitmaps.append("detail_map")
+            ShaderItem.needed_bitmaps.append("detail_map2")
+        elif(ShaderItem.albedo_option == 8): #H3Category: albedo - color_mask    
+            ShaderItem.needed_bitmaps.append("base_map")
+            ShaderItem.needed_bitmaps.append("detail_map")
+            ShaderItem.needed_bitmaps.append("color_mask")
+        elif(ShaderItem.albedo_option == 17): #H3Category: albedo - custom_cube
+            ShaderItem.needed_bitmaps.append("base_map")
+            ShaderItem.needed_bitmaps.append("custom_cube")
+        elif(ShaderItem.albedo_option == 18): #H3Category: albedo - two_color
+            ShaderItem.needed_bitmaps.append("base_map")
+            ShaderItem.needed_bitmaps.append("blend_map")
+        elif(ShaderItem.albedo_option == 21): #H3Category: albedo - scrolling_texture_uv
+            ShaderItem.needed_bitmaps.append("base_map")
+            ShaderItem.needed_bitmaps.append("color_texture")
+        elif(ShaderItem.albedo_option == 22): #H3Category: albedo - texture_from_misc
+            ShaderItem.needed_bitmaps.append("base_map")
+            ShaderItem.needed_bitmaps.append("color_texture")
+    #bump_map group
+        #if(ShaderItem.bump_mapping_option == 1): #H3Category: bump_mapping - standard
+            #no values needed?        
+        if(ShaderItem.bump_mapping_option == 2): #H3Category: bump_mapping - detail
+            NodeGroup.inputs.get("bump_detail_coefficient").default_value = ShaderItem.bump_detail_coefficient
+        elif(ShaderItem.bump_mapping_option == 3): #H3Category: bump_mapping - detail_masked
+            NodeGroup.inputs.get("albedo_color").default_value = ShaderItem.albedo_color
+            #invert_mask?
+        elif(ShaderItem.bump_mapping_option == 4): #H3Category: bump_mapping - detail_plus_detail_masked
+            NodeGroup.inputs.get("bump_detail_coefficient").default_value = ShaderItem.bump_detail_coefficient
+            #bump_detail_masked_coefficient  
+        #elif(ShaderItem.bump_mapping_option == 5): #H3Category: bump_mapping - detail_unorm
+            #NodeGroup.inputs.get("bump_detail_coefficient").default_value = ShaderItem.bump_detail_coefficient            
+        
+    #environment map group    
+        if(ShaderItem.environment_mapping_option == 1 or ShaderItem.environment_map_option == 1): #H3Category: environment_mapping - per_pixel
+            NodeGroup.inputs.get("env_tint_color").default_value = ShaderItem.env_tint_color
+        elif(ShaderItem.environment_mapping_option == 2 or ShaderItem.environment_map_option == 2): #H3Category: environment_mapping - dynamic
+            NodeGroup.inputs.get("env_tint_color").default_value = ShaderItem.env_tint_color        
+            NodeGroup.inputs.get("env_roughness_scale").default_value = ShaderItem.env_roughness_scale  
+            
+    #material model group        
+        #if(ShaderItem.material_model_option == 0): #H3Category: mateiral_model - diffuse_only
+            #no values needed
+        if(ShaderItem.material_model_option == 1): #H3Category: material_model - cook_torrance
+            NodeGroup.inputs.get("diffuse_coefficient").default_value = ShaderItem.diffuse_coefficient
+            NodeGroup.inputs.get("specular_coefficient").default_value = ShaderItem.specular_coefficient
+            NodeGroup.inputs.get("specular_tint").default_value = ShaderItem.specular_tint
+            NodeGroup.inputs.get("fresnel_color").default_value = ShaderItem.fresnel_color
+            NodeGroup.inputs.get("roughness").default_value = ShaderItem.roughness
+            NodeGroup.inputs.get("environment_map_specular_contribution").default_value = ShaderItem.environment_map_specular_contribution
+            NodeGroup.inputs.get("use_material_texture").default_value = ShaderItem.use_material_texture
+            NodeGroup.inputs.get("albedo_blend").default_value = ShaderItem.albedo_blend            
+            NodeGroup.inputs.get("analytical_specular_contribution").default_value = ShaderItem.analytical_specular_contribution
+        elif(ShaderItem.material_model_option == 2): #H3Category: material_model - two_lobe_phong
+            NodeGroup.inputs.get("diffuse_coefficient").default_value = ShaderItem.diffuse_coefficient   
+            NodeGroup.inputs.get("specular_coefficient").default_value = ShaderItem.specular_coefficient
+            NodeGroup.inputs.get("normal_specular_power").default_value = ShaderItem.normal_specular_power
+            NodeGroup.inputs.get("normal_specular_tint").default_value = ShaderItem.normal_specular_tint
+            NodeGroup.inputs.get("glancing_specular_power").default_value = ShaderItem.glancing_specular_power
+            NodeGroup.inputs.get("glancing_specular_tint").default_value = ShaderItem.glancing_specular_tint
+            NodeGroup.inputs.get("fresnel_curve_steepness").default_value = ShaderItem.fresnel_curve_steepness
+            NodeGroup.inputs.get("environment_map_specular_contribution").default_value = ShaderItem.environment_map_specular_contribution
+            NodeGroup.inputs.get("albedo_specular_tint_blend").default_value = ShaderItem.albedo_specular_tint_blend   
+            NodeGroup.inputs.get("analytical_specular_contribution").default_value = ShaderItem.analytical_specular_contribution            
+        elif(ShaderItem.material_model_option == 5): #H3Category: material_model - glass
+            NodeGroup.inputs.get("diffuse_coefficient").default_value = ShaderItem.diffuse_coefficient   
+            NodeGroup.inputs.get("specular_coefficient").default_value = ShaderItem.specular_coefficient
+            NodeGroup.inputs.get("roughness").default_value = ShaderItem.roughness
+            NodeGroup.inputs.get("fresnel_coefficient").default_value = ShaderItem.fresnel_coefficient              
+            NodeGroup.inputs.get("fresnel_curve_steepness").default_value = ShaderItem.fresnel_curve_steepness
+            NodeGroup.inputs.get("fresnel_curve_bias").default_value = ShaderItem.fresnel_curve_bias                
+            NodeGroup.inputs.get("analytical_specular_contribution").default_value = ShaderItem.analytical_specular_contribution            
+        elif(ShaderItem.material_model_option == 7): #H3Category: material_model - single_lobe_phong
+            NodeGroup.inputs.get("diffuse_coefficient").default_value = ShaderItem.diffuse_coefficient
+            NodeGroup.inputs.get("specular_coefficient").default_value = ShaderItem.specular_coefficient        
+            NodeGroup.inputs.get("specular_tint").default_value = ShaderItem.specular_tint    
+            NodeGroup.inputs.get("roughness").default_value = ShaderItem.roughness            
+            NodeGroup.inputs.get("environment_map_specular_contribution").default_value = ShaderItem.environment_map_specular_contribution
+            NodeGroup.inputs.get("analytical_specular_contribution").default_value = ShaderItem.analytical_specular_contribution
+                
+    #self illum group
+        if(ShaderItem.self_illumination_option == 1): #H3Category: self_illumination - simple
+            NodeGroup.inputs.get("self_illum_color").default_value = ShaderItem.self_illum_color
+            NodeGroup.inputs.get("self_illum_intensity").default_value = ShaderItem.self_illum_intensity            
+        elif(ShaderItem.self_illumination_option == 2): #H3Category: self_illumination - 3_channel_self_illum
+            NodeGroup.inputs.get("channel_a").default_value = ShaderItem.channel_a
+            NodeGroup.inputs.get("channel_a_alpha").default_value = ShaderItem.channel_a_alpha
+            NodeGroup.inputs.get("channel_b").default_value = ShaderItem.channel_b
+            NodeGroup.inputs.get("channel_b_alpha").default_value = ShaderItem.channel_b_alpha
+            NodeGroup.inputs.get("channel_c").default_value = ShaderItem.channel_c
+            NodeGroup.inputs.get("channel_c_alpha").default_value = ShaderItem.channel_c_alpha            
+        elif(ShaderItem.self_illumination_option == 3): #H3Category: self_illumination - plasma
+            NodeGroup.inputs.get("color_wide").default_value = ShaderItem.color_wide
+            NodeGroup.inputs.get("color_wide_alpha").default_value = ShaderItem.color_wide_alpha
+            NodeGroup.inputs.get("color_sharp").default_value = ShaderItem.color_sharp
+            NodeGroup.inputs.get("color_sharp_alpha").default_value = ShaderItem.color_sharp_alpha
+            NodeGroup.inputs.get("color_medium").default_value = ShaderItem.color_medium
+            NodeGroup.inputs.get("color_medium_alpha").default_value = ShaderItem.color_medium_alpha
+            NodeGroup.inputs.get("self_illum_intensity").default_value = ShaderItem.self_illum_intensity
+            NodeGroup.inputs.get("thinness_medium").default_value = ShaderItem.thinness_medium
+            NodeGroup.inputs.get("thinness_wide").default_value = ShaderItem.thinness_wide
+            NodeGroup.inputs.get("thinness_sharp").default_value = ShaderItem.thinness_sharp
+        elif(ShaderItem.self_illumination_option == 4): #H3Category: self_illumination - from_diffuse
+            NodeGroup.inputs.get("self_illum_color").default_value = ShaderItem.self_illum_color
+            NodeGroup.inputs.get("self_illum_intensity").default_value = ShaderItem.self_illum_intensity
+        elif(ShaderItem.self_illumination_option == 5): #H3Category: self_illumination - illum_detail
+            NodeGroup.inputs.get("self_illum_color").default_value = ShaderItem.self_illum_color
+            NodeGroup.inputs.get("self_illum_intensity").default_value = ShaderItem.self_illum_intensity
+        elif(ShaderItem.self_illumination_option == 6): #H3Category: self_illumination - meter
+            NodeGroup.inputs.get("meter_color_off").default_value = ShaderItem.meter_color_off
+            NodeGroup.inputs.get("meter_color_on").default_value = ShaderItem.meter_color_on
+            NodeGroup.inputs.get("meter_value").default_value = ShaderItem.meter_value
+        elif(ShaderItem.self_illumination_option == 7): #H3Category: self_illumination - self_illum_times_diffuse
+            NodeGroup.inputs.get("self_illum_color").default_value = ShaderItem.self_illum_color
+            NodeGroup.inputs.get("self_illum_intensity").default_value = ShaderItem.self_illum_intensity
+            NodeGroup.inputs.get("primary_change_color_blend").default_value = ShaderItem.primary_change_color_blend
+        elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 8): #H3Category: self_illumination - multilayer_additive
+            #add these in later
+            print("self_illumination - multilayer_additive")
+        elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 9): #H3Category: self_illumination - scope_blur
+            #add these in later
+            print("self_illumination - scope_blur")
+        elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 10): #H3Category: self_illumination - ml_add_four_change_color
+            #add these in later
+            print("self_illumination - ml_add_four_change_color")
+        elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 11): #H3Category: self_illumination - ml_add_five_change_color
+            #add these in later
+            print("self_illumination - ml_add_five_change_color")
+        elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 12): #H3Category: self_illumination - plasma_wide_and_sharp_five_change_color
+            #add these in later
+            print("self_illumination - plasma_wide_and_sharp_five_change_color")
+        elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 13): #H3Category: self_illumination - self_illum_holograms
+            #add these in later
+            print("self_illumination - self_illum_holograms")
+    
+        
+    ##############    
+    #terrain group
+    ##############
+    
+    #Halo3TerrainCategory - material - diffuse_only
+
+
+    #Halo3TerrainCategory - material - diffuse_plus_specular
+    #all materials
+
+        NodeGroup.inputs.get("diffuse_coefficient_m_0").default_value = ShaderItem.diffuse_coefficient_m_0
+        NodeGroup.inputs.get("specular_coefficient_m_0").default_value = ShaderItem.specular_coefficient_m_0
+        NodeGroup.inputs.get("specular_power_m_0").default_value = ShaderItem.specular_power_m_0
+        NodeGroup.inputs.get("specular_tint_m_0").default_value = ShaderItem.specular_tint_m_0
+        NodeGroup.inputs.get("analytical_specular_contribution_m_0").default_value = ShaderItem.analytical_specular_contribution_m_0
+        NodeGroup.inputs.get("fresnel_curve_steepness_m_0").default_value = ShaderItem.fresnel_curve_steepness_m_0
+        NodeGroup.inputs.get("environment_specular_contribution_m_0").default_value = ShaderItem.environment_specular_contribution_m_0
+        NodeGroup.inputs.get("albedo_specular_tint_blend_m_0").default_value = ShaderItem.albedo_specular_tint_blend_m_0
+        NodeGroup.inputs.get("diffuse_coefficient_m_1").default_value = ShaderItem.diffuse_coefficient_m_1
+        NodeGroup.inputs.get("specular_coefficient_m_1").default_value = ShaderItem.specular_coefficient_m_1
+        NodeGroup.inputs.get("specular_power_m_1").default_value = ShaderItem.specular_power_m_1
+        NodeGroup.inputs.get("specular_tint_m_1").default_value = ShaderItem.specular_tint_m_1
+        NodeGroup.inputs.get("analytical_specular_contribution_m_1").default_value = ShaderItem.analytical_specular_contribution_m_1
+        NodeGroup.inputs.get("fresnel_curve_steepness_m_1").default_value = ShaderItem.fresnel_curve_steepness_m_1
+        NodeGroup.inputs.get("environment_specular_contribution_m_1").default_value = ShaderItem.environment_specular_contribution_m_1
+        NodeGroup.inputs.get("albedo_specular_tint_blend_m_1").default_value = ShaderItem.albedo_specular_tint_blend_m_1    
+        NodeGroup.inputs.get("diffuse_coefficient_m_2").default_value = ShaderItem.diffuse_coefficient_m_2
+        NodeGroup.inputs.get("specular_coefficient_m_2").default_value = ShaderItem.specular_coefficient_m_2
+        NodeGroup.inputs.get("specular_power_m_2").default_value = ShaderItem.specular_power_m_2
+        NodeGroup.inputs.get("specular_tint_m_2").default_value = ShaderItem.specular_tint_m_2
+        NodeGroup.inputs.get("analytical_specular_contribution_m_2").default_value = ShaderItem.analytical_specular_contribution_m_2
+        NodeGroup.inputs.get("fresnel_curve_steepness_m_2").default_value = ShaderItem.fresnel_curve_steepness_m_2
+        NodeGroup.inputs.get("environment_specular_contribution_m_2").default_value = ShaderItem.environment_specular_contribution_m_2
+        NodeGroup.inputs.get("albedo_specular_tint_blend_m_2").default_value = ShaderItem.albedo_specular_tint_blend_m_2    
+        NodeGroup.inputs.get("diffuse_coefficient_m_3").default_value = ShaderItem.diffuse_coefficient_m_3
+        NodeGroup.inputs.get("specular_coefficient_m_3").default_value = ShaderItem.specular_coefficient_m_3
+        NodeGroup.inputs.get("specular_power_m_3").default_value = ShaderItem.specular_power_m_3
+        NodeGroup.inputs.get("specular_tint_m_3").default_value = ShaderItem.specular_tint_m_3
+        NodeGroup.inputs.get("analytical_specular_contribution_m_3").default_value = ShaderItem.analytical_specular_contribution_m_3
+        NodeGroup.inputs.get("fresnel_curve_steepness_m_3").default_value = ShaderItem.fresnel_curve_steepness_m_3
+        NodeGroup.inputs.get("environment_specular_contribution_m_3").default_value = ShaderItem.environment_specular_contribution_m_3
+        NodeGroup.inputs.get("albedo_specular_tint_blend_m_3").default_value = ShaderItem.albedo_specular_tint_blend_m_3
+
+        #disable certain values if materials are off or are certain values
+        if(ShaderItem.material_0_option == 0 or ShaderItem.material_0_option == 2 or ShaderItem.material_0_option == 3): #if off or diffuse only
+            NodeGroup.inputs.get("specular_coefficient_m_0").default_value = 0.00
+        elif(ShaderItem.material_1_option == 0 or ShaderItem.material_1_option == 2 or ShaderItem.material_1_option == 3): #if off or diffuse only
+            NodeGroup.inputs.get("specular_coefficient_m_1").default_value = 0.00            
+        elif(ShaderItem.material_2_option == 0 or ShaderItem.material_2_option == 2 or ShaderItem.material_2_option == 3): #if off or diffuse only
+            NodeGroup.inputs.get("specular_coefficient_m_2").default_value = 0.00
+        elif(ShaderItem.material_3_option == 0 or ShaderItem.material_3_option == 1): #if off or diffuse only
+            NodeGroup.inputs.get("specular_coefficient_m_3").default_value = 0.00
+
+
+
+
+
     #Apply values from ShaderItem to Shader 
     def apply_group_values(NodeGroup, ShaderItem, category):
         #albedo/base_map group
@@ -2696,6 +2952,28 @@ def Start_CR4B_Tool():
                 NodeGroup.inputs.get("self_illum_color").default_value = ShaderItem.self_illum_color
                 NodeGroup.inputs.get("self_illum_intensity").default_value = ShaderItem.self_illum_intensity
                 NodeGroup.inputs.get("primary_change_color_blend").default_value = ShaderItem.primary_change_color_blend
+            elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 8): #H3Category: self_illumination - multilayer_additive
+                #add these in later
+                print("self_illumination - multilayer_additive")
+            elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 9): #H3Category: self_illumination - scope_blur
+                #add these in later
+                print("self_illumination - scope_blur")
+            elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 10): #H3Category: self_illumination - ml_add_four_change_color
+                #add these in later
+                print("self_illumination - ml_add_four_change_color")
+            elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 11): #H3Category: self_illumination - ml_add_five_change_color
+                #add these in later
+                print("self_illumination - ml_add_five_change_color")
+            elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 12): #H3Category: self_illumination - plasma_wide_and_sharp_five_change_color
+                #add these in later
+                print("self_illumination - plasma_wide_and_sharp_five_change_color")
+            elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 13): #H3Category: self_illumination - self_illum_holograms
+                #add these in later
+                print("self_illumination - self_illum_holograms")
+            
+            
+            
+            
             
         ##############    
         #terrain group
@@ -2932,6 +3210,26 @@ def Start_CR4B_Tool():
                 ShaderItem.misc_option = 0
                 ShaderItem.bitmap_list = []
                 ShaderItem.function_list = []
+                ShaderItem.needed_bitmaps = []
+                
+                #used for default textures
+                #Clear the found texture offsets for each new ShaderItem
+                ShaderItem.BaseMap_Offset = 0x0
+                ShaderItem.DetailMap_Offset = 0x0
+                ShaderItem.DetailMap2_Offset = 0x0
+                ShaderItem.DetailMap3_Offset = 0x0
+                ShaderItem.SpecularMaskTexture_Offset = 0x0
+                ShaderItem.ChangeColorMap_Offset = 0x0
+                ShaderItem.BumpMap_Offset = 0x0
+                ShaderItem.BumpDetailMap_Offset = 0x0
+                ShaderItem.EnvironmentMap_Offset = 0x0
+                ShaderItem.FlatEnvironmentMap_Offset = 0x0
+                ShaderItem.SelfIllumMap_Offset = 0x0
+                ShaderItem.SelfIllumDetailMap_Offset = 0x0
+                
+                
+                
+                
                 
                 #create blank function object
                 FunctionItem = function()
@@ -3153,62 +3451,74 @@ def Start_CR4B_Tool():
                     #CHECK FOR TEXTURE OFFSETS    
                     try: #check for base_map
                         BaseMap_Offset = shaderfile_read.index(b'\x00\x62\x61\x73\x65\x5F\x6D\x61\x70\x66\x72\x67\x74')
+                        ShaderItem.BaseMap_Offset = BaseMap_Offset
                     except ValueError:
                         if(debug_textures_values_found != 0):                        
                             print("base_map not found!")
                     try: 
                         DetailMap_Offset = shaderfile_read.index(b'\x00\x64\x65\x74\x61\x69\x6c\x5f\x6d\x61\x70\x66\x72\x67\x74')
+                        ShaderItem.DetailMap_Offset = DetailMap_Offset
                     except ValueError:
                         if(debug_textures_values_found != 0):
                             print("detail_map not found!")
                     try: 
-                        DetailMap2_Offset = shaderfile_read.index(b'\x00\x64\x65\x74\x61\x69\x6c\x5f\x6d\x61\x70\x32\x0a\x66\x72\x67\x74')
+                        DetailMap2_Offset = shaderfile_read.index(b'\x00\x64\x65\x74\x61\x69\x6c\x5f\x6d\x61\x70\x32\x66\x72\x67\x74')
+                        ShaderItem.DetailMap2_Offset = DetailMap2_Offset
                     except ValueError:
                         if(debug_textures_values_found != 0):
                             print("detail_map2 not found!")
                     try: 
-                        DetailMap3_Offset = shaderfile_read.index(b'\x00\x64\x65\x74\x61\x69\x6c\x5f\x6d\x61\x70\x33\x0a\x66\x72\x67\x74')
+                        DetailMap3_Offset = shaderfile_read.index(b'\x00\x64\x65\x74\x61\x69\x6c\x5f\x6d\x61\x70\x33\x66\x72\x67\x74')
+                        ShaderItem.DetailMap3_Offset = DetailMap3_Offset
                     except ValueError:
                         if(debug_textures_values_found != 0):
                             print("detail_map3 not found!")
                     #search for detail_map_overlay                
                     try: 
                         SpecularMaskTexture_Offset = shaderfile_read.index(b'\x00\x73\x70\x65\x63\x75\x6C\x61\x72\x5F\x6D\x61\x73\x6B\x5F\x74\x65\x78\x74\x75\x72\x65\x66\x72\x67\x74')
+                        ShaderItem.SpecularMaskTexture_Offset = SpecularMaskTexture_Offset
                     except ValueError:
                         if(debug_textures_values_found != 0):                    
                             print("specular_mask_texture not found!")    
                     try: 
                         ChangeColorMap_Offset = shaderfile_read.index(b'\x00\x63\x68\x61\x6e\x67\x65\x5f\x63\x6f\x6c\x6f\x72\x5f\x6d\x61\x70\x66\x72\x67\x74')
+                        ShaderItem.ChangeColorMap_Offset = ChangeColorMap_Offset
                     except ValueError:
                         if(debug_textures_values_found != 0):                    
                             print("change_color_map not found!")
                     try: 
                         BumpMap_Offset = shaderfile_read.index(b'\x00\x62\x75\x6d\x70\x5f\x6d\x61\x70\x66\x72\x67\x74')
+                        ShaderItem.BumpMap_Offset = BumpMap_Offset
                     except ValueError:
                         if(debug_textures_values_found != 0):                    
                             print("bump_map not found!")
                     try: 
                         BumpDetailMap_Offset = shaderfile_read.index(b'\x00\x62\x75\x6d\x70\x5f\x64\x65\x74\x61\x69\x6c\x5f\x6d\x61\x70\x66\x72\x67\x74')
+                        ShaderItem.BumpDetailMap_Offset = BumpDetailMap_Offset
                     except ValueError:
                         if(debug_textures_values_found != 0):                    
                             print("bump_detail_map not found!")       
                     try: 
                         EnvironmentMap_Offset = shaderfile_read.index(b'\x00\x65\x6e\x76\x69\x72\x6f\x6e\x6d\x65\x6e\x74\x5f\x6d\x61\x70\x66\x72\x67\x74')
+                        ShaderItem.EnvironmentMap_Offset = EnvironmentMap_Offset
                     except ValueError:
                         if(debug_textures_values_found != 0):                    
                             print("environment_map not found!")     
                     try: 
                         FlatEnvironmentMap_Offset = shaderfile_read.index(b'\x00\x66\x6C\x61\x74\x5F\x65\x6E\x76\x69\x72\x6F\x6E\x6D\x65\x6E\x74\x5F\x6D\x61\x70\x66\x72\x67\x74')
+                        ShaderItem.FlatEnvironmentMap_Offset = FlatEnvironmentMap_Offset
                     except ValueError:
                         if(debug_textures_values_found != 0): 
                             print("flat_environment_map not found!")     
                     try: 
                         SelfIllumMap_Offset = shaderfile_read.index(b'\x00\x73\x65\x6c\x66\x5f\x69\x6c\x6c\x75\x6d\x5f\x6d\x61\x70\x66\x72\x67\x74')
+                        ShaderItem.SelfIllumMap_Offset = SelfIllumMap_Offset
                     except ValueError:
                         if(debug_textures_values_found != 0): 
                             print("self_illum_map not found!")     
                     try: 
                         SelfIllumDetailMap_Offset = shaderfile_read.index(b'\x00\x73\x65\x6c\x66\x5f\x69\x6c\x6c\x75\x6d\x5f\x64\x65\x74\x61\x69\x6c\x5f\x6d\x61\x70\x66\x72\x67\x74')
+                        ShaderItem.SelfIllumDetailMap_Offset = SelfIllumDetailMap_Offset
                     except ValueError:
                         if(debug_textures_values_found != 0): 
                             print("self_illum_detail_map not found!")
@@ -6811,8 +7121,8 @@ def Start_CR4B_Tool():
                                     #########################
                                     #Alpha Blend Group Create
                                     #########################
-                #.shader files
-                if(Shader_Type == 0 and (ShaderItem.blend_mode_option == 3 or ShaderItem.blend_mode_option == 5)):
+                #.shader files and .shader_halogram
+                if((Shader_Type == 0 or Shader_Type == 3) and (ShaderItem.blend_mode_option == 3 or ShaderItem.blend_mode_option == 5)):
                     AlphaBlendGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: blend_mode - alpha_blend")
 
                     #locations of group
@@ -6841,7 +7151,7 @@ def Start_CR4B_Tool():
                                     #Additive Group Create
                                     ######################
                 # .shader files
-                if(Shader_Type == 0 and ShaderItem.blend_mode_option == 1):
+                if((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.blend_mode_option == 1):
                     AdditiveGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: blend_mode - additive")
                     
                     #locations of group
@@ -6890,7 +7200,38 @@ def Start_CR4B_Tool():
                     ShaderOutputCount = ShaderOutputCount + 1
                 elif(Shader_Type == 0 and ShaderItem.self_illumination_option == 7): #H3Category: self_illumination - self_illum_times_diffuse
                     ShaderOutputCount = ShaderOutputCount + 1
-
+                    
+                ########################
+                # .shader_halogram files
+                ########################
+                
+                if(Shader_Type == 3 and ShaderItem.self_illumination_option == 1): #H3Category: self_illumination - simple
+                    ShaderOutputCount = ShaderOutputCount + 1
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 2): #H3Category: self_illumination - 3_channel_self_illum
+                    ShaderOutputCount = ShaderOutputCount + 1
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 3): #H3Category: self_illumination - plasma
+                    ShaderOutputCount = ShaderOutputCount + 1
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 4): #H3Category: self_illumination - from_diffuse
+                    ShaderOutputCount = ShaderOutputCount + 1
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 5): #H3Category: self_illumination - illum_detail
+                    ShaderOutputCount = ShaderOutputCount + 1
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 6): #H3Category: self_illumination - meter
+                    ShaderOutputCount = ShaderOutputCount + 1
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 7): #H3Category: self_illumination - self_illum_times_diffuse
+                    ShaderOutputCount = ShaderOutputCount + 1    
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 8): #H3Category: self_illumination - multilayer_additive
+                    ShaderOutputCount = ShaderOutputCount + 1  
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 9): #H3Category: self_illumination - scope_blur
+                    ShaderOutputCount = ShaderOutputCount + 1  
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 10): #H3Category: self_illumination - ml_add_four_change_color
+                    ShaderOutputCount = ShaderOutputCount + 1  
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 11): #H3Category: self_illumination - ml_add_five_change_color
+                    ShaderOutputCount = ShaderOutputCount + 1  
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 12): #H3Category: self_illumination - plasma_wide_and_sharp_five_change_color
+                    ShaderOutputCount = ShaderOutputCount + 1  
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 13): #H3Category: self_illumination - self_illum_holograms
+                    ShaderOutputCount = ShaderOutputCount + 1  
+                    
                                     ############################
                                     #material model group create
                                     ############################
@@ -7009,48 +7350,92 @@ def Start_CR4B_Tool():
                 # .shader files
                 ###############
                 
-                if(Shader_Type == 0 and ShaderItem.self_illumination_option == 1): #H3Category: self_illumination - simple
+                if((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.self_illumination_option == 1): #H3Category: self_illumination - simple
                     SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: self_illumination - simple")
                     SelfIllumGroup = apply_group_values(SelfIllumGroup, ShaderItem, "self illum")
                     #ShaderOutputCount = ShaderOutputCount + 1
                     ShaderGroupList.append("self_illum")
                     illum_group_made = 1
-                elif(Shader_Type == 0 and ShaderItem.self_illumination_option == 2): #H3Category: self_illumination - 3_channel_self_illum
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.self_illumination_option == 2): #H3Category: self_illumination - 3_channel_self_illum
                     SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: self_illumination - 3_channel_self_illum")
                     SelfIllumGroup = apply_group_values(SelfIllumGroup, ShaderItem, "self illum")
                     #ShaderOutputCount = ShaderOutputCount + 1
                     ShaderGroupList.append("self_illum")
                     illum_group_made = 1
-                elif(Shader_Type == 0 and ShaderItem.self_illumination_option == 3): #H3Category: self_illumination - plasma
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.self_illumination_option == 3): #H3Category: self_illumination - plasma
                     SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: self_illumination - plasma")
                     SelfIllumGroup = apply_group_values(SelfIllumGroup, ShaderItem, "self illum")
                     #ShaderOutputCount = ShaderOutputCount + 1
                     ShaderGroupList.append("self_illum")
                     illum_group_made = 1
-                elif(Shader_Type == 0 and ShaderItem.self_illumination_option == 4): #H3Category: self_illumination - from_diffuse
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.self_illumination_option == 4): #H3Category: self_illumination - from_diffuse
                     SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: self_illumination - from_diffuse")
                     SelfIllumGroup = apply_group_values(SelfIllumGroup, ShaderItem, "self illum")
                     #ShaderOutputCount = ShaderOutputCount + 1
                     ShaderGroupList.append("self_illum")
                     illum_group_made = 1
-                elif(Shader_Type == 0 and ShaderItem.self_illumination_option == 5): #H3Category: self_illumination - illum_detail
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.self_illumination_option == 5): #H3Category: self_illumination - illum_detail
                     SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: self_illumination - illum_detail")
                     SelfIllumGroup = apply_group_values(SelfIllumGroup, ShaderItem, "self illum")
                     #ShaderOutputCount = ShaderOutputCount + 1
                     ShaderGroupList.append("self_illum")
                     illum_group_made = 1
-                elif(Shader_Type == 0 and ShaderItem.self_illumination_option == 6): #H3Category: self_illumination - meter
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.self_illumination_option == 6): #H3Category: self_illumination - meter
                     SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: self_illumination - meter")
                     SelfIllumGroup = apply_group_values(SelfIllumGroup, ShaderItem, "self illum")
                     #ShaderOutputCount = ShaderOutputCount + 1
                     ShaderGroupList.append("self_illum")
                     illum_group_made = 1
-                elif(Shader_Type == 0 and ShaderItem.self_illumination_option == 7): #H3Category: self_illumination - self_illum_times_diffuse
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.self_illumination_option == 7): #H3Category: self_illumination - self_illum_times_diffuse
                     SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: self_illumination - self_illum_times_diffuse")
                     SelfIllumGroup = apply_group_values(SelfIllumGroup, ShaderItem, "self illum")
                     #ShaderOutputCount = ShaderOutputCount + 1
                     ShaderGroupList.append("self_illum")
                     illum_group_made = 1
+
+
+                ########################
+                # .shader_halogram files
+                ########################
+                 
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 8): #H3Category: self_illumination - multilayer_additive
+                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: self_illumination - multilayer_additive")
+                    SelfIllumGroup = apply_group_values(SelfIllumGroup, ShaderItem, "self illum")
+                    #ShaderOutputCount = ShaderOutputCount + 1
+                    ShaderGroupList.append("self_illum")
+                    illum_group_made = 1
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 9): #H3Category: self_illumination - scope_blur
+                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: self_illumination - scope_blur")
+                    SelfIllumGroup = apply_group_values(SelfIllumGroup, ShaderItem, "self illum")
+                    #ShaderOutputCount = ShaderOutputCount + 1
+                    ShaderGroupList.append("self_illum")
+                    illum_group_made = 1 
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 10): #H3Category: self_illumination - ml_add_four_change_color
+                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: self_illumination - ml_add_four_change_color")
+                    SelfIllumGroup = apply_group_values(SelfIllumGroup, ShaderItem, "self illum")
+                    #ShaderOutputCount = ShaderOutputCount + 1
+                    ShaderGroupList.append("self_illum")
+                    illum_group_made = 1   
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 11): #H3Category: self_illumination - ml_add_five_change_color
+                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: self_illumination - ml_add_five_change_color")
+                    SelfIllumGroup = apply_group_values(SelfIllumGroup, ShaderItem, "self illum")
+                    #ShaderOutputCount = ShaderOutputCount + 1
+                    ShaderGroupList.append("self_illum")
+                    illum_group_made = 1   
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 12): #H3Category: self_illumination - plasma_wide_and_sharp_five_change_color
+                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: self_illumination - plasma_wide_and_sharp_five_change_color")
+                    SelfIllumGroup = apply_group_values(SelfIllumGroup, ShaderItem, "self illum")
+                    #ShaderOutputCount = ShaderOutputCount + 1
+                    ShaderGroupList.append("self_illum")
+                    illum_group_made = 1  
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 13): #H3Category: self_illumination - self_illum_holograms
+                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: self_illumination - self_illum_holograms")
+                    SelfIllumGroup = apply_group_values(SelfIllumGroup, ShaderItem, "self illum")
+                    #ShaderOutputCount = ShaderOutputCount + 1
+                    ShaderGroupList.append("self_illum")
+                    illum_group_made = 1 
+
+
 
                 #location of node group
                 if(illum_group_made == 1):
@@ -7143,54 +7528,54 @@ def Start_CR4B_Tool():
                 # .shader file
                 ##############
                 
-                if((Shader_Type == 0 or Shader_Type == 2) and ShaderItem.albedo_option == 0): #H3Category: albedo - default 
+                if((Shader_Type == 0 or Shader_Type == 3 or Shader_Type == 2) and ShaderItem.albedo_option == 0): #H3Category: albedo - default 
                     AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: albedo - default")
                     AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
                     ShaderGroupList.append("albedo")
                     ShaderGroupList.append("albedo") #extra option for an additional texture being needed IN the order they get connected
                     albedo_group_made = 1
-                elif(Shader_Type == 0 and ShaderItem.albedo_option == 1): #H3Category: albedo - detail_blend
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 1): #H3Category: albedo - detail_blend
                     AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: albedo - detail_blend")
                     AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
                     ShaderGroupList.append("albedo")
                     ShaderGroupList.append("albedo")
                     albedo_group_made = 1
-                elif(Shader_Type == 0 and ShaderItem.albedo_option == 2): #H3Category: albedo - constant_color
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 2): #H3Category: albedo - constant_color
                     AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: albedo - constant_color")
                     AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
                     ShaderGroupList.append("albedo")
                     albedo_group_made = 1        
-                elif(Shader_Type == 0 and ShaderItem.albedo_option == 3): #H3Category: albedo - two_change_color
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 3): #H3Category: albedo - two_change_color
                     AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: albedo - two_change_color")
                     AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
                     ShaderGroupList.append("albedo")
                     ShaderGroupList.append("albedo")
                     albedo_group_made = 1
-                elif(Shader_Type == 0 and ShaderItem.albedo_option == 4): #H3Category: albedo - four_change_color
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 4): #H3Category: albedo - four_change_color
                     AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: albedo - four_change_color")
                     AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
                     ShaderGroupList.append("albedo")
                     ShaderGroupList.append("albedo")
                     albedo_group_made = 1
-                elif(Shader_Type == 0 and ShaderItem.albedo_option == 5): #H3Category: albedo - three_detail_blend
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 5): #H3Category: albedo - three_detail_blend
                     AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: albedo - three_detail_blend")
                     AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
                     ShaderGroupList.append("albedo")
                     ShaderGroupList.append("albedo")
                     albedo_group_made = 1
-                elif(Shader_Type == 0 and ShaderItem.albedo_option == 6): #H3Category: albedo - two_detail_overlay
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 6): #H3Category: albedo - two_detail_overlay
                     AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: albedo - two_detail_overlay")
                     AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
                     ShaderGroupList.append("albedo")
                     ShaderGroupList.append("albedo")
                     albedo_group_made = 1
-                elif(Shader_Type == 0 and ShaderItem.albedo_option == 7): #H3Category: albedo - two_detail
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 7): #H3Category: albedo - two_detail
                     AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: albedo - two_detail")
                     AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
                     ShaderGroupList.append("albedo")
                     ShaderGroupList.append("albedo")
                     albedo_group_made = 1
-                elif(Shader_Type == 0 and ShaderItem.albedo_option == 8): #H3Category: albedo - color_mask
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 8): #H3Category: albedo - color_mask
                     AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: albedo - color_mask")
                     AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
                     ShaderGroupList.append("albedo")
@@ -7424,7 +7809,7 @@ def Start_CR4B_Tool():
                 #CONNECT "MATERIAL MODEL" TO "ENVIRONMENT MAP" GROUP
                 if(Shader_Type == 0 and ShaderItem.environment_mapping_option != 0 and ShaderItem.material_model_option != 4 and ShaderItem.material_model_option != 0): #as long as environment option is not none or diffuse only
                     pymat_copy.node_tree.links.new(EnvGroup.inputs["specular_reflectance_and_roughness.rgb"], MatModelGroup.outputs["specular_reflectance_and_roughness.rgb"])
-                    if(Shader_Type == 0 and ShaderItem.environment_mapping_option == 2 and (ShaderItem.material_model_option == 1 or ShaderItem.material_model_option == 2 or ShaderItem.material_model_option == 5 or ShaderItem.material_model_option == 9 or ShaderItem.material_model_option == 10)): #if environment option is dynamic
+                    if(ShaderItem.environment_mapping_option == 2 and (ShaderItem.material_model_option == 1 or ShaderItem.material_model_option == 2 or ShaderItem.material_model_option == 5 or ShaderItem.material_model_option == 7 or ShaderItem.material_model_option == 9 or ShaderItem.material_model_option == 10)): #if environment option is dynamic
                         pymat_copy.node_tree.links.new(EnvGroup.inputs["specular_reflectance_and_roughness.a"], MatModelGroup.outputs["specular_reflectance_and_roughness.a"])
                 
                 
@@ -7545,7 +7930,7 @@ def Start_CR4B_Tool():
                         
                         
                 #connect "Add Shader" and/or "Materiol Output" and/or "Additive Group" and/or AlphaBlendGroup
-                if (Shader_Type == 0 and ShaderOutputCount <= 2):
+                if ((Shader_Type == 0 or Shader_Type == 3) and ShaderOutputCount <= 2):
                     if (ShaderItem.alpha_test_option == 0): #alpha test = off
                         if (ShaderItem.blend_mode_option == 1):
                             #print("test 1")
@@ -7575,7 +7960,7 @@ def Start_CR4B_Tool():
                             pymat_copy.node_tree.links.new(AlphaTestGroup.inputs["Shader"], AddShader.outputs["Shader"])
                 
                 
-                if (Shader_Type == 0 and ShaderOutputCount == 3):
+                if ((Shader_Type == 0 or Shader_Type == 3) and ShaderOutputCount == 3):
                     if (ShaderItem.alpha_test_option == 0): #alpha test = off
                         if (ShaderItem.blend_mode_option == 1):
                             pymat_copy.node_tree.links.new(AdditiveGroup.inputs["Shader"], Add3Group.outputs["Shader"])                
@@ -7718,6 +8103,26 @@ def Start_CR4B_Tool():
                         print("      foliage 2")
 
 
+                #######################      
+                # .shader_halogram files      
+                #######################
+
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -7748,6 +8153,10 @@ def Start_CR4B_Tool():
                     #fix texture start position if it is too high up
                     if(last_texture_y > 400):
                         last_texture_y = 100
+                
+                    #fix texture location for terrain files
+                    if (Shader_Type == 1):
+                        last_texture_x = last_texture_x - 150
                 
                     #correct texture node placement when there is no texture made
                     before_no_tex_x = last_texture_x
@@ -7871,7 +8280,29 @@ def Start_CR4B_Tool():
                                 
                                     GammaNode_Detail.location.x = last_texture_x + TEXTURE_GAMMA_HORIZONTAL_PLACEMENT
                                     GammaNode_Detail.location.y = last_texture_y
-                                    GammaNode_Detail.hide = True       
+                                    GammaNode_Detail.hide = True    
+                                elif(ShaderItem.bitmap_list[bitm].type == "detail_map2"):
+                                    #create Gamma Node
+                                    GammaNode_Detail = pymat_copy.node_tree.nodes.new("ShaderNodeGamma")
+                                    GammaNode_Detail.inputs.get("Gamma").default_value = gamma_value
+
+                                    #link Gamma Node
+                                    pymat_copy.node_tree.links.new(GammaNode_Detail.inputs["Color"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                
+                                    GammaNode_Detail.location.x = last_texture_x + TEXTURE_GAMMA_HORIZONTAL_PLACEMENT
+                                    GammaNode_Detail.location.y = last_texture_y
+                                    GammaNode_Detail.hide = True  
+                                elif(ShaderItem.bitmap_list[bitm].type == "detail_map3"):
+                                    #create Gamma Node
+                                    GammaNode_Detail = pymat_copy.node_tree.nodes.new("ShaderNodeGamma")
+                                    GammaNode_Detail.inputs.get("Gamma").default_value = gamma_value
+
+                                    #link Gamma Node
+                                    pymat_copy.node_tree.links.new(GammaNode_Detail.inputs["Color"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                
+                                    GammaNode_Detail.location.x = last_texture_x + TEXTURE_GAMMA_HORIZONTAL_PLACEMENT
+                                    GammaNode_Detail.location.y = last_texture_y
+                                    GammaNode_Detail.hide = True                                      
                                 elif(ShaderItem.bitmap_list[bitm].type == "bump_map"):
                                     #create Gamma Node
                                     GammaNode_Bump = pymat_copy.node_tree.nodes.new("ShaderNodeGamma")
@@ -8131,6 +8562,28 @@ def Start_CR4B_Tool():
                                     GammaNode_Detail.location.x = last_texture_x + TEXTURE_GAMMA_HORIZONTAL_PLACEMENT
                                     GammaNode_Detail.location.y = last_texture_y                     
                                     GammaNode_Detail.hide = True
+                                elif(ShaderItem.bitmap_list[bitm].type == "detail_map2"):
+                                    #create Gamma Node
+                                    GammaNode_Detail = pymat_copy.node_tree.nodes.new("ShaderNodeGamma")
+                                    GammaNode_Detail.inputs.get("Gamma").default_value = gamma_value
+
+                                    #link Gamma Node
+                                    pymat_copy.node_tree.links.new(GammaNode_Detail.inputs["Color"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+
+                                    GammaNode_Detail.location.x = last_texture_x + TEXTURE_GAMMA_HORIZONTAL_PLACEMENT
+                                    GammaNode_Detail.location.y = last_texture_y                     
+                                    GammaNode_Detail.hide = True
+                                elif(ShaderItem.bitmap_list[bitm].type == "detail_map3"):
+                                    #create Gamma Node
+                                    GammaNode_Detail = pymat_copy.node_tree.nodes.new("ShaderNodeGamma")
+                                    GammaNode_Detail.inputs.get("Gamma").default_value = gamma_value
+
+                                    #link Gamma Node
+                                    pymat_copy.node_tree.links.new(GammaNode_Detail.inputs["Color"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+
+                                    GammaNode_Detail.location.x = last_texture_x + TEXTURE_GAMMA_HORIZONTAL_PLACEMENT
+                                    GammaNode_Detail.location.y = last_texture_y                     
+                                    GammaNode_Detail.hide = True                                    
                                 elif(ShaderItem.bitmap_list[bitm].type == "bump_map"):
                                     #create Gamma Node
                                     GammaNode_Bump = pymat_copy.node_tree.nodes.new("ShaderNodeGamma")
@@ -8649,15 +9102,18 @@ def Start_CR4B_Tool():
                                         #print("  base 1a1")
                                         #link gamma to albedo
                                         pymat_copy.node_tree.links.new(AlbedoGroup.inputs[0], GammaNode_Base.outputs[0])
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs[1], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                     else:
                                         #print("  base 1a2")
                                         #link base_map to albedo
                                         pymat_copy.node_tree.links.new(AlbedoGroup.inputs[0], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs[1], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                     #- a/spec node
                                     #if spec data comes from diffuse
-                                    if(ShaderItem.specular_mask_option == 1):
-                                        #print("  base 1a3")
-                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs[1], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+                                    
+                                    # if(ShaderItem.specular_mask_option == 1):
+                                        # #print("  base 1a3")
+                                        # pymat_copy.node_tree.links.new(AlbedoGroup.inputs[1], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                             #print("before detail map")
                             #DETAIL_MAP
                             if((Shader_Type == 0 or Shader_Type == 2) and ShaderItem.bitmap_list[bitm].type == "detail_map"): # and ShaderGroupList[bitm + 1] == "albedo"):
@@ -8671,15 +9127,65 @@ def Start_CR4B_Tool():
                                         #link gamma to albedo
                                         #print("  detail 0b")
                                         pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map.rgb"], GammaNode_Detail.outputs[0])
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                     else:
                                         #link base_map to albedo
                                         #print("  detail 0c")
                                         pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                     #- a/spec node
                                     #if spec data comes from diffuse
-                                    if(ShaderItem.specular_mask_option == 1):
-                                        #print("  detail 0d")
-                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+                                    # if(ShaderItem.specular_mask_option == 1):
+                                        # #print("  detail 0d")
+                                        # pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+
+                            #DETAIL_MAP2
+                            if((Shader_Type == 0 or Shader_Type == 2) and ShaderItem.bitmap_list[bitm].type == "detail_map2"): # and ShaderGroupList[bitm + 1] == "albedo"):
+                                print("  trying to link detail_map2")
+                                #if albedo option is not constant color
+                                if ((ShaderItem.albedo_option == 1 or ShaderItem.albedo_option == 5 or ShaderItem.albedo_option == 6 or ShaderItem.albedo_option == 7) and ShaderItem.material_model_option != 0):
+                                    #print("  detail 0a")
+                                    #- rgb node
+                                    #if curve uses Gamma
+                                    if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
+                                        #link gamma to albedo
+                                        #print("  detail 0b")
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map2.rgb"], GammaNode_Detail.outputs[0])
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map2.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+                                    else:
+                                        #link base_map to albedo
+                                        #print("  detail 0c")
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map2.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map2.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+                                    #- a/spec node
+                                    #if spec data comes from diffuse
+                                    # if(ShaderItem.specular_mask_option == 1):
+                                        # #print("  detail 0d")
+                                        # pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+
+                            #DETAIL_MAP3
+                            if((Shader_Type == 0 or Shader_Type == 2) and ShaderItem.bitmap_list[bitm].type == "detail_map3"): # and ShaderGroupList[bitm + 1] == "albedo"):
+                                print("  trying to link detail_map3")
+                                #if albedo option is not constant color
+                                if (ShaderItem.albedo_option == 5 and ShaderItem.material_model_option != 0):
+                                    #print("  detail 0a")
+                                    #- rgb node
+                                    #if curve uses Gamma
+                                    if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
+                                        #link gamma to albedo
+                                        #print("  detail 0b")
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map3.rgb"], GammaNode_Detail.outputs[0])
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map3.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+                                    else:
+                                        #link base_map to albedo
+                                        #print("  detail 0c")
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map3.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map3.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+                                    #- a/spec node
+                                    #if spec data comes from diffuse
+                                    # if(ShaderItem.specular_mask_option == 1):
+                                        # #print("  detail 0d")
+                                        # pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                             
                             #BUMP MAP
                             #print("before bump")
@@ -8752,9 +9258,11 @@ def Start_CR4B_Tool():
                                     if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
                                         #link gamma to albedo
                                         pymat_copy.node_tree.links.new(TerrainGroup.inputs["base_map_m_0.rgb"], GammaNode_Base_M0.outputs[0])
+                                        pymat_copy.node_tree.links.new(TerrainGroup.inputs["base_map_m_0.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                     else:
                                         #link base_map_m_0 to terrain group m0
                                         pymat_copy.node_tree.links.new(TerrainGroup.inputs["base_map_m_0.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(TerrainGroup.inputs["base_map_m_0.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                 elif(ShaderItem.bitmap_list[bitm].type == "detail_map_m_0" and ShaderItem.material_0_option != 2):
                                     #print("  trying to link detail_map_m_0")
                                     #- rgb node
@@ -8762,9 +9270,11 @@ def Start_CR4B_Tool():
                                     if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
                                         #link gamma to albedo
                                         pymat_copy.node_tree.links.new(TerrainGroup.inputs["detail_map_m_0.rgb"], GammaNode_Detail_M0.outputs[0])
+                                        pymat_copy.node_tree.links.new(TerrainGroup.inputs["detail_map_m_0.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                     else:
                                         #link detail_map_m_0 to terrain group m0
                                         pymat_copy.node_tree.links.new(TerrainGroup.inputs["detail_map_m_0.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(TerrainGroup.inputs["detail_map_m_0.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                 elif(ShaderItem.bitmap_list[bitm].type == "bump_map_m_0" and ShaderItem.material_0_option != 2):
                                     #print("  trying to link bump_map_m_0")
                                     #- rgb node
@@ -8794,9 +9304,11 @@ def Start_CR4B_Tool():
                                     if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
                                         #link gamma to albedo
                                         pymat_copy.node_tree.links.new(TerrainGroup.inputs["base_map_m_1.rgb"], GammaNode_Base_M1.outputs[0])
+                                        pymat_copy.node_tree.links.new(TerrainGroup.inputs["base_map_m_1.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                     else:
                                         #link base_map_m_1 to terrain group M1
                                         pymat_copy.node_tree.links.new(TerrainGroup.inputs["base_map_m_1.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(TerrainGroup.inputs["base_map_m_1.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                 elif(ShaderItem.bitmap_list[bitm].type == "detail_map_m_1" and ShaderItem.material_1_option != 2):
                                     #print("  trying to link detail_map_m_1")
                                     #- rgb node
@@ -8804,9 +9316,11 @@ def Start_CR4B_Tool():
                                     if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
                                         #link gamma to albedo
                                         pymat_copy.node_tree.links.new(TerrainGroup.inputs["detail_map_m_1.rgb"], GammaNode_Detail_M1.outputs[0])
+                                        pymat_copy.node_tree.links.new(TerrainGroup.inputs["detail_map_m_1.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                     else:
                                         #link detail_map_m_1 to terrain group M1
                                         pymat_copy.node_tree.links.new(TerrainGroup.inputs["detail_map_m_1.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(TerrainGroup.inputs["detail_map_m_1.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                 elif(ShaderItem.bitmap_list[bitm].type == "bump_map_m_1" and ShaderItem.material_1_option != 2):
                                     #print("  trying to link bump_map_m_1")
                                     #- rgb node
@@ -8836,9 +9350,11 @@ def Start_CR4B_Tool():
                                     if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
                                         #link gamma to albedo
                                         pymat_copy.node_tree.links.new(TerrainGroup.inputs["base_map_m_2.rgb"], GammaNode_Base_M2.outputs[0])
+                                        pymat_copy.node_tree.links.new(TerrainGroup.inputs["base_map_m_2.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                     else:
                                         #link base_map_m_2 to terrain group M2
                                         pymat_copy.node_tree.links.new(TerrainGroup.inputs["base_map_m_2.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(TerrainGroup.inputs["base_map_m_2.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                 elif(ShaderItem.bitmap_list[bitm].type == "detail_map_m_2" and ShaderItem.material_2_option != 2):
                                     #print("  trying to link detail_map_m_2")
                                     #- rgb node
@@ -8846,9 +9362,11 @@ def Start_CR4B_Tool():
                                     if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
                                         #link gamma to albedo
                                         pymat_copy.node_tree.links.new(TerrainGroup.inputs["detail_map_m_2.rgb"], GammaNode_Detail_M2.outputs[0])
+                                        pymat_copy.node_tree.links.new(TerrainGroup.inputs["detail_map_m_2.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                     else:
                                         #link detail_map_m_2 to terrain group M2
                                         pymat_copy.node_tree.links.new(TerrainGroup.inputs["detail_map_m_2.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(TerrainGroup.inputs["detail_map_m_2.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                 elif(ShaderItem.bitmap_list[bitm].type == "bump_map_m_2" and ShaderItem.material_2_option != 2):
                                     #print("  trying to link bump_map_m_2")
                                     #- rgb node
@@ -8878,9 +9396,11 @@ def Start_CR4B_Tool():
                                     if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
                                         #link gamma to albedo
                                         pymat_copy.node_tree.links.new(TerrainGroup.inputs["base_map_m_3.rgb"], GammaNode_Base_M3.outputs[0])
+                                        pymat_copy.node_tree.links.new(TerrainGroup.inputs["base_map_m_3.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                     else:
                                         #link base_map_m_3 to terrain group M3
                                         pymat_copy.node_tree.links.new(TerrainGroup.inputs["base_map_m_3.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(TerrainGroup.inputs["base_map_m_3.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                 elif(ShaderItem.bitmap_list[bitm].type == "detail_map_m_3" and ShaderItem.material_3_option != 0):
                                     #print("  trying to link detail_map_m_3")
                                     #- rgb node
@@ -8888,9 +9408,11 @@ def Start_CR4B_Tool():
                                     if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
                                         #link gamma to albedo
                                         pymat_copy.node_tree.links.new(TerrainGroup.inputs["detail_map_m_3.rgb"], GammaNode_Detail_M3.outputs[0])
+                                        pymat_copy.node_tree.links.new(TerrainGroup.inputs["detail_map_m_3.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                     else:
                                         #link detail_map_m_3 to terrain group M3
                                         pymat_copy.node_tree.links.new(TerrainGroup.inputs["detail_map_m_3.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(TerrainGroup.inputs["detail_map_m_3.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                 elif(ShaderItem.bitmap_list[bitm].type == "bump_map_m_3" and ShaderItem.material_3_option != 0):
                                     #print("  trying to link bump_map_m_3")
                                     #- rgb node
@@ -9419,6 +9941,7 @@ if __name__ == "__main__":
 
 #TODO STILL
 
+#FIX SUPPORT FOR PREFIXES TO TELL WHERE .SHADER FILES SHOULD COME FROM
 
 #If default values are needed, spawn them and make sure they get plugged in!
 
