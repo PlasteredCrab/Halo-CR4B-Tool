@@ -4,7 +4,7 @@ bl_info = {
     "name": "CR4B Tool",
     "description": "An addon that aims to get Halo 3/ODST/Reach levels and objects as close to game accurate as possible with one click",
     "author": "Add-on by Plastered_Crab. Shaders made by Chiefster with help from Soulburnin",
-    "version": (1, 0),
+    "version": (2, 0),
     "blender": (2, 80, 0),
     "location": "View3D > Sidebar > CR4B Tool",
     "warning": "",
@@ -88,7 +88,8 @@ def Start_CR4B_Tool():
         Tag_Root = bpy.context.preferences.addons[__name__].preferences.reach_tag_path
     else:
         print("Error with Tag option property")
-             
+    
+    
     #MUST SPECIFY THE ROOT FOLDER OF YOUR MODELS YOU RIPPED (FROM DRIVE LETTER -> BASE FOLDER WHERE YOU EXPORT YOUR MODELS, TEXTURES, AND .BLEND FILES)
     Export_Root = bpy.context.preferences.addons[__name__].preferences.export_path
     #Export_Root = "C:/Users/jeffr/Downloads/H3 Material Tool/Test Objects"
@@ -426,7 +427,7 @@ def Start_CR4B_Tool():
                 print("Self Illum Option not disabling: self_illum_map")
                 return False
         elif (BitmapType == "self_illum_detail_map"):
-            if (ShaderItem.self_illumination_option != 5 and ShaderItem.self_illumination_option != 10): #if self_illum option is not self_illum_detail or illum_detail_world_space_four_cc 
+            if (ShaderItem.self_illumination_option != 5 or ShaderItem.self_illumination_option != 10): #if self_illum option is not self_illum_detail or illum_detail_world_space_four_cc 
                 print("Self Illum Option not disabling: self_illum_detail_map")
                 return False
             else: #other options
@@ -1642,17 +1643,19 @@ def Start_CR4B_Tool():
         print("translate X: " + str(transX))
         print("translate Y: " + str(transY))
         
-        if(scaleX != 1.0 and scaleY != 1.0):
+        if(scaleX != 1.0 or scaleY != 1.0):
             temp_list = []
             temp_list.append(scaleX)
             temp_list.append(scaleY)
             bitmap_object.scale_xy = temp_list
-        if(transX != 0.0 and transY != 0.0):
+        if(transX != 0.0 or transY != 0.0):
             temp_trans_list = []
             temp_trans_list.append(transX)
             temp_trans_list.append(transY)
             bitmap_object.translation_xy = temp_trans_list
-            
+        
+
+        print("bitmap object scale: " + str(bitmap_object.scale_xy))
         return bitmap_object
            
     #checks if bitmap type has mirror mode on       
@@ -1954,11 +1957,636 @@ def Start_CR4B_Tool():
         #print("Value: " + str(value))
         return value
         
+    #Check the directory of the prefix for Halo 3
+    #trim extra \ from directory afterwards!!
+    def get_prefix_dir_h3(prefix):
+        if prefix == "g":
+            return "scenarios/shaders/generic";
+        elif prefix == "n":
+            return "scenarios/shaders/nature";
+        elif prefix == "m":
+            return "scenarios/shaders/multi";
+        elif prefix == "shared":
+            return "scenarios/shaders/shared/shaders";
+        elif prefix == "ui":
+            return "scenarios/shaders/ui";
+        elif prefix == "mainmenu":
+            return "scenarios/shaders/ui/mainmenu";
+        elif prefix == "mm":
+            return "levels/ui/mainmenu/shaders";
+        elif prefix == "gen":
+            return "levels/shared/shaders/generic";
+        elif prefix == "simple":
+            return "levels/shared/shaders/simple";
+        elif prefix == "mpshare":
+            return "levels/shared/shaders/multi";
+        elif prefix == "shared":
+            return "levels/shared/shaders";
+        elif prefix == "test_box":
+            return "levels/test/box";
+        elif prefix == "shr":
+            return "levels/shared/shaders";
+        elif prefix == "jun":
+            return "levels/solo/010_jungle";
+        elif prefix == "base":
+            return "levels/solo/020_base";
+        elif prefix == "city":
+            return "levels/solo/03a_oldmombasa";
+        elif prefix == "zanzibar":
+            return "levels/solo/03a_oldmombasa";
+        elif prefix == "temple":
+            return "levels/solo/05a_deltaapproach";
+        elif prefix == "voi":
+            return "levels/solo/040_voi";
+        elif prefix == "fvoi":
+            return "levels/solo/050_floodvoi";
+        elif prefix == "fz":
+            return "levels/solo/06b_floodzone";
+        elif prefix == "fs":
+            return "levels/solo/110_hc/shaders";
+        elif prefix == "out":
+            return "levels/solo/030_outskirts";
+        elif prefix == "hc":
+            return "levels/solo/110_hc";
+        elif prefix == "gf":
+            return "levels/solo/080_forest";
+        elif prefix == "waste":
+            return "levels/solo/070_waste";
+        elif prefix == "cit":
+            return "levels/solo/100_citadel";
+        elif prefix == "halo":
+            return "levels/solo/120_halo";
+        elif prefix == "shadow":
+            return "levels/solo/055_shadow";
+        elif prefix == "s3dtut":
+            return "levels/solo/s3d_tutorial";
+        elif prefix == "temp":
+            return "levels/temp";
+        elif prefix == "play":
+            return "levels/temp/scarab_playground";
+        elif prefix == "concrete":
+            return "levels/temp/concrete";
+        elif prefix == "destructo":
+            return "levels/temp/destructo";
+        elif prefix == "re":
+            return "levels/temp/reservoir";
+        elif prefix == "lt":
+            return "levels/temp/lighting_test";
+        elif prefix == "omega":
+            return "levels/temp/barry/omega";
+        elif prefix == "mptemp":
+            return "levels/temp/mp_temp_shaders";
+        elif prefix == "mpsky":
+            return "levels/temp/mp_temp_sky";
+        elif prefix == "chill":
+            return "levels/multi/chill";
+        elif prefix == "sal":
+            return "levels/multi/salvation";     
+        elif prefix == "shaft":
+            return "levels/multi/shaft";
+        elif prefix == "ph":
+            return "levels/multi/pump_haus";
+        elif prefix == "sb":
+            return "levels/multi/snowbound";
+        elif prefix == "iso":
+            return "levels/multi/isolation";
+        elif prefix == "shr":
+            return "levels/multi/shrine";
+        elif prefix == "con":
+            return "levels/multi/construct";
+        elif prefix == "dead":
+            return "levels/multi/deadlock";
+        elif prefix == "guardian":
+            return "levels/multi/guardian";
+        elif prefix == "river":
+            return "levels/multi/riverworld";
+        elif prefix == "zan":
+            return "levels/multi/zanzibar";
+        elif prefix == "cyber":
+            return "levels/multi/cyberdyne";
+        elif prefix == "s3dava":
+            return "levels/multi/s3d_avalanche";
+        elif prefix == "s3ddale":
+            return "levels/multi/s3d_dale";
+        elif prefix == "s3dedge":
+            return "levels/multi/s3d_edge";
+        elif prefix == "s3dhangar":
+            return "levels/multi/s3d_hangar";
+        elif prefix == "s3dreactor":
+            return "levels/multi/s3d_reactor";
+        elif prefix == "s3drock":
+            return "levels/multi/s3d_rock";
+        elif prefix == "s3dside":
+            return "levels/multi/s3d_sidewinder";
+        elif prefix == "s3dturf":
+            return "levels/multi/s3d_turf";
+        elif prefix == "s3dunder":
+            return "levels/multi/s3d_underwater";
+        elif prefix == "s3dwell":
+            return "levels/multi/s3d_well";
+        elif prefix == "s3dpwhs":
+            return "levels/multi/s3d_powerhouse";
+        elif prefix == "s3dwtf":
+            return "levels/multi/s3d_waterfall";
+        elif prefix == "s3dcntdw":
+            return "levels/multi/s3d_countdown";
+        elif prefix == "s3dskybr":
+            return "levels/multi/s3d_sky_bridgenew";
+        elif prefix == "s3dlock":
+            return "levels/multi/s3d_lockout";
+        elif prefix == "s3dhvn":
+            return "levels/multi/s3d_haven";
+        elif prefix == "s3ddrd":
+            return "levels/multi/s3d_drydock";
+        elif prefix == "s3dbms":
+            return "levels/multi/s3d_burial_mounds";
+        elif prefix == "s3dchill":
+            return "levels/multi/s3d_chillout";
+        elif prefix == "s3dbvr":
+            return "levels/multi/s3d_beaver_creek";
+        elif prefix == "obj_sh":
+            return "objects/levels/shared";
+        elif prefix == "phantom":
+            return "objects/vehicles/phantom";
+        elif prefix == "wraith":
+            return "objects/vehicles/wraith";
+        elif prefix == "cruis":
+            return "objects/vehicles/cov_cruiser";
+        elif prefix == "voi_obj":
+            return "objects/levels/solo/040_voi";
+        elif prefix == "pelican":
+            return "objects/vehicles/pelican";
+        elif prefix == "lod":
+            return "objects/vehicles/lod";
+        elif prefix == "civ":
+            return "objects/vehicles/civilian";
+        elif prefix == "humanmil":
+            return "objects/gear/human/military";
+        elif prefix == "humanind":
+            return "objects/gear/human/industrial";
+        elif prefix == "dlobj":
+            return "objects/levels/multi/deadlock";
+        elif prefix == "scarab":
+            return "objects/giants/scarab";
+        elif prefix == "salobj":
+            return "objects/levels/multi/salvation";
+        elif prefix == "frigate":
+            return "objects/cinematics/human/frigate";
+        elif prefix == "plas_turret":
+            return "objects/weapons/turret/plasma_cannon";
+        elif prefix == "char":
+            return "objects/characters";
+        elif prefix == "ware":
+            return "levels/dlc/warehouse";
+        elif prefix == "dock":
+            return "levels/dlc/docks";
+        elif prefix == "camp":
+            return "levels/dlc/spacecamp";
+        elif prefix == "side":
+            return "levels/dlc/sidewinder";
+        elif prefix == "beach":
+            return "levels/dlc/beachhead";
+        elif prefix == "descent":
+            return "levels/dlc/descent";
+        elif prefix == "lock":
+            return "levels/dlc/lockout";
+        elif prefix == "bunk":
+            return "levels/dlc/bunkerworld";
+        elif prefix == "vol":
+            return "levels/dlc/volcano";
+        elif prefix == "gash":
+            return "levels/dlc/the_gash";
+        elif prefix == "arm":
+            return "levels/dlc/armory";
+        elif prefix == "land":
+            return "levels/dlc/landslide";
+        elif prefix == "pump":
+            return "levels/dlc/pump_haus";
+        elif prefix == "shaft":
+            return "levels/dlc/shaft";
+        elif prefix == "wart":
+            return "levels/dlc/warthog_inc";
+        elif prefix == "ghost":
+            return "levels/dlc/ghosttown";
+        elif prefix == "chillout":
+            return "levels/dlc/chillout";
+        elif prefix == "midship":
+            return "levels/dlc/midship";
+        elif prefix == "fort":
+            return "levels/dlc/fortress";
+        else:
+            return "error"
+
         
-        
+    #Halo 3 ODST prefix
+    def get_prefix_dir_h3odst(prefix):
+        if prefix == "g":
+            return "scenarios/shaders/generic";
+        elif prefix == "n":
+            return "scenarios/shaders/nature";
+        elif prefix == "m":
+            return "scenarios/shaders/multi";
+        elif prefix == "shared":
+            return "scenarios/shaders/shared/shaders";
+        elif prefix == "ui":
+            return "scenarios/shaders/ui";
+        elif prefix == "mainmenu":
+            return "scenarios/shaders/ui/mainmenu";
+        elif prefix == "gen":
+            return "levels/shared/shaders/generic";
+        elif prefix == "simple":
+            return "levels/shared/shaders/simple";
+        elif prefix == "mpshare":
+            return "levels/shared/shaders/multi";
+        elif prefix == "shared":
+            return "levels/shared/shaders";
+        elif prefix == "def":
+            return "levels/atlas/shared/default/shaders";
+        elif prefix == "deftest":
+            return "levels/atlas/shared/default/shaders/temp";
+        elif prefix == "atlas":
+            return "levels/atlas/shared/shaders";
+        elif prefix == "test_box":
+            return "levels/test/box";
+        elif prefix == "shr":
+            return "levels/shared/shaders";
+        elif prefix == "jun":
+            return "levels/solo/010_jungle";
+        elif prefix == "base":
+            return "levels/solo/020_base";
+        elif prefix == "city":
+            return "levels/solo/03a_oldmombasa";
+        elif prefix == "zanzibar":
+            return "levels/solo/03a_oldmombasa";
+        elif prefix == "temple":
+            return "levels/solo/05a_deltaapproach";
+        elif prefix == "voi":
+            return "levels/solo/040_voi";
+        elif prefix == "fvoi":
+            return "levels/solo/050_floodvoi";
+        elif prefix == "fz":
+            return "levels/solo/06b_floodzone";
+        elif prefix == "fs":
+            return "levels/solo/110_hc/shaders";
+        elif prefix == "out":
+            return "levels/solo/030_outskirts";
+        elif prefix == "hc":
+            return "levels/solo/110_hc";
+        elif prefix == "gf":
+            return "levels/solo/080_forest";
+        elif prefix == "waste":
+            return "levels/solo/070_waste";
+        elif prefix == "cit":
+            return "levels/solo/100_citadel";
+        elif prefix == "halo":
+            return "levels/solo/120_halo";
+        elif prefix == "shadow":
+            return "levels/solo/055_shadow";
+        elif prefix == "temp":
+            return "levels/temp";
+        elif prefix == "play":
+            return "levels/temp/scarab_playground";
+        elif prefix == "concrete":
+            return "levels/temp/concrete";
+        elif prefix == "destructo":
+            return "levels/temp/destructo";
+        elif prefix == "re":
+            return "levels/temp/reservoir";
+        elif prefix == "lt":
+            return "levels/temp/lighting_test";
+        elif prefix == "omega":
+            return "levels/temp/barry/omega";
+        elif prefix == "mptemp":
+            return "levels/temp/mp_temp_shaders";
+        elif prefix == "mpsky":
+            return "levels/temp/mp_temp_sky";
+        elif prefix == "bp":
+            return "levels/atlas/shared";
+        elif prefix == "hut":
+            return "levels/temp/kdal";
+        elif prefix == "chill":
+            return "levels/multi/chill";
+        elif prefix == "sal":
+            return "levels/multi/salvation";
+        elif prefix == "shaft":
+            return "levels/multi/shaft";
+        elif prefix == "ph":
+            return "levels/multi/pump_haus";
+        elif prefix == "sb":
+            return "levels/multi/snowbound";
+        elif prefix == "iso":
+            return "levels/multi/isolation";
+        elif prefix == "shrine":
+            return "levels/multi/shrine";
+        elif prefix == "con":
+            return "levels/multi/construct";
+        elif prefix == "dead":
+            return "levels/multi/deadlock";
+        elif prefix == "guardian":
+            return "levels/multi/guardian";
+        elif prefix == "river":
+            return "levels/multi/riverworld";
+        elif prefix == "zan":
+            return "levels/multi/zanzibar";
+        elif prefix == "cyber":
+            return "levels/multi/cyberdyne";
+        elif prefix == "obj_sh":
+            return "objects/levels/shared";
+        elif prefix == "phantom":
+            return "objects/vehicles/phantom";
+        elif prefix == "wraith":
+            return "objects/vehicles/wraith";
+        elif prefix == "cruis":
+            return "objects/vehicles/cov_cruiser";
+        elif prefix == "voi_obj":
+            return "objects/levels/solo/040_voi";
+        elif prefix == "pelican":
+            return "objects/vehicles/pelican";
+        elif prefix == "lod":
+            return "objects/vehicles/lod";
+        elif prefix == "civ":
+            return "objects/vehicles/civilian";
+        elif prefix == "humanmil":
+            return "objects/gear/human/military";
+        elif prefix == "humanind":
+            return "objects/gear/human/industrial";
+        elif prefix == "dlobj":
+            return "objects/levels/multi/deadlock";
+        elif prefix == "scarab":
+            return "objects/giants/scarab";
+        elif prefix == "salobj":
+            return "objects/levels/multi/salvation";
+        elif prefix == "frigate":
+            return "objects/cinematics/human/frigate";
+        elif prefix == "plas_turret":
+            return "objects/weapons/turret/plasma_cannon";
+        elif prefix == "char":
+            return "objects/characters";
+        elif prefix == "smon":
+            return "objects/levels/dlc/spacecamp";
+        elif prefix == "gciv":
+            return "objects/gear/atlas/civilian";
+        elif prefix == "sign":
+            return "objects/levels/atlas/shared/signage";
+        elif prefix == "obj_tether":
+            return "objects/levels/atlas/tether_chunks";
+        elif prefix == "obj_l200":
+            return "objects/levels/atlas/l200";
+        elif prefix == "ware":
+            return "levels/dlc/warehouse";
+        elif prefix == "dock":
+            return "levels/dlc/docks";
+        elif prefix == "camp":
+            return "levels/dlc/spacecamp";
+        elif prefix == "side":
+            return "levels/dlc/sidewinder";
+        elif prefix == "beach":
+            return "levels/dlc/beachhead";
+        elif prefix == "descent":
+            return "levels/dlc/descent";
+        elif prefix == "lock":
+            return "levels/dlc/lockout";
+        elif prefix == "bunk":
+            return "levels/dlc/bunkerworld";
+        elif prefix == "vol":
+            return "levels/dlc/volcano";
+        elif prefix == "gash":
+            return "levels/dlc/the_gash";
+        elif prefix == "arm":
+            return "levels/dlc/armory";
+        elif prefix == "land":
+            return "levels/dlc/landslide";
+        elif prefix == "pump":
+            return "levels/dlc/pump_haus";
+        elif prefix == "shaft":
+            return "levels/dlc/shaft";
+        elif prefix == "wart":
+            return "levels/dlc/warthog_inc";
+        elif prefix == "ghost":
+            return "levels/dlc/ghosttown";
+        elif prefix == "chillout":
+            return "levels/dlc/chillout";
+        elif prefix == "midship":
+            return "levels/dlc/midship";
+        elif prefix == "proto":
+            return "levels/temp/prototypes";
+        elif prefix == "hev":
+            return "levels/atlas/c100";
+        elif prefix == "mom":
+            return "levels/atlas/h100";
+        elif prefix == "street":
+            return "levels/atlas/l100";
+        elif prefix == "Plaza":
+            return "levels/atlas/sc100";
+        elif prefix == "park":
+            return "levels/atlas/sc110";
+        elif prefix == "park_shared":
+            return "levels/atlas/sc110/shaders/shared";
+        elif prefix == "convoy":
+            return "levels/atlas/sc120";
+        elif prefix == "oni":
+            return "levels/atlas/sc130";
+        elif prefix == "roof":
+            return "levels/atlas/sc140";
+        elif prefix == "train":
+            return "levels/atlas/sc150";
+        elif prefix == "sewer":
+            return "levels/atlas/l200";
+        elif prefix == "high":
+            return "levels/atlas/l300";
+        elif prefix == "excav":
+            return "levels/atlas/c200";
+        elif prefix == "basehang":
+            return "levels/atlas/c300";
+        elif prefix == "shared_atlas":
+            return "levels/atlas/shared";
+        elif prefix == "atlas_shared":
+            return "levels/atlas/shared";
+        elif prefix == "roof_sky":
+            return "levels/atlas/sc140/sky";
+        else:
+            return "error"
+
+    def get_prefix_dir_reach(prefix):
+        if prefix == "g":
+            return "scenarios/shaders/generic";
+        elif prefix == "n":
+            return "scenarios/shaders/nature";
+        elif prefix == "m":
+            return "scenarios/shaders/multi";
+        elif prefix == "shared":
+            return "scenarios/shaders/shared/shaders";
+        elif prefix == "ui":
+            return "scenarios/shaders/ui";
+        elif prefix == "mainmenu":
+            return "scenarios/shaders/ui/mainmenu";
+        elif prefix == "gen":
+            return "levels/shared/shaders/generic";
+        elif prefix == "simple":
+            return "levels/shared/shaders/simple";
+        elif prefix == "mpshare":
+            return "levels/shared/shaders/multi";
+        elif prefix == "shared":
+            return "levels/shared/shaders";
+        elif prefix == "test_box":
+            return "levels/test/box";
+        elif prefix == "shr":
+            return "levels/shared/shaders";
+        elif prefix == "jun":
+            return "levels/solo/010_jungle";
+        elif prefix == "base":
+            return "levels/solo/020_base";
+        elif prefix == "city":
+            return "levels/solo/03a_oldmombasa";
+        elif prefix == "zanzibar":
+            return "levels/solo/03a_oldmombasa";
+        elif prefix == "temple":
+            return "levels/solo/05a_deltaapproach";
+        elif prefix == "voi":
+            return "levels/solo/040_voi";
+        elif prefix == "fvoi":
+            return "levels/solo/050_floodvoi";
+        elif prefix == "fz":
+            return "levels/solo/06b_floodzone";
+        elif prefix == "fs":
+            return "levels/solo/110_hc/shaders";
+        elif prefix == "out":
+            return "levels/temp/niles/outskirts_test/shaders";
+        elif prefix == "hc":
+            return "levels/solo/110_hc";
+        elif prefix == "gf":
+            return "levels/solo/080_forest";
+        elif prefix == "waste":
+            return "levels/solo/070_waste";
+        elif prefix == "cit":
+            return "levels/solo/100_citadel";
+        elif prefix == "halo":
+            return "levels/solo/120_halo";
+        elif prefix == "shadow":
+            return "levels/solo/055_shadow";
+        elif prefix == "cra":
+            return "levels/missions/mission_40";
+        elif prefix == "temp":
+            return "levels/temp";
+        elif prefix == "play":
+            return "levels/temp/scarab_playground";
+        elif prefix == "concrete":
+            return "levels/temp/concrete";
+        elif prefix == "destructo":
+            return "levels/temp/destructo";
+        elif prefix == "re":
+            return "levels/temp/reservoir";
+        elif prefix == "lt":
+            return "levels/temp/lighting_test";
+        elif prefix == "omega":
+            return "levels/temp/barry/omega";
+        elif prefix == "mptemp":
+            return "levels/temp/mp_temp_shaders";
+        elif prefix == "mpsky":
+            return "levels/temp/mp_temp_sky";
+        elif prefix == "ref":
+            return "levels/reference/material_samples/shaders/building";
+        elif prefix == "chill":
+            return "levels/multi/chill";
+        elif prefix == "sal":
+            return "levels/multi/salvation";
+        elif prefix == "shaft":
+            return "levels/multi/shaft";
+        elif prefix == "ph":
+            return "levels/multi/pump_haus";
+        elif prefix == "sb":
+            return "levels/multi/snowbound";
+        elif prefix == "iso":
+            return "levels/multi/isolation";
+        elif prefix == "shr":
+            return "levels/multi/shrine";
+        elif prefix == "con":
+            return "levels/multi/construct";
+        elif prefix == "dead":
+            return "levels/multi/deadlock";
+        elif prefix == "guardian":
+            return "levels/multi/guardian";
+        elif prefix == "river":
+            return "levels/multi/riverworld";
+        elif prefix == "zan":
+            return "levels/multi/zanzibar";
+        elif prefix == "cyber":
+            return "levels/multi/cyberdyne";
+        elif prefix == "spartan":
+            return "levels/multi/spartanland";
+        elif prefix == "settle":
+            return "levels/multi/10_settlement";
+        elif prefix == "obj_sh":
+            return "objects/levels/shared/";
+        elif prefix == "phantom":
+            return "objects/vehicles/phantom";
+        elif prefix == "wraith":
+            return "objects/vehicles/wraith";
+        elif prefix == "cruis":
+            return "objects/vehicles/cov_cruiser";
+        elif prefix == "voi_obj":
+            return "objects/levels/solo/040_voi";
+        elif prefix == "pelican":
+            return "objects/vehicles/human/pelican";
+        elif prefix == "lod":
+            return "objects/vehicles/lod";
+        elif prefix == "civ":
+            return "objects/vehicles/civilian";
+        elif prefix == "humanmil":
+            return "objects/gear/human/military";
+        elif prefix == "humanind":
+            return "objects/gear/human/industrial";
+        elif prefix == "dlobj":
+            return "objects/levels/multi/deadlock";
+        elif prefix == "scarab":
+            return "objects/giants/scarab";
+        elif prefix == "salobj":
+            return "objects/levels/multi/salvation";
+        elif prefix == "frigate":
+            return "objects/cinematics/human/frigate";
+        elif prefix == "plas_turret":
+            return "objects/weapons/turret/plasma_cannon";
+        elif prefix == "char":
+            return "objects/characters";
+        elif prefix == "elite":
+            return "objects/characters/elite";
+        elif prefix == "ware":
+            return "levels/dlc/warehouse";
+        elif prefix == "dock":
+            return "levels/dlc/docks";
+        elif prefix == "camp":
+            return "levels/dlc/spacecamp";
+        elif prefix == "side":
+            return "levels/dlc/sidewinder";
+        elif prefix == "beach":
+            return "levels/dlc/beachhead";
+        elif prefix == "descent":
+            return "levels/dlc/descent";
+        elif prefix == "lock":
+            return "levels/dlc/lockout";
+        elif prefix == "bunk":
+            return "levels/dlc/bunkerworld";
+        elif prefix == "vol":
+            return "levels/dlc/volcano";
+        elif prefix == "gash":
+            return "levels/dlc/the_gash";
+        elif prefix == "arm":
+            return "levels/dlc/armory";
+        elif prefix == "land":
+            return "levels/dlc/landslide";
+        elif prefix == "pump":
+            return "levels/dlc/pump_haus";
+        elif prefix == "shaft":
+            return "levels/dlc/shaft";
+        elif prefix == "wart":
+            return "levels/dlc/warthog_inc";
+        else:
+            return "error"
+    
+    
     #Checks if a directory is valid or not
     def is_valid_dir(directory):
-        if (directory.split('/')[0] == 'ai' or directory.split('/')[0] == 'camera' or directory.split('/')[0] == 'cinematics' or directory.split('/')[0] == 'effects' or directory.split('/')[0] == 'fx' or directory.split('/')[0] == 'globals' or directory.split('/')[0] == 'levels' or directory.split('/')[0] == 'multiplayer' or directory.split('/')[0] == 'objects' or directory.split('/')[0] == 'rasterizer' or directory.split('/')[0] == 'shaders' or directory.split('/')[0] == 'sound' or directory.split('/')[0] == 'ui'):
+        if (directory.split('/')[0] == 'ai' or directory.split('/')[0] == 'camera' or directory.split('/')[0] == 'cinematics' or directory.split('/')[0] == 'effects' or directory.split('/')[0] == 'fx' or directory.split('/')[0] == 'globals' or directory.split('/')[0] == 'levels' or directory.split('/')[0] == 'multiplayer' or directory.split('/')[0] == 'objects' or directory.split('/')[0] == 'rasterizer' or directory.split('/')[0] == 'shaders' or directory.split('/')[0] == 'sound' or directory.split('/')[0] == 'ui' or directory.split('/')[0] == ''):
             return True
         else:
             return False
@@ -2104,10 +2732,16 @@ def Start_CR4B_Tool():
         elif (option == 10):
             return "cook_torrance_pbr_maps"
         elif (option == 11):
-            return "cook_torrance_rim_fresnel"
+            return "cook_torrance_two_color_spec_tint"    
         elif (option == 12):
-            return "cook_torrance_scrolling_cube"        
+            return "two_lobe_phong_tint_map"    
         elif (option == 13):
+            return "cook_torrance_scrolling_cube_mask"    
+        elif (option == 14):
+            return "cook_torrance_rim_fresnel"
+        elif (option == 15):
+            return "cook_torrance_scrolling_cube"        
+        elif (option == 16):
             return "cook_torrance_from_albedo"   
         else:
             return "ERROR"
@@ -2596,6 +3230,7 @@ def Start_CR4B_Tool():
 
 
     def is_texture_needed(ShaderItem, texture_type):
+        print("Checking if " + texture_type + " is needed")
         if texture_type in ShaderItem.needed_bitmaps:
             return True
         else:
@@ -2633,11 +3268,11 @@ def Start_CR4B_Tool():
 
         
 
-##############
-#.shader files
-##############
+    ########################################
+    #.shader files and .shader_foliage files
+    ########################################
 
-        if(Shader_Type == 0):
+        if(Shader_Type == 0 or Shader_Type == 2):
         #albedo options
             if(ShaderItem.albedo_option == 0): #H3Category: albedo - default 
                 ShaderItem.needed_bitmaps.append("base_map")
@@ -2777,6 +3412,8 @@ def Start_CR4B_Tool():
             ShaderItem.needed_bitmaps.append("detail_map_m_3")
             ShaderItem.needed_bitmaps.append("bump_map_m_3")
             ShaderItem.needed_bitmaps.append("detail_bump_m_3")
+        
+
 
         #######################
         #.shader_halogram files
@@ -2835,7 +3472,7 @@ def Start_CR4B_Tool():
             if(ShaderItem.bump_mapping_option == 2): #H3Category: bump_mapping - detail
                 NodeGroup.inputs.get("bump_detail_coefficient").default_value = ShaderItem.bump_detail_coefficient
             elif(ShaderItem.bump_mapping_option == 3): #H3Category: bump_mapping - detail_masked
-                NodeGroup.inputs.get("albedo_color").default_value = ShaderItem.albedo_color
+                NodeGroup.inputs.get("bump_detail_coefficient").default_value = ShaderItem.bump_detail_coefficient
                 #invert_mask?
             elif(ShaderItem.bump_mapping_option == 4): #H3Category: bump_mapping - detail_plus_detail_masked
                 NodeGroup.inputs.get("bump_detail_coefficient").default_value = ShaderItem.bump_detail_coefficient
@@ -2929,24 +3566,24 @@ def Start_CR4B_Tool():
                 NodeGroup.inputs.get("self_illum_color").default_value = ShaderItem.self_illum_color
                 NodeGroup.inputs.get("self_illum_intensity").default_value = ShaderItem.self_illum_intensity
                 NodeGroup.inputs.get("primary_change_color_blend").default_value = ShaderItem.primary_change_color_blend
-            elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 8): #H3Category: self_illumination - multilayer_additive
-                #add these in later
-                print("self_illumination - multilayer_additive")
-            elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 9): #H3Category: self_illumination - scope_blur
-                #add these in later
-                print("self_illumination - scope_blur")
-            elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 10): #H3Category: self_illumination - ml_add_four_change_color
-                #add these in later
-                print("self_illumination - ml_add_four_change_color")
-            elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 11): #H3Category: self_illumination - ml_add_five_change_color
-                #add these in later
-                print("self_illumination - ml_add_five_change_color")
-            elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 12): #H3Category: self_illumination - plasma_wide_and_sharp_five_change_color
-                #add these in later
-                print("self_illumination - plasma_wide_and_sharp_five_change_color")
-            elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 13): #H3Category: self_illumination - self_illum_holograms
-                #add these in later
-                print("self_illumination - self_illum_holograms")
+            # elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 8): #H3Category: self_illumination - multilayer_additive
+                # #add these in later
+                # print("self_illumination - multilayer_additive")
+            # elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 9): #H3Category: self_illumination - scope_blur
+                # #add these in later
+                # print("self_illumination - scope_blur")
+            # elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 10): #H3Category: self_illumination - ml_add_four_change_color
+                # #add these in later
+                # print("self_illumination - ml_add_four_change_color")
+            # elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 11): #H3Category: self_illumination - ml_add_five_change_color
+                # #add these in later
+                # print("self_illumination - ml_add_five_change_color")
+            # elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 12): #H3Category: self_illumination - plasma_wide_and_sharp_five_change_color
+                # #add these in later
+                # print("self_illumination - plasma_wide_and_sharp_five_change_color")
+            # elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 13): #H3Category: self_illumination - self_illum_holograms
+                # #add these in later
+                # print("self_illumination - self_illum_holograms")
             
             
             
@@ -3103,17 +3740,86 @@ def Start_CR4B_Tool():
                                         
     pymat = bpy.data.materials
     for idx, i in enumerate(pymat):
-        #print ( 'i=',i)
-        ShaderName = i.name + ".shader"                        # Shader_Type = 0
-        ShaderName_Terrain_Shader = i.name + ".shader_terrain" # Shader_Type = 1
-        ShaderName_Foliage_Shader = i.name + ".shader_foliage" # Shader_Type = 2
-        ShaderName_Halogram_Shader = i.name + ".shader_halogram" # Shader_Type = 3
+        mat_name = ""
+        
+        #reset has_prefix and prefix
+        has_prefix = False
+        prefix = ""
+        
+        #reset the Tag_Root each pass
+        if(bpy.context.scene.tag_dropdown == "Halo 3"):
+            #print("Using Halo 3 Tags")
+            Tag_Root = bpy.context.preferences.addons[__name__].preferences.halo3_tag_path 
+            #print("halo3_tag_path: " + bpy.context.preferences.addons[__name__].preferences.halo3_tag_path)
+        elif (bpy.context.scene.tag_dropdown == "Halo 3: ODST"):
+            #print("Using Halo 3: ODST Tags")
+            #print("odst_tag_path: " + bpy.context.preferences.addons[__name__].preferences.odst_tag_path)
+            Tag_Root = bpy.context.preferences.addons[__name__].preferences.odst_tag_path
+        elif (bpy.context.scene.tag_dropdown == "Halo Reach"):
+            #print("Using Halo Reach Tags")
+            #print("reach_tag_path: " + bpy.context.preferences.addons[__name__].preferences.reach_tag_path)
+            Tag_Root = bpy.context.preferences.addons[__name__].preferences.reach_tag_path
+        else:
+            print("Error with Tag option property")
+        
+
+        Game_Source = ""
+        
+        if(bpy.context.scene.tag_dropdown == "Halo 3"):
+            Game_Source = "H3"
+        elif (bpy.context.scene.tag_dropdown == "Halo 3: ODST"):
+            Game_Source = "H3ODST"
+        elif (bpy.context.scene.tag_dropdown == "Halo Reach"):
+            Game_Source = "Reach"
+        else:
+            print("Error with dropdown option property")
+
+
+        
+        #try to handle any prefixes (from using mod tools to rip .ass files)
+        split_i = i.name.split(' ', 1)
+        print(split_i)
+        #mat_name = split_i;
+        
+        if len(split_i) > 1:
+            mat_name = split_i[1]
+            prefix = split_i[0] #store the prefix for the current material name
+            
+            #handles random prefixes that aren't in the library
+            if (Game_Source == "H3" and get_prefix_dir_h3(prefix) != "error"):
+                has_prefix = True
+            elif (Game_Source == "H3ODST" and get_prefix_dir_h3odst(prefix) != "error"):
+                has_prefix = True
+            elif (Game_Source == "Reach" and get_prefix_dir_reach(prefix) != "error"):
+                has_prefix = True
+            else:
+                print ("-Error has occured with prefix of Material that is not hardcoded to be handled. Likely a Blender value or custom material created by user.");
+            
+            if has_prefix == True:
+                split_mat_name = mat_name.split(' ', 1);
+                
+                #tests to see if there is a suffix
+                if len(split_mat_name) > 1:
+                    mat_name = split_mat_name[0];
+        else:
+            # Handle the case where the delimiter isn't found in the string
+            mat_name = i.name
+        
+        #try to ignore symbols like ! and %
+        symbols_to_remove = "%#?!@*$^-&=.;)><|~({}['] "  #removed 0 from the list
+        mat_name = mat_name.rstrip(symbols_to_remove);
+        
+        
+        ShaderName = mat_name + ".shader"                        # Shader_Type = 0
+        ShaderName_Terrain_Shader = mat_name + ".shader_terrain" # Shader_Type = 1
+        ShaderName_Foliage_Shader = mat_name + ".shader_foliage" # Shader_Type = 2
+        ShaderName_Halogram_Shader = mat_name + ".shader_halogram" # Shader_Type = 3
         ShaderPath = ""
         ShaderItem = shader() 
         Shader_Type = 0   #resets Shader_Type back to 0
         
         
-        #Try to hansle multiple shader files of the same name
+        #Try to handle multiple shader files of the same name
         file_found = False
         
         pymat_copy = i
@@ -3121,7 +3827,25 @@ def Start_CR4B_Tool():
         #update the progress bar
         wm.progress_update(idx)
         
-        
+
+            
+        #edit tag_root per each prefix found
+        if has_prefix == True:
+            print("PREFIX FOUND-----------------------------------------------------------------");
+            print("Prefix = " + prefix);
+            if Game_Source == "H3":
+                Tag_Root = Tag_Root + "/" + get_prefix_dir_h3(prefix);
+            elif Game_Source == "H3ODST":
+                Tag_Root = Tag_Root + "/" + get_prefix_dir_h3odst(prefix);
+            elif Game_Source == "Reach":
+                Tag_Root = Tag_Root + "/" + get_prefix_dir_reach(prefix);
+
+        print("Tag Root: " + Tag_Root)
+        print("prefix: " + prefix)
+        print("mat_name: " + mat_name)
+
+
+            
         #find shader files and deal with each one
         for root, dirs, files in os.walk(Tag_Root):
             if (ShaderName_Terrain_Shader in files):
@@ -3140,7 +3864,7 @@ def Start_CR4B_Tool():
 
             if (ShaderName in files):
             
-                if (file_found == True):
+                if (file_found == True and has_prefix != True):
                     #create a new material with the same name but add a suffix to it and append it to pymat
                     #copy all this new data to that newly created material
                     
@@ -3159,7 +3883,7 @@ def Start_CR4B_Tool():
                     print("first shader file")
                     #first iteration, do nothing
                     
-                file_found = True #shader file wqs found
+                file_found = True #shader file was found
             
             
             
@@ -3375,8 +4099,7 @@ def Start_CR4B_Tool():
                         
                 #Halogram shaders
                 Halogram_Options_Offset = 0x0
-                        
-                        
+                                
                         
                 ShaderPath = root + "/" + ShaderName
                 print ("Shader exists!")
@@ -3399,8 +4122,8 @@ def Start_CR4B_Tool():
                 # .shader files and foliage shaders
                 ###################################
                 
-                #if shader file is .shader or foliage shaders
-                if (Shader_Type == 0 or Shader_Type == 2):   #then search for this data below
+                #if shader file is .shader or foliage or halogram shaders
+                if (Shader_Type == 0 or Shader_Type == 2 or Shader_Type == 3):   #then search for this data below
                 
                     #GET START OFFSETS FOR DATA FROM SHADER FILE              maybe add the crap after the type name tp make sure it is legit full type name IF lbgt is 12bytes after end of type name then no directory
                     try: 
@@ -4151,7 +4874,7 @@ def Start_CR4B_Tool():
 
                             
                             print("albedo option: " + get_albedo_option(ShaderItem.albedo_option))
-                            print("self_illumination option: " + get_halogram_self_illumination_option(ShaderItem.self_illumination))
+                            print("self_illumination option: " + get_halogram_self_illumination_option(ShaderItem.self_illumination_option))
                             print("blend_mode option: " + get_blend_mode_option(ShaderItem.blend_mode_option))                        
                             print("misc option: " + get_misc_option(ShaderItem.misc_option))                        
                             
@@ -4211,6 +4934,9 @@ def Start_CR4B_Tool():
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (BaseMap_Offset + 0x18 + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
                         
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
+                    
                     ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
                     ShaderItem.bitmap_list.append(Bitmap)
                     DefaultNeeded = 0
@@ -4298,6 +5024,9 @@ def Start_CR4B_Tool():
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (DetailMap_Offset + 0x1A + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
+
                     DefaultNeeded = 0
                 
                 else:
@@ -4355,6 +5084,9 @@ def Start_CR4B_Tool():
                             print("Bitmap Directory not referenced. Please use Default Data")
                    
                     Bitmap = get_scale(shaderfile, (DetailMap2_Offset + 0x1B + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
+
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
 
                     DefaultNeeded = 0
                 else:
@@ -4415,6 +5147,9 @@ def Start_CR4B_Tool():
                    
                     Bitmap = get_scale(shaderfile, (DetailMap3_Offset + 0x1B + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
+
                     DefaultNeeded = 0
                 else:
                     #bitmap not referenced but might be needed
@@ -4472,6 +5207,9 @@ def Start_CR4B_Tool():
                    
                     Bitmap = get_scale(shaderfile, (SpecularMaskTexture_Offset + 0x25 + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
+
                     DefaultNeeded = 0
                 else:
                     #bitmap not referenced but might be needed
@@ -4528,6 +5266,9 @@ def Start_CR4B_Tool():
                             print("Bitmap Directory not referenced. Please use Default Data")
                    
                     Bitmap = get_scale(shaderfile, (ChangeColorMap_Offset + 0x20 + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
+
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
 
                     DefaultNeeded = 0
                 else:
@@ -4589,6 +5330,9 @@ def Start_CR4B_Tool():
 
                     Bitmap = get_scale(shaderfile, (BumpMap_Offset + 0x18 + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
+
                     DefaultNeeded = 0
                 else:
                     #bitmap not referenced but might be needed
@@ -4648,6 +5392,9 @@ def Start_CR4B_Tool():
                                 print("Bitmap Directory not referenced. Please use Default Data")
                         
                     Bitmap = get_scale(shaderfile, (BumpDetailMap_Offset + 0x1F + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
+
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
 
                     DefaultNeeded = 0
                 else:
@@ -4737,6 +5484,8 @@ def Start_CR4B_Tool():
                                
                                 Bitmap = get_scale(shaderfile, (FlatEnvironmentMap_Offset + 0x24 + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
+                                #check scaling is correct:
+                                print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
                         
                     elif (ShaderItem.environment_mapping_option != 0):
                         if (DefaultNeeded != 1):
@@ -4752,6 +5501,9 @@ def Start_CR4B_Tool():
                         
                         #get scaling data for bitmap
                         Bitmap = get_scale(shaderfile, (EnvironmentMap_Offset + 0x1F + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
+
+                        #check scaling is correct:
+                        print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
 
                     DefaultNeeded = 0
 
@@ -4792,6 +5544,9 @@ def Start_CR4B_Tool():
                     
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (SelfIllumMap_Offset + 0x1E + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
+
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
 
                     DefaultNeeded = 0
                 else:
@@ -4850,6 +5605,9 @@ def Start_CR4B_Tool():
                     
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (SelfIllumDetailMap_Offset + 0x25 + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
+
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
 
                     DefaultNeeded = 0
                 else:
@@ -4912,6 +5670,8 @@ def Start_CR4B_Tool():
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (AlphaTestMap_Offset + 0x1E + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
                         
                     ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
                     ShaderItem.bitmap_list.append(Bitmap)
@@ -4961,6 +5721,9 @@ def Start_CR4B_Tool():
                     
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (Blend_Map_Offset + 0x10 + 0x9 + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
+
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
 
                     DefaultNeeded = 0
                 else:
@@ -5021,6 +5784,9 @@ def Start_CR4B_Tool():
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (Base_Map_M_0_Offset + 0x10 + 0xC + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
+
                     DefaultNeeded = 0            
                 else:
                     #bitmap not referenced but might be needed
@@ -5079,6 +5845,9 @@ def Start_CR4B_Tool():
                     
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (Detail_Map_M_0_Offset + 0x10 + 0xE + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
+
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
 
                     DefaultNeeded = 0             
                 else:
@@ -5139,6 +5908,9 @@ def Start_CR4B_Tool():
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (Bump_Map_M_0_Offset + 0x10 + 0xC + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
+
                     DefaultNeeded = 0  
                 else:
                     #bitmap not referenced but might be needed
@@ -5197,6 +5969,9 @@ def Start_CR4B_Tool():
                     
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (Detail_Bump_M_0_Offset + 0x10 + 0xF + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
+
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
 
                     DefaultNeeded = 0 
                 else:
@@ -5257,6 +6032,9 @@ def Start_CR4B_Tool():
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (Base_Map_M_1_Offset + 0x10 + 0xC + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
+
                     DefaultNeeded = 0            
                 else:
                     #bitmap not referenced but might be needed
@@ -5315,6 +6093,9 @@ def Start_CR4B_Tool():
                     
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (Detail_Map_M_1_Offset + 0x10 + 0xE + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
+
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
 
                     DefaultNeeded = 0             
                 else:
@@ -5375,6 +6156,9 @@ def Start_CR4B_Tool():
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (Bump_Map_M_1_Offset + 0x10 + 0xC + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
+
                     DefaultNeeded = 0  
                 else:
                     #bitmap not referenced but might be needed
@@ -5433,6 +6217,9 @@ def Start_CR4B_Tool():
                     
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (Detail_Bump_M_1_Offset + 0x10 + 0xF + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
+
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
 
                     DefaultNeeded = 0 
                 else:
@@ -5493,6 +6280,9 @@ def Start_CR4B_Tool():
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (Base_Map_M_2_Offset + 0x10 + 0xC + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
+
                     DefaultNeeded = 0            
                 else:
                     #bitmap not referenced but might be needed
@@ -5551,6 +6341,9 @@ def Start_CR4B_Tool():
                     
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (Detail_Map_M_2_Offset + 0x10 + 0xE + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
+
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
 
                     DefaultNeeded = 0             
                 else:
@@ -5611,6 +6404,9 @@ def Start_CR4B_Tool():
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (Bump_Map_M_2_Offset + 0x10 + 0xC + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
+
                     DefaultNeeded = 0  
                 else:
                     #bitmap not referenced but might be needed
@@ -5669,6 +6465,9 @@ def Start_CR4B_Tool():
                     
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (Detail_Bump_M_3_Offset + 0x10 + 0xF + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
+
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
 
                     DefaultNeeded = 0 
                 else:
@@ -5729,6 +6528,9 @@ def Start_CR4B_Tool():
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (Base_Map_M_3_Offset + 0x10 + 0xC + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
+
                     DefaultNeeded = 0            
                 else:
                     #bitmap not referenced but might be needed
@@ -5787,6 +6589,9 @@ def Start_CR4B_Tool():
                     
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (Detail_Map_M_3_Offset + 0x10 + 0xE + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
+
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
 
                     DefaultNeeded = 0             
                 else:
@@ -5847,6 +6652,9 @@ def Start_CR4B_Tool():
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (Bump_Map_M_3_Offset + 0x10 + 0xC + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
+
                     DefaultNeeded = 0  
                 else:
                     #bitmap not referenced but might be needed
@@ -5905,6 +6713,9 @@ def Start_CR4B_Tool():
                     
                     #get scaling data for bitmap
                     Bitmap = get_scale(shaderfile, (Detail_Bump_M_3_Offset + 0x10 + 0xF + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
+
+                    #check scaling is correct:
+                    print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
 
                     DefaultNeeded = 0 
                 else:
@@ -8072,6 +8883,12 @@ def Start_CR4B_Tool():
                     ShaderGroupList.append("albedo")
                     ShaderGroupList.append("albedo")
                     albedo_group_made = 1
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 9): #H3Category: albedo - two_detail_black_point
+                    AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: albedo - two_detail_black_point")
+                    AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
+                    ShaderGroupList.append("albedo")
+                    ShaderGroupList.append("albedo")
+                    albedo_group_made = 1
                 elif(Shader_Type == 0 and ShaderItem.albedo_option == 17): #H3Category: albedo - custom_cube
                     AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: albedo - custom_cube")
                     AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
@@ -8605,6 +9422,8 @@ def Start_CR4B_Tool():
 
 
 
+                ##Output bitmap_list for testing   
+                #print("bitmap list:  " + str(ShaderItem.bitmap_list))
 
 
 
@@ -8614,8 +9433,7 @@ def Start_CR4B_Tool():
 
 
 
-
-
+                
 
 
                 #prep the area for textures
@@ -9354,6 +10172,8 @@ def Start_CR4B_Tool():
                             #print("scale xy entering if: " + str(ShaderItem.bitmap_list[bitm].scale_xy))
                             #print("trans xy entering if: " + str(ShaderItem.bitmap_list[bitm].translation_xy))
                             
+                            print("Transform Data: scale_uniform = " + str(ShaderItem.bitmap_list[bitm].scale_uniform) + "  scale_xy = " + str(ShaderItem.bitmap_list[bitm].scale_xy))
+                            
                             #CREATE SCALING NODES IF SCALING VALUES EXIST
                             if(ShaderItem.bitmap_list[bitm].scale_uniform != 1.00 or ShaderItem.bitmap_list[bitm].scale_xy != [1.00,1.00] or ShaderItem.bitmap_list[bitm].translation_xy != [0.00,0.00]): #if the scale values are not default
                                 #create scaling node
@@ -9550,7 +10370,9 @@ def Start_CR4B_Tool():
                             elif(ShaderItem.bitmap_list[bitm].type == "bump_detail_map"):
                                 BumpDetailMap = ImageTextureNodeList[bitm + 1].image            
                             elif(ShaderItem.bitmap_list[bitm].type == "self_illum_map"):
-                                SelfIllumMap = ImageTextureNodeList[bitm + 1].image            
+                                SelfIllumMap = ImageTextureNodeList[bitm + 1].image  
+                            elif(ShaderItem.bitmap_list[bitm].type == "self_illum_detail_map"):
+                                SelfIllumDetailMap = ImageTextureNodeList[bitm + 1].image 
                             elif(ShaderItem.bitmap_list[bitm].type == "environment_map"):
                                 EnvironmentMap = ImageTextureNodeList[bitm + 1].image    
                             else:
@@ -9607,10 +10429,10 @@ def Start_CR4B_Tool():
                             #print("before detail map")
                             #DETAIL_MAP
                             if((Shader_Type == 0 or Shader_Type == 2) and ShaderItem.bitmap_list[bitm].type == "detail_map"): # and ShaderGroupList[bitm + 1] == "albedo"):
-                                print("  trying to link detail_map")
+                                print("  trying to link detail_map------------------")
                                 #if albedo option is not constant color
                                 if (ShaderItem.albedo_option != 2 and ShaderItem.material_model_option != 0):
-                                    #print("  detail 0a")
+                                    print("  detail 0a - alebdo option is not constant color and mat model is NOT diffuse only-------------------")
                                     #- rgb node
                                     #if curve uses Gamma
                                     if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
@@ -9620,7 +10442,7 @@ def Start_CR4B_Tool():
                                         pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                     else:
                                         #link base_map to albedo
-                                        #print("  detail 0c")
+                                        print("  detail 0c linking------------------")
                                         pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
                                         pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                                     #- a/spec node
@@ -9628,12 +10450,33 @@ def Start_CR4B_Tool():
                                     # if(ShaderItem.specular_mask_option == 1):
                                         # #print("  detail 0d")
                                         # pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
-
+                                elif (ShaderItem.albedo_option != 2 and ShaderItem.material_model_option == 0):
+                                    print("  detail 0b - alebdo option is not constant color and mat model is diffuse only---------------")
+                                    #- rgb node
+                                    #if curve uses Gamma
+                                    if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
+                                        #link gamma to albedo
+                                        #print("  detail 0b")
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map.rgb"], GammaNode_Detail.outputs[0])
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+                                    else:
+                                        #link base_map to albedo
+                                        print("  detail 0c linking------------------")
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+                                    #- a/spec node
+                                    #if spec data comes from diffuse
+                                    # if(ShaderItem.specular_mask_option == 1):
+                                        # #print("  detail 0d")
+                                        # pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+                                
                             #DETAIL_MAP2
                             if((Shader_Type == 0 or Shader_Type == 2) and ShaderItem.bitmap_list[bitm].type == "detail_map2"): # and ShaderGroupList[bitm + 1] == "albedo"):
                                 print("  trying to link detail_map2")
                                 #if albedo option is not constant color
-                                if ((ShaderItem.albedo_option == 1 or ShaderItem.albedo_option == 5 or ShaderItem.albedo_option == 6 or ShaderItem.albedo_option == 7) and ShaderItem.material_model_option != 0):
+                                
+                                #if ((ShaderItem.albedo_option == 1 or ShaderItem.albedo_option == 5 or ShaderItem.albedo_option == 6 or ShaderItem.albedo_option == 7 or ShaderItem.albedo_option == 9) and ShaderItem.material_model_option != 0):
+                                if (ShaderItem.albedo_option == 1 or ShaderItem.albedo_option == 5 or ShaderItem.albedo_option == 6 or ShaderItem.albedo_option == 7 or ShaderItem.albedo_option == 9):
                                     #print("  detail 0a")
                                     #- rgb node
                                     #if curve uses Gamma
@@ -9712,7 +10555,16 @@ def Start_CR4B_Tool():
                                         pymat_copy.node_tree.links.new(SelfIllumGroup.inputs["self_illum_map.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
                             
                             #SELF ILLUM DETAIL MAP
-                            
+                            if((Shader_Type == 0 or Shader_Type == 2) and ShaderItem.bitmap_list[bitm].type == "self_illum_detail_map" and ShaderItem.self_illumination_option == 5):
+                                print("  trying to link self_illum_detail_map")
+                                #if self illumination option == 1 2 5 7 8 9 10 11
+                                if (ShaderItem.self_illumination_option == 5 or ShaderItem.self_illumination_option == 10):
+                                    #if bitmap curve data uses Gamma then connect that
+                                    if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
+                                        pymat_copy.node_tree.links.new(SelfIllumGroup.inputs["self_illum_detail_map.rgb"], GammaNode_SelfIllumDetail.outputs[0])
+                                    else:
+                                        pymat_copy.node_tree.links.new(SelfIllumGroup.inputs["self_illum_detail_map.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+
                             
                             
                             
