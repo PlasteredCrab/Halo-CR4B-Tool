@@ -4,7 +4,7 @@ bl_info = {
     "name": "CR4B Tool",
     "description": "An addon that aims to get Halo 3/ODST/Reach levels and objects as close to game accurate as possible with one click",
     "author": "Add-on by Plastered_Crab. Shaders made by Chiefster with help from Soulburnin",
-    "version": (2, 0),
+    "version": (1, 0),
     "blender": (2, 80, 0),
     "location": "View3D > Sidebar > CR4B Tool",
     "warning": "",
@@ -31,6 +31,10 @@ from mathutils import Matrix
 from time import perf_counter
 import cProfile
 import pstats
+import shutil
+import numpy as np
+import py360convert
+
 
 #Dependant modules
 #import scipy
@@ -61,12 +65,11 @@ import numpy as np
 def Start_CR4B_Tool():
 
 
-    #DEPENDANCIES NEEDED
-    # pip install cube2sphere  for python 3.0+
-    # https://github.com/Xyene/cube2sphere
-
-    # pip install py360convert  
-    # https://github.com/sunset1995/py360convert
+    #DEPENDANCIES NEEDED:
+    #-py360convert
+    #[INSTRUCTIONS] RUN BLENDER AS ADMINISTRATOR AND THEN USE THE "Install Py360Convert" BUTTON
+    
+    
 
     #update the context.scene
     #bpy.context.scene.update()
@@ -280,7 +283,7 @@ def Start_CR4B_Tool():
         #terrain stuff
           #categories  start 20 bytes after shaders/shaders in terrain_shader file
         blending_option = 0
-        environment_map_option = 0
+        environment_mapping_option = 0
         material_0_option = 0
         material_1_option = 0
         material_2_option = 0
@@ -2746,7 +2749,7 @@ def Start_CR4B_Tool():
         else:
             return "ERROR"
             
-    def get_environment_map_option(option):
+    def get_environment_mapping_option(option):
         if (option == 0):
             return "none"
         elif (option == 1):
@@ -3274,42 +3277,42 @@ def Start_CR4B_Tool():
 
         if(Shader_Type == 0 or Shader_Type == 2):
         #albedo options
-            if(ShaderItem.albedo_option == 0): #H3Category: albedo - default 
+            if(ShaderItem.albedo_option == 0): #H3RCategory: albedo - default 
                 ShaderItem.needed_bitmaps.append("base_map")
                 ShaderItem.needed_bitmaps.append("detail_map")
             elif(ShaderItem.albedo_option == 1): #H3Category: albedo - detail_blend
                 ShaderItem.needed_bitmaps.append("base_map")
                 ShaderItem.needed_bitmaps.append("detail_map")
                 ShaderItem.needed_bitmaps.append("detail_map2")
-            elif(ShaderItem.albedo_option == 2): #H3Category: albedo - constant_color
+            elif(ShaderItem.albedo_option == 2): #H3RCategory: albedo - constant_color
                 print("constant color doesn't need bitmaps")
-            elif(ShaderItem.albedo_option == 3): #H3Category: albedo - two_change_color
+            elif(ShaderItem.albedo_option == 3): #H3RCategory: albedo - two_change_color
                 ShaderItem.needed_bitmaps.append("base_map")
                 ShaderItem.needed_bitmaps.append("detail_map")
                 ShaderItem.needed_bitmaps.append("change_color_map")
-            elif(ShaderItem.albedo_option == 4): #H3Category: albedo - four_change_color
+            elif(ShaderItem.albedo_option == 4): #H3RCategory: albedo - four_change_color
                 ShaderItem.needed_bitmaps.append("base_map")
                 ShaderItem.needed_bitmaps.append("detail_map")
                 ShaderItem.needed_bitmaps.append("change_color_map")
-            elif(ShaderItem.albedo_option == 5): #H3Category: albedo - three_detail_blend
+            elif(ShaderItem.albedo_option == 5): #H3RCategory: albedo - three_detail_blend
                 ShaderItem.needed_bitmaps.append("base_map")
                 ShaderItem.needed_bitmaps.append("detail_map")
                 ShaderItem.needed_bitmaps.append("detail_map2")
                 ShaderItem.needed_bitmaps.append("detail_map3")
-            elif(ShaderItem.albedo_option == 6): #H3Category: albedo - two_detail_overlay
+            elif(ShaderItem.albedo_option == 6): #H3RCategory: albedo - two_detail_overlay
                 ShaderItem.needed_bitmaps.append("base_map")
                 ShaderItem.needed_bitmaps.append("detail_map")
                 ShaderItem.needed_bitmaps.append("detail_map2")
                 ShaderItem.needed_bitmaps.append("detail_overlay")
-            elif(ShaderItem.albedo_option == 7): #H3Category: albedo - two_detail
+            elif(ShaderItem.albedo_option == 7): #H3RCategory: albedo - two_detail
                 ShaderItem.needed_bitmaps.append("base_map")
                 ShaderItem.needed_bitmaps.append("detail_map")
                 ShaderItem.needed_bitmaps.append("detail_map2")
-            elif(ShaderItem.albedo_option == 8): #H3Category: albedo - color_mask    
+            elif(ShaderItem.albedo_option == 8): #H3RCategory: albedo - color_mask    
                 ShaderItem.needed_bitmaps.append("base_map")
                 ShaderItem.needed_bitmaps.append("detail_map")
                 ShaderItem.needed_bitmaps.append("color_mask")
-            elif(ShaderItem.albedo_option == 9): #H3Category: albedo - two_detail_black_point    
+            elif(ShaderItem.albedo_option == 9): #H3RCategory: albedo - two_detail_black_point    
                 ShaderItem.needed_bitmaps.append("base_map")
                 ShaderItem.needed_bitmaps.append("detail_map")
                 ShaderItem.needed_bitmaps.append("detail_map2")
@@ -3326,7 +3329,7 @@ def Start_CR4B_Tool():
                 ShaderItem.needed_bitmaps.append("base_map")
                 ShaderItem.needed_bitmaps.append("color_texture")
         #bump_map group
-            if(ShaderItem.bump_mapping_option == 1): #H3Category: bump_mapping - standard
+            if(ShaderItem.bump_mapping_option == 1): #H3RCategory: bump_mapping - standard
                 ShaderItem.needed_bitmaps.append("bump_map")       
             if(ShaderItem.bump_mapping_option == 2): #H3Category: bump_mapping - detail
                 ShaderItem.needed_bitmaps.append("bump_map")
@@ -3344,9 +3347,9 @@ def Start_CR4B_Tool():
                 #NodeGroup.inputs.get("bump_detail_coefficient").default_value = ShaderItem.bump_detail_coefficient            
             
         #environment map group    
-            if(ShaderItem.environment_mapping_option == 1 or ShaderItem.environment_map_option == 1): #H3Category: environment_mapping - per_pixel
+            if(ShaderItem.environment_mapping_option == 1 or ShaderItem.environment_mapping_option == 1): #H3RCategory: environment_mapping - per_pixel
                 ShaderItem.needed_bitmaps.append("environment_map")
-            elif(ShaderItem.environment_mapping_option == 2 or ShaderItem.environment_map_option == 2): #H3Category: environment_mapping - dynamic
+            elif(ShaderItem.environment_mapping_option == 2 or ShaderItem.environment_mapping_option == 2): #H3RCategory: environment_mapping - dynamic
                 print("dynamic env group needs no textures")
                 
         #material model group        
@@ -3364,24 +3367,24 @@ def Start_CR4B_Tool():
                 
                     
         #self illum group
-            if(ShaderItem.self_illumination_option == 1): #H3Category: self_illumination - simple
+            if(ShaderItem.self_illumination_option == 1): #H3RCategory: self_illumination - simple
                 ShaderItem.needed_bitmaps.append("self_illum_map")
-            elif(ShaderItem.self_illumination_option == 2): #H3Category: self_illumination - 3_channel_self_illum
+            elif(ShaderItem.self_illumination_option == 2): #H3RCategory: self_illumination - 3_channel_self_illum
                 ShaderItem.needed_bitmaps.append("self_illum_map")           
-            elif(ShaderItem.self_illumination_option == 3): #H3Category: self_illumination - plasma
+            elif(ShaderItem.self_illumination_option == 3): #H3CategoryHalogram: self_illumination - plasma
                 ShaderItem.needed_bitmaps.append("noise_map_a")
                 ShaderItem.needed_bitmaps.append("noise_map_b")
                 ShaderItem.needed_bitmaps.append("alpha_mask_map")
-            #elif(ShaderItem.self_illumination_option == 4): #H3Category: self_illumination - from_diffuse
+            #elif(ShaderItem.self_illumination_option == 4): #H3RCategory: self_illumination - from_diffuse
                 
-            elif(ShaderItem.self_illumination_option == 5): #H3Category: self_illumination - illum_detail
+            elif(ShaderItem.self_illumination_option == 5): #H3RCategory: self_illumination - illum_detail
                 ShaderItem.needed_bitmaps.append("self_illum_map")
                 ShaderItem.needed_bitmaps.append("self_illum_detail_map")
-            elif(ShaderItem.self_illumination_option == 6): #H3Category: self_illumination - meter
+            elif(ShaderItem.self_illumination_option == 6): #H3RCategory: self_illumination - meter
                 ShaderItem.needed_bitmaps.append("meter_map")
-            elif(ShaderItem.self_illumination_option == 7): #H3Category: self_illumination - self_illum_times_diffuse
+            elif(ShaderItem.self_illumination_option == 7): #H3RCategory: self_illumination - self_illum_times_diffuse
                 ShaderItem.needed_bitmaps.append("self_illum_map")
-            elif(ShaderItem.self_illumination_option == 8): #H3Category: self_illumination - simple_with_alpha_mask    
+            elif(ShaderItem.self_illumination_option == 8): #H3RCategory: self_illumination - simple_with_alpha_mask    
                 ShaderItem.needed_bitmaps.append("self_illum_map")
                
         
@@ -3432,7 +3435,7 @@ def Start_CR4B_Tool():
             elif(ShaderItem.self_illumination_option == 11): #H3Category: self_illumination - ml_add_five_change_color
                 #add these in later
                 print("self_illumination - ml_add_five_change_color")
-            elif(ShaderItem.self_illumination_option == 12): #H3Category: self_illumination - plasma_wide_and_sharp_five_change_color
+            elif(ShaderItem.self_illumination_option == 12): #H3CategoryHalogram: self_illumination - plasma_wide_and_sharp_five_change_color
                 #add these in later
                 print("self_illumination - plasma_wide_and_sharp_five_change_color")
             elif(ShaderItem.self_illumination_option == 13): #H3Category: self_illumination - self_illum_holograms
@@ -3446,28 +3449,28 @@ def Start_CR4B_Tool():
     def apply_group_values(NodeGroup, ShaderItem, category):
         #albedo/base_map group
         if(category == "albedo"):
-            if(ShaderItem.albedo_option == 0): #H3Category: albedo - default 
+            if(ShaderItem.albedo_option == 0): #H3RCategory: albedo - default 
                 NodeGroup.inputs.get("albedo_color").default_value = ShaderItem.albedo_color
                 NodeGroup.inputs.get("albedo_color_alpha").default_value = ShaderItem.albedo_color_alpha
             #elif(ShaderItem.albedo_option == 1): #H3Category: albedo - detail_blend
                 #no values needed?
-            elif(ShaderItem.albedo_option == 2): #H3Category: albedo - constant_color
+            elif(ShaderItem.albedo_option == 2): #H3RCategory: albedo - constant_color
                 NodeGroup.inputs.get("albedo_color").default_value = ShaderItem.albedo_color
                 NodeGroup.inputs.get("albedo_color_alpha").default_value = ShaderItem.albedo_color_alpha
-            #elif(ShaderItem.albedo_option == 3): #H3Category: albedo - two_change_color
+            #elif(ShaderItem.albedo_option == 3): #H3RCategory: albedo - two_change_color
                 #no values needed?
-            #elif(ShaderItem.albedo_option == 4): #H3Category: albedo - four_change_color
+            #elif(ShaderItem.albedo_option == 4): #H3RCategory: albedo - four_change_color
                 #no values needed?
-            #elif(ShaderItem.albedo_option == 5): #H3Category: albedo - three_detail_blend
+            #elif(ShaderItem.albedo_option == 5): #H3RCategory: albedo - three_detail_blend
                 #no values needed?
-            #elif(ShaderItem.albedo_option == 6): #H3Category: albedo - two_detail_overlay
+            #elif(ShaderItem.albedo_option == 6): #H3RCategory: albedo - two_detail_overlay
                 #no values needed?     
-            #elif(ShaderItem.albedo_option == 7): #H3Category: albedo - two_detail
+            #elif(ShaderItem.albedo_option == 7): #H3RCategory: albedo - two_detail
                 #no values needed?
                 
         #bump_map group
         elif(category == "bump"):
-            #if(ShaderItem.bump_mapping_option == 1): #H3Category: bump_mapping - standard
+            #if(ShaderItem.bump_mapping_option == 1): #H3RCategory: bump_mapping - standard
                 #no values needed?        
             if(ShaderItem.bump_mapping_option == 2): #H3Category: bump_mapping - detail
                 NodeGroup.inputs.get("bump_detail_coefficient").default_value = ShaderItem.bump_detail_coefficient
@@ -3482,9 +3485,9 @@ def Start_CR4B_Tool():
             
         #environment map group    
         elif(category == "env map"):
-            if(ShaderItem.environment_mapping_option == 1 or ShaderItem.environment_map_option == 1): #H3Category: environment_mapping - per_pixel
+            if(ShaderItem.environment_mapping_option == 1 or ShaderItem.environment_mapping_option == 1): #H3RCategory: environment_mapping - per_pixel
                 NodeGroup.inputs.get("env_tint_color").default_value = ShaderItem.env_tint_color
-            elif(ShaderItem.environment_mapping_option == 2 or ShaderItem.environment_map_option == 2): #H3Category: environment_mapping - dynamic
+            elif(ShaderItem.environment_mapping_option == 2 or ShaderItem.environment_mapping_option == 2): #H3RCategory: environment_mapping - dynamic
                 NodeGroup.inputs.get("env_tint_color").default_value = ShaderItem.env_tint_color        
                 NodeGroup.inputs.get("env_roughness_scale").default_value = ShaderItem.env_roughness_scale  
                 
@@ -3531,17 +3534,17 @@ def Start_CR4B_Tool():
                     
         #self illum group
         elif(category == "self illum"):
-            if(ShaderItem.self_illumination_option == 1): #H3Category: self_illumination - simple
+            if(ShaderItem.self_illumination_option == 1): #H3RCategory: self_illumination - simple
                 NodeGroup.inputs.get("self_illum_color").default_value = ShaderItem.self_illum_color
                 NodeGroup.inputs.get("self_illum_intensity").default_value = ShaderItem.self_illum_intensity            
-            elif(ShaderItem.self_illumination_option == 2): #H3Category: self_illumination - 3_channel_self_illum
+            elif(ShaderItem.self_illumination_option == 2): #H3RCategory: self_illumination - 3_channel_self_illum
                 NodeGroup.inputs.get("channel_a").default_value = ShaderItem.channel_a
                 NodeGroup.inputs.get("channel_a_alpha").default_value = ShaderItem.channel_a_alpha
                 NodeGroup.inputs.get("channel_b").default_value = ShaderItem.channel_b
                 NodeGroup.inputs.get("channel_b_alpha").default_value = ShaderItem.channel_b_alpha
                 NodeGroup.inputs.get("channel_c").default_value = ShaderItem.channel_c
                 NodeGroup.inputs.get("channel_c_alpha").default_value = ShaderItem.channel_c_alpha            
-            elif(ShaderItem.self_illumination_option == 3): #H3Category: self_illumination - plasma
+            elif(ShaderItem.self_illumination_option == 3): #H3CategoryHalogram: self_illumination - plasma
                 NodeGroup.inputs.get("color_wide").default_value = ShaderItem.color_wide
                 NodeGroup.inputs.get("color_wide_alpha").default_value = ShaderItem.color_wide_alpha
                 NodeGroup.inputs.get("color_sharp").default_value = ShaderItem.color_sharp
@@ -3552,17 +3555,17 @@ def Start_CR4B_Tool():
                 NodeGroup.inputs.get("thinness_medium").default_value = ShaderItem.thinness_medium
                 NodeGroup.inputs.get("thinness_wide").default_value = ShaderItem.thinness_wide
                 NodeGroup.inputs.get("thinness_sharp").default_value = ShaderItem.thinness_sharp
-            elif(ShaderItem.self_illumination_option == 4): #H3Category: self_illumination - from_diffuse
+            elif(ShaderItem.self_illumination_option == 4): #H3RCategory: self_illumination - from_diffuse
                 NodeGroup.inputs.get("self_illum_color").default_value = ShaderItem.self_illum_color
                 NodeGroup.inputs.get("self_illum_intensity").default_value = ShaderItem.self_illum_intensity
-            elif(ShaderItem.self_illumination_option == 5): #H3Category: self_illumination - illum_detail
+            elif(ShaderItem.self_illumination_option == 5): #H3RCategory: self_illumination - illum_detail
                 NodeGroup.inputs.get("self_illum_color").default_value = ShaderItem.self_illum_color
                 NodeGroup.inputs.get("self_illum_intensity").default_value = ShaderItem.self_illum_intensity
-            elif(ShaderItem.self_illumination_option == 6): #H3Category: self_illumination - meter
+            elif(ShaderItem.self_illumination_option == 6): #H3RCategory: self_illumination - meter
                 NodeGroup.inputs.get("meter_color_off").default_value = ShaderItem.meter_color_off
                 NodeGroup.inputs.get("meter_color_on").default_value = ShaderItem.meter_color_on
                 NodeGroup.inputs.get("meter_value").default_value = ShaderItem.meter_value
-            elif(ShaderItem.self_illumination_option == 7): #H3Category: self_illumination - self_illum_times_diffuse
+            elif(ShaderItem.self_illumination_option == 7): #H3RCategory: self_illumination - self_illum_times_diffuse
                 NodeGroup.inputs.get("self_illum_color").default_value = ShaderItem.self_illum_color
                 NodeGroup.inputs.get("self_illum_intensity").default_value = ShaderItem.self_illum_intensity
                 NodeGroup.inputs.get("primary_change_color_blend").default_value = ShaderItem.primary_change_color_blend
@@ -3578,7 +3581,7 @@ def Start_CR4B_Tool():
             # elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 11): #H3Category: self_illumination - ml_add_five_change_color
                 # #add these in later
                 # print("self_illumination - ml_add_five_change_color")
-            # elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 12): #H3Category: self_illumination - plasma_wide_and_sharp_five_change_color
+            # elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 12): #H3CategoryHalogram: self_illumination - plasma_wide_and_sharp_five_change_color
                 # #add these in later
                 # print("self_illumination - plasma_wide_and_sharp_five_change_color")
             # elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 13): #H3Category: self_illumination - self_illum_holograms
@@ -4099,7 +4102,8 @@ def Start_CR4B_Tool():
                         
                 #Halogram shaders
                 Halogram_Options_Offset = 0x0
-                                
+                        
+                        
                         
                 ShaderPath = root + "/" + ShaderName
                 print ("Shader exists!")
@@ -4692,7 +4696,7 @@ def Start_CR4B_Tool():
                     except ValueError:
                         if(debug_textures_values_found != 0): 
                             print("specular_power_m_2 not found!")
-                    try: 
+                    try:  
                         Specular_Tint_M_2_Offset = shaderfile_read.index(b'\x00\x73\x70\x65\x63\x75\x6C\x61\x72\x5F\x74\x69\x6E\x74\x5F\x6D\x5F\x32\x66\x72\x67\x74') 
                     except ValueError:
                         if(debug_textures_values_found != 0): 
@@ -4802,7 +4806,7 @@ def Start_CR4B_Tool():
                             print("alpha_test option: " + get_alpha_test_option(ShaderItem.alpha_test_option))
                             print("specular_mask option: " + get_specular_mask_option(ShaderItem.specular_mask_option))
                             print("material_model option: " + get_material_model_option(ShaderItem.material_model_option))
-                            print("environment_mapping option: " + get_environment_map_option(ShaderItem.environment_mapping_option))
+                            print("environment_mapping option: " + get_environment_mapping_option(ShaderItem.environment_mapping_option))
                             print("self_illumination option: " + get_self_illumination_option(ShaderItem.self_illumination_option))
                             print("blend_mode option: " + get_blend_mode_option(ShaderItem.blend_mode_option))
                             print("parallax option: " + get_parallax_option(ShaderItem.parallax_option))
@@ -4821,14 +4825,14 @@ def Start_CR4B_Tool():
                     if (CategoryOptions_Offset != 0):
                             shaderfile.seek(CategoryOptions_Offset + 0x28) #skips to start of Category options
                             ShaderItem.blending_option = int.from_bytes(shaderfile.read(2), 'little')
-                            ShaderItem.environment_map_option = int.from_bytes(shaderfile.read(2), 'little')
+                            ShaderItem.environment_mapping_option = int.from_bytes(shaderfile.read(2), 'little')
                             ShaderItem.material_0_option = int.from_bytes(shaderfile.read(2), 'little')
                             ShaderItem.material_1_option = int.from_bytes(shaderfile.read(2), 'little')
                             ShaderItem.material_2_option = int.from_bytes(shaderfile.read(2), 'little')
                             ShaderItem.material_3_option = int.from_bytes(shaderfile.read(2), 'little')
                             
                             print("blending option: " + get_blending_option(ShaderItem.blending_option))
-                            print("environment_map option: " + get_environment_map_terr_option(ShaderItem.environment_map_option))
+                            print("environment_map option: " + get_environment_map_terr_option(ShaderItem.environment_mapping_option))
                             print("material_0 option: " + get_material_0_option(ShaderItem.material_0_option))
                             print("material_1 option: " + get_material_1_option(ShaderItem.material_1_option))
                             print("material_2 option: " + get_material_2_option(ShaderItem.material_2_option))
@@ -5486,6 +5490,7 @@ def Start_CR4B_Tool():
 
                                 #check scaling is correct:
                                 print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
+                                
                         
                     elif (ShaderItem.environment_mapping_option != 0):
                         if (DefaultNeeded != 1):
@@ -5506,6 +5511,12 @@ def Start_CR4B_Tool():
                         print("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
 
                     DefaultNeeded = 0
+                    
+                    if(ShaderItem.environment_mapping_option != 0 and ShaderItem.environment_mapping_option != 2):
+                        #Grab the Environment Map and convert it to equirectangular
+                        Bitmap.directory = convert_cubemap_to_equirectangular(Bitmap.directory)
+                    
+                    
 
                 if (SelfIllumMap_Offset != 0):
                     #print("self_illum_map offset: " + str(SelfIllumMap_Offset))
@@ -8425,7 +8436,7 @@ def Start_CR4B_Tool():
                                     #########################
                 #.shader files and .shader_halogram
                 if((Shader_Type == 0 or Shader_Type == 3) and (ShaderItem.blend_mode_option == 3 or ShaderItem.blend_mode_option == 5)):
-                    AlphaBlendGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: blend_mode - alpha_blend")
+                    AlphaBlendGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: blend_mode - alpha_blend")
 
                     #locations of group
                     AlphaBlendGroup.location.x = last_node_x - ALPHA_BLEND_HORIZONTAL_SPACING
@@ -8439,8 +8450,8 @@ def Start_CR4B_Tool():
                                     #Alpha Test Group Create
                                     ########################
                 # .shader files                           #if alpha_test is simple
-                if((Shader_Type == 0 or Shader_Type == 2) and (ShaderItem.alpha_test_option == 1)): #H3Category: alpha_test - simple 
-                    AlphaTestGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: alpha_test - simple")
+                if((Shader_Type == 0 or Shader_Type == 2) and (ShaderItem.alpha_test_option == 1)): #H3RCategory: alpha_test - simple 
+                    AlphaTestGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: alpha_test - simple")
 
                     #locations of group
                     AlphaTestGroup.location.x = last_node_x - ALPHA_TEST_HORIZONTAL_SPACING
@@ -8454,7 +8465,7 @@ def Start_CR4B_Tool():
                                     ######################
                 # .shader files
                 if((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.blend_mode_option == 1):
-                    AdditiveGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: blend_mode - additive")
+                    AdditiveGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: blend_mode - additive")
                     
                     #locations of group
                     AdditiveGroup.location.x = last_node_x - ADDITIVE_GROUP_HORIZONTAL_SPACING
@@ -8476,9 +8487,9 @@ def Start_CR4B_Tool():
                 # .shader files
                 ###############
                 
-                if(Shader_Type == 0 and ShaderItem.environment_mapping_option == 1): #H3Category: environment_mapping - per_pixel
+                if(Shader_Type == 0 and ShaderItem.environment_mapping_option == 1): #H3RCategory: environment_mapping - per_pixel
                     ShaderOutputCount = ShaderOutputCount + 1
-                elif(Shader_Type == 0 and ShaderItem.environment_mapping_option == 2): #H3Category: environment_mapping - dynamic
+                elif(Shader_Type == 0 and ShaderItem.environment_mapping_option == 2): #H3RCategory: environment_mapping - dynamic
                     ShaderOutputCount = ShaderOutputCount + 1
 
                                     ########################
@@ -8488,38 +8499,38 @@ def Start_CR4B_Tool():
                 # .shader files
                 ###############
                 
-                if(Shader_Type == 0 and ShaderItem.self_illumination_option == 1): #H3Category: self_illumination - simple
+                if(Shader_Type == 0 and ShaderItem.self_illumination_option == 1): #H3RCategory: self_illumination - simple
                     ShaderOutputCount = ShaderOutputCount + 1
-                elif(Shader_Type == 0 and ShaderItem.self_illumination_option == 2): #H3Category: self_illumination - 3_channel_self_illum
+                elif(Shader_Type == 0 and ShaderItem.self_illumination_option == 2): #H3RCategory: self_illumination - 3_channel_self_illum
                     ShaderOutputCount = ShaderOutputCount + 1
-                elif(Shader_Type == 0 and ShaderItem.self_illumination_option == 3): #H3Category: self_illumination - plasma
+                elif(Shader_Type == 0 and ShaderItem.self_illumination_option == 3): #H3CategoryHalogram: self_illumination - plasma
                     ShaderOutputCount = ShaderOutputCount + 1
-                elif(Shader_Type == 0 and ShaderItem.self_illumination_option == 4): #H3Category: self_illumination - from_diffuse
+                elif(Shader_Type == 0 and ShaderItem.self_illumination_option == 4): #H3RCategory: self_illumination - from_diffuse
                     ShaderOutputCount = ShaderOutputCount + 1
-                elif(Shader_Type == 0 and ShaderItem.self_illumination_option == 5): #H3Category: self_illumination - illum_detail
+                elif(Shader_Type == 0 and ShaderItem.self_illumination_option == 5): #H3RCategory: self_illumination - illum_detail
                     ShaderOutputCount = ShaderOutputCount + 1
-                elif(Shader_Type == 0 and ShaderItem.self_illumination_option == 6): #H3Category: self_illumination - meter
+                elif(Shader_Type == 0 and ShaderItem.self_illumination_option == 6): #H3RCategory: self_illumination - meter
                     ShaderOutputCount = ShaderOutputCount + 1
-                elif(Shader_Type == 0 and ShaderItem.self_illumination_option == 7): #H3Category: self_illumination - self_illum_times_diffuse
+                elif(Shader_Type == 0 and ShaderItem.self_illumination_option == 7): #H3RCategory: self_illumination - self_illum_times_diffuse
                     ShaderOutputCount = ShaderOutputCount + 1
                     
                 ########################
                 # .shader_halogram files
                 ########################
                 
-                if(Shader_Type == 3 and ShaderItem.self_illumination_option == 1): #H3Category: self_illumination - simple
+                if(Shader_Type == 3 and ShaderItem.self_illumination_option == 1): #H3RCategory: self_illumination - simple
                     ShaderOutputCount = ShaderOutputCount + 1
-                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 2): #H3Category: self_illumination - 3_channel_self_illum
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 2): #H3RCategory: self_illumination - 3_channel_self_illum
                     ShaderOutputCount = ShaderOutputCount + 1
-                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 3): #H3Category: self_illumination - plasma
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 3): #H3CategoryHalogram: self_illumination - plasma
                     ShaderOutputCount = ShaderOutputCount + 1
-                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 4): #H3Category: self_illumination - from_diffuse
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 4): #H3RCategory: self_illumination - from_diffuse
                     ShaderOutputCount = ShaderOutputCount + 1
-                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 5): #H3Category: self_illumination - illum_detail
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 5): #H3RCategory: self_illumination - illum_detail
                     ShaderOutputCount = ShaderOutputCount + 1
-                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 6): #H3Category: self_illumination - meter
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 6): #H3RCategory: self_illumination - meter
                     ShaderOutputCount = ShaderOutputCount + 1
-                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 7): #H3Category: self_illumination - self_illum_times_diffuse
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 7): #H3RCategory: self_illumination - self_illum_times_diffuse
                     ShaderOutputCount = ShaderOutputCount + 1    
                 elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 8): #H3Category: self_illumination - multilayer_additive
                     ShaderOutputCount = ShaderOutputCount + 1  
@@ -8529,7 +8540,7 @@ def Start_CR4B_Tool():
                     ShaderOutputCount = ShaderOutputCount + 1  
                 elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 11): #H3Category: self_illumination - ml_add_five_change_color
                     ShaderOutputCount = ShaderOutputCount + 1  
-                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 12): #H3Category: self_illumination - plasma_wide_and_sharp_five_change_color
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 12): #H3CategoryHalogram: self_illumination - plasma_wide_and_sharp_five_change_color
                     ShaderOutputCount = ShaderOutputCount + 1  
                 elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 13): #H3Category: self_illumination - self_illum_holograms
                     ShaderOutputCount = ShaderOutputCount + 1  
@@ -8573,7 +8584,7 @@ def Start_CR4B_Tool():
                     pymat_copy.node_tree.nodes.new('ShaderNodeAddShader')
                     AddShader = pymat_copy.node_tree.nodes.get("Add Shader")
                 elif (Shader_Type == 0 and ShaderOutputCount == 3): #if there are 3
-                    Add3Group = instantiate_group(pymat_copy.node_tree.nodes, "H3Utility: Add 3 Shader")
+                    Add3Group = instantiate_group(pymat_copy.node_tree.nodes, "CR4BUtility: Add 3 Shader")
                 else:
                     print ("ShaderOutputCount Issue!")
                     
@@ -8583,11 +8594,11 @@ def Start_CR4B_Tool():
                     pymat_copy.node_tree.nodes.new('ShaderNodeAddShader')
                     AddShader = pymat_copy.node_tree.nodes.get("Add Shader")
                 # elif (Shader_Type == 1 and ShaderOutputCount == 3): #if there are 3
-                    # Add3Group = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: Add 3 Shader")
+                    # Add3Group = instantiate_group(pymat_copy.node_tree.nodes, "CR4BUtility: Add 3 Shader")
                 # elif (Shader_Type == 1 and ShaderOutputCount == 4): #if there are 4
-                    # Add4Group = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: Add 4 Shader")   
+                    # Add4Group = instantiate_group(pymat_copy.node_tree.nodes, "CR4BUtility: Add 4 Shader")   
                 # elif (Shader_Type == 1 and ShaderOutputCount == 5): #if there are 5
-                    # Add5Group = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: Add 5 Shader")    
+                    # Add5Group = instantiate_group(pymat_copy.node_tree.nodes, "CR4BUtility: Add 5 Shader")    
 
                 #foliage shader
                 if(ShaderItem == 2):
@@ -8622,8 +8633,8 @@ def Start_CR4B_Tool():
                 # .shader files
                 ###############
                 
-                if(Shader_Type == 0 and ShaderItem.environment_mapping_option == 1): #H3Category: environment_mapping - per_pixel
-                    EnvGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: environment_mapping - per_pixel")
+                if(Shader_Type == 0 and ShaderItem.environment_mapping_option == 1): #H3RCategory: environment_mapping - per_pixel
+                    EnvGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: environment_mapping - per_pixel")
                     EnvGroup = apply_group_values(EnvGroup, ShaderItem, "env map")
                     #ShaderOutputCount = ShaderOutputCount + 1
                     ShaderGroupList.append("environment")
@@ -8633,8 +8644,8 @@ def Start_CR4B_Tool():
                         
                     last_node_x = EnvGroup.location.x
                     last_node_y = EnvGroup.location.y 
-                elif(Shader_Type == 0 and ShaderItem.environment_mapping_option == 2): #H3Category: environment_mapping - dynamic
-                    EnvGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: environment_mapping - dynamic")
+                elif(Shader_Type == 0 and ShaderItem.environment_mapping_option == 2): #H3RCategory: environment_mapping - dynamic
+                    EnvGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: environment_mapping - dynamic")
                     EnvGroup = apply_group_values(EnvGroup, ShaderItem, "env map")
                     #ShaderOutputCount = ShaderOutputCount + 1
                     ShaderGroupList.append("environment")
@@ -8652,44 +8663,44 @@ def Start_CR4B_Tool():
                 # .shader files
                 ###############
                 
-                if((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.self_illumination_option == 1): #H3Category: self_illumination - simple
-                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: self_illumination - simple")
+                if((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.self_illumination_option == 1): #H3RCategory: self_illumination - simple
+                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: self_illumination - simple")
                     SelfIllumGroup = apply_group_values(SelfIllumGroup, ShaderItem, "self illum")
                     #ShaderOutputCount = ShaderOutputCount + 1
                     ShaderGroupList.append("self_illum")
                     illum_group_made = 1
-                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.self_illumination_option == 2): #H3Category: self_illumination - 3_channel_self_illum
-                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: self_illumination - 3_channel_self_illum")
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.self_illumination_option == 2): #H3RCategory: self_illumination - 3_channel_self_illum
+                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: self_illumination - 3_channel_self_illum")
                     SelfIllumGroup = apply_group_values(SelfIllumGroup, ShaderItem, "self illum")
                     #ShaderOutputCount = ShaderOutputCount + 1
                     ShaderGroupList.append("self_illum")
                     illum_group_made = 1
-                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.self_illumination_option == 3): #H3Category: self_illumination - plasma
-                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: self_illumination - plasma")
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.self_illumination_option == 3): #H3CategoryHalogram: self_illumination - plasma
+                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3CategoryHalogram: self_illumination - plasma")
                     SelfIllumGroup = apply_group_values(SelfIllumGroup, ShaderItem, "self illum")
                     #ShaderOutputCount = ShaderOutputCount + 1
                     ShaderGroupList.append("self_illum")
                     illum_group_made = 1
-                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.self_illumination_option == 4): #H3Category: self_illumination - from_diffuse
-                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: self_illumination - from_diffuse")
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.self_illumination_option == 4): #H3RCategory: self_illumination - from_diffuse
+                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: self_illumination - from_diffuse")
                     SelfIllumGroup = apply_group_values(SelfIllumGroup, ShaderItem, "self illum")
                     #ShaderOutputCount = ShaderOutputCount + 1
                     ShaderGroupList.append("self_illum")
                     illum_group_made = 1
-                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.self_illumination_option == 5): #H3Category: self_illumination - illum_detail
-                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: self_illumination - illum_detail")
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.self_illumination_option == 5): #H3RCategory: self_illumination - illum_detail
+                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: self_illumination - illum_detail")
                     SelfIllumGroup = apply_group_values(SelfIllumGroup, ShaderItem, "self illum")
                     #ShaderOutputCount = ShaderOutputCount + 1
                     ShaderGroupList.append("self_illum")
                     illum_group_made = 1
-                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.self_illumination_option == 6): #H3Category: self_illumination - meter
-                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: self_illumination - meter")
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.self_illumination_option == 6): #H3RCategory: self_illumination - meter
+                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: self_illumination - meter")
                     SelfIllumGroup = apply_group_values(SelfIllumGroup, ShaderItem, "self illum")
                     #ShaderOutputCount = ShaderOutputCount + 1
                     ShaderGroupList.append("self_illum")
                     illum_group_made = 1
-                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.self_illumination_option == 7): #H3Category: self_illumination - self_illum_times_diffuse
-                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: self_illumination - self_illum_times_diffuse")
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.self_illumination_option == 7): #H3RCategory: self_illumination - self_illum_times_diffuse
+                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: self_illumination - self_illum_times_diffuse")
                     SelfIllumGroup = apply_group_values(SelfIllumGroup, ShaderItem, "self illum")
                     #ShaderOutputCount = ShaderOutputCount + 1
                     ShaderGroupList.append("self_illum")
@@ -8724,8 +8735,8 @@ def Start_CR4B_Tool():
                     #ShaderOutputCount = ShaderOutputCount + 1
                     ShaderGroupList.append("self_illum")
                     illum_group_made = 1   
-                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 12): #H3Category: self_illumination - plasma_wide_and_sharp_five_change_color
-                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: self_illumination - plasma_wide_and_sharp_five_change_color")
+                elif(Shader_Type == 3 and ShaderItem.self_illumination_option == 12): #H3CategoryHalogram: self_illumination - plasma_wide_and_sharp_five_change_color
+                    SelfIllumGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3CategoryHalogram: self_illumination - plasma_wide_and_sharp_five_change_color")
                     SelfIllumGroup = apply_group_values(SelfIllumGroup, ShaderItem, "self illum")
                     #ShaderOutputCount = ShaderOutputCount + 1
                     ShaderGroupList.append("self_illum")
@@ -8755,7 +8766,7 @@ def Start_CR4B_Tool():
                 ###############
                 
                 if((Shader_Type == 0 or Shader_Type == 2) and ShaderItem.material_model_option == 0): #H3Category: materrial_model - diffuse_only
-                    MatModelGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: material_model - diffuse_only")
+                    MatModelGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: material_model - diffuse_only")
                     MatModelGroup = apply_group_values(MatModelGroup, ShaderItem, "mat model")
                     #ShaderOutputCount = ShaderOutputCount + 1
                     ShaderGroupList.append("material")
@@ -8773,7 +8784,7 @@ def Start_CR4B_Tool():
                     ShaderGroupList.append("material")
                     mat_group_made = 1
                 elif(Shader_Type == 0 and ShaderItem.material_model_option == 3): #H3Category: material_model - foliage                           #Using Diffuse Only FOR NOW FIX LATER
-                    MatModelGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: material_model - diffuse_only")
+                    MatModelGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: material_model - diffuse_only")
                     MatModelGroup = apply_group_values(MatModelGroup, ShaderItem, "mat model")
                     #ShaderOutputCount = ShaderOutputCount + 1
                     ShaderGroupList.append("material") 
@@ -8830,8 +8841,8 @@ def Start_CR4B_Tool():
                 # .shader file
                 ##############
                 
-                if((Shader_Type == 0 or Shader_Type == 3 or Shader_Type == 2) and ShaderItem.albedo_option == 0): #H3Category: albedo - default 
-                    AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: albedo - default")
+                if((Shader_Type == 0 or Shader_Type == 3 or Shader_Type == 2) and ShaderItem.albedo_option == 0): #H3RCategory: albedo - default 
+                    AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: albedo - default")
                     AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
                     ShaderGroupList.append("albedo")
                     ShaderGroupList.append("albedo") #extra option for an additional texture being needed IN the order they get connected
@@ -8842,49 +8853,43 @@ def Start_CR4B_Tool():
                     ShaderGroupList.append("albedo")
                     ShaderGroupList.append("albedo")
                     albedo_group_made = 1
-                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 2): #H3Category: albedo - constant_color
-                    AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: albedo - constant_color")
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 2): #H3RCategory: albedo - constant_color
+                    AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: albedo - constant_color")
                     AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
                     ShaderGroupList.append("albedo")
                     albedo_group_made = 1        
-                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 3): #H3Category: albedo - two_change_color
-                    AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: albedo - two_change_color")
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 3): #H3RCategory: albedo - two_change_color
+                    AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: albedo - two_change_color")
                     AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
                     ShaderGroupList.append("albedo")
                     ShaderGroupList.append("albedo")
                     albedo_group_made = 1
-                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 4): #H3Category: albedo - four_change_color
-                    AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: albedo - four_change_color")
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 4): #H3RCategory: albedo - four_change_color
+                    AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: albedo - four_change_color")
                     AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
                     ShaderGroupList.append("albedo")
                     ShaderGroupList.append("albedo")
                     albedo_group_made = 1
-                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 5): #H3Category: albedo - three_detail_blend
-                    AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: albedo - three_detail_blend")
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 5): #H3RCategory: albedo - three_detail_blend
+                    AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: albedo - three_detail_blend")
                     AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
                     ShaderGroupList.append("albedo")
                     ShaderGroupList.append("albedo")
                     albedo_group_made = 1
-                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 6): #H3Category: albedo - two_detail_overlay
-                    AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: albedo - two_detail_overlay")
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 6): #H3RCategory: albedo - two_detail_overlay
+                    AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: albedo - two_detail_overlay")
                     AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
                     ShaderGroupList.append("albedo")
                     ShaderGroupList.append("albedo")
                     albedo_group_made = 1
-                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 7): #H3Category: albedo - two_detail
-                    AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: albedo - two_detail")
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 7): #H3RCategory: albedo - two_detail
+                    AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: albedo - two_detail")
                     AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
                     ShaderGroupList.append("albedo")
                     ShaderGroupList.append("albedo")
                     albedo_group_made = 1
-                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 8): #H3Category: albedo - color_mask
-                    AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: albedo - color_mask")
-                    AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
-                    ShaderGroupList.append("albedo")
-                    ShaderGroupList.append("albedo")
-                    albedo_group_made = 1
-                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 9): #H3Category: albedo - two_detail_black_point
-                    AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: albedo - two_detail_black_point")
+                elif((Shader_Type == 0 or Shader_Type == 3) and ShaderItem.albedo_option == 8): #H3RCategory: albedo - color_mask
+                    AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: albedo - color_mask")
                     AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
                     ShaderGroupList.append("albedo")
                     ShaderGroupList.append("albedo")
@@ -8911,8 +8916,8 @@ def Start_CR4B_Tool():
                 # .shader files
                 ###############
                 
-                if(Shader_Type == 0 and ShaderItem.bump_mapping_option == 1): #H3Category: bump_mapping - standard
-                    BumpGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: bump_mapping - standard")
+                if(Shader_Type == 0 and ShaderItem.bump_mapping_option == 1): #H3RCategory: bump_mapping - standard
+                    BumpGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: bump_mapping - standard")
                     BumpGroup = apply_group_values(BumpGroup, ShaderItem, "bump")
                     ShaderGroupList.append("bump")
                     bump_group_made = 1
@@ -8977,12 +8982,12 @@ def Start_CR4B_Tool():
                                         #################################
                                         #TERRAIN ENVIRONMENT GROUP CREATE
                                         #################################
-                if(Shader_Type == 1 and ShaderItem.environment_map_option != 0):
-                    if(ShaderItem.environment_map_option == 1): #per pixel
-                        TerrainEnvGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: environment_mapping - per_pixel")
+                if(Shader_Type == 1 and ShaderItem.environment_mapping_option != 0):
+                    if(ShaderItem.environment_mapping_option == 1): #per pixel
+                        TerrainEnvGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: environment_mapping - per_pixel")
                         TerrainEnvGroup = apply_group_values(TerrainEnvGroup, ShaderItem, "env map")
-                    if(ShaderItem.environment_map_option == 2): #dynamic
-                        TerrainEnvGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: environment_mapping - dynamic")
+                    if(ShaderItem.environment_mapping_option == 2): #dynamic
+                        TerrainEnvGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: environment_mapping - dynamic")
                         TerrainEnvGroup = apply_group_values(TerrainEnvGroup, ShaderItem, "env map")
                     
                     TerrainEnvGroup.location.x = end_group_x
@@ -8998,7 +9003,7 @@ def Start_CR4B_Tool():
                 #################
                 
                 if(Shader_Type == 1):
-                    TerrainGroup = instantiate_group(pymat_copy.node_tree.nodes, "Halo3Category - Master Terrain Material")
+                    TerrainGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: Master Terrain Material")
                     TerrainGroup = apply_group_values(TerrainGroup, ShaderItem, "terrain")
                     
                     #location of node groups
@@ -9324,13 +9329,13 @@ def Start_CR4B_Tool():
                     if(ShaderOutputCount <= 2): #if there are 2 or less shader outputs needed            
                         pymat_copy.node_tree.links.new(AddShader.inputs[0], TerrainGroup.outputs["Shader"])
                         
-                        if (ShaderItem.environment_map_option == 1): # per_pixel
+                        if (ShaderItem.environment_mapping_option == 1): # per_pixel
                             #Connect TerrainGroup to TerrainEnvGroup
                             pymat_copy.node_tree.links.new(TerrainEnvGroup.inputs[0], TerrainGroup.outputs[1])
                             
                             #Connect TerrainEvnGroup to AddShader
                             pymat_copy.node_tree.links.new(AddShader.inputs[1], TerrainEnvGroup.outputs[0])
-                        elif (ShaderItem.environment_map_option == 2): # dynamic
+                        elif (ShaderItem.environment_mapping_option == 2): # dynamic
                             #Connect TerrainGroup to TerrainEnvGroup
                             pymat_copy.node_tree.links.new(TerrainEnvGroup.inputs[0], TerrainGroup.outputs[1])  
                             pymat_copy.node_tree.links.new(TerrainEnvGroup.inputs[1], TerrainGroup.outputs[2])
@@ -10211,7 +10216,7 @@ def Start_CR4B_Tool():
                                     print("making mirror map for " + ShaderItem.bitmap_list[bitm].type)
                                     
                                     #link texture to mirror group node
-                                    MirrorGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Utility: XY Mirror Wrap")
+                                    MirrorGroup = instantiate_group(pymat_copy.node_tree.nodes, "CR4BUtility: XY Mirror Wrap")
                                     pymat_copy.node_tree.links.new(ImageTextureNodeList[bitm + 1].inputs["Vector"], MirrorGroup.outputs["Vector"])
                                     
                                     #link mapping to mirror group node
@@ -10227,7 +10232,7 @@ def Start_CR4B_Tool():
                                     print("making mirror map for " + ShaderItem.bitmap_list[bitm].type)
                                     
                                     #link texture to mirror group node
-                                    MirrorGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Utility: X Mirror Wrap")
+                                    MirrorGroup = instantiate_group(pymat_copy.node_tree.nodes, "CR4BUtility: X Mirror Wrap")
                                     pymat_copy.node_tree.links.new(ImageTextureNodeList[bitm + 1].inputs["Vector"], MirrorGroup.outputs["Vector"])
                                     
                                     #link mapping to mirror group node
@@ -10242,7 +10247,7 @@ def Start_CR4B_Tool():
                                     print("making mirror map for " + ShaderItem.bitmap_list[bitm].type)
                                     
                                     #link texture to mirror group node
-                                    MirrorGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Utility: Y Mirror Wrap")
+                                    MirrorGroup = instantiate_group(pymat_copy.node_tree.nodes, "CR4BUtility: Y Mirror Wrap")
                                     pymat_copy.node_tree.links.new(ImageTextureNodeList[bitm + 1].inputs["Vector"], MirrorGroup.outputs["Vector"])
                                     
                                     #link mapping to mirror group node
@@ -10273,7 +10278,7 @@ def Start_CR4B_Tool():
                                     pymat_copy.node_tree.links.new(MappingNode.inputs["Vector"],TexCoordNode.outputs["UV"]) #connects UV to Vector
                                     
                                     #link texture to mirror group node
-                                    MirrorGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Utility: XY Mirror Wrap")
+                                    MirrorGroup = instantiate_group(pymat_copy.node_tree.nodes, "CR4BUtility: XY Mirror Wrap")
                                     pymat_copy.node_tree.links.new(ImageTextureNodeList[bitm + 1].inputs["Vector"], MirrorGroup.outputs["Vector"])
                               
                                     #link mapping to mirror group node
@@ -10297,7 +10302,7 @@ def Start_CR4B_Tool():
                                     pymat_copy.node_tree.links.new(MappingNode.inputs["Vector"],TexCoordNode.outputs["UV"]) #connects UV to Vector
                                     
                                     #link texture to mirror group node
-                                    MirrorGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Utility: X Mirror Wrap")
+                                    MirrorGroup = instantiate_group(pymat_copy.node_tree.nodes, "CR4BUtility: X Mirror Wrap")
                                     pymat_copy.node_tree.links.new(ImageTextureNodeList[bitm + 1].inputs["Vector"], MirrorGroup.outputs["Vector"])
                               
                                     #link mapping to mirror group node
@@ -10323,7 +10328,7 @@ def Start_CR4B_Tool():
                                     pymat_copy.node_tree.links.new(MappingNode.inputs["Vector"],TexCoordNode.outputs["UV"]) #connects UV to Vector
                                     
                                     #link texture to mirror group node
-                                    MirrorGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Utility: Y Mirror Wrap")
+                                    MirrorGroup = instantiate_group(pymat_copy.node_tree.nodes, "CR4BUtility: Y Mirror Wrap")
                                     pymat_copy.node_tree.links.new(ImageTextureNodeList[bitm + 1].inputs["Vector"], MirrorGroup.outputs["Vector"])
                               
                                     #link mapping to mirror group node
@@ -10565,11 +10570,12 @@ def Start_CR4B_Tool():
                                     else:
                                         pymat_copy.node_tree.links.new(SelfIllumGroup.inputs["self_illum_detail_map.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
 
-                            
-                            
-                            
+                            #print(str(Shader_Type) + "  " + str(ShaderItem.environment_mapping_option) + "  " + ShaderItem.bitmap_list[bitm].type)
                             #ENVIRONMENT MAP 
-                            
+                            if((Shader_Type == 0 or Shader_Type == 2) and (ShaderItem.environment_mapping_option != 0 and ShaderItem.environment_mapping_option != 2) and (ShaderItem.bitmap_list[bitm].type == "environment_map" or ShaderItem.bitmap_list[bitm].type == "flat_environment_map")):
+                                print("  trying to link environment_map")
+                                pymat_copy.node_tree.links.new(EnvGroup.inputs["environment_map.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+
                             
                             #ALPHA_TEST_MAP
                             if((Shader_Type == 0 or Shader_Type == 2) and ShaderItem.alpha_test_option != 0 and ShaderItem.bitmap_list[bitm].type == "alpha_test_map" and (ShaderItem.alpha_test_option == 1 or ShaderItem.specular_mask_option == 2)):
@@ -10880,6 +10886,10 @@ class CR4BAddonPreferences(bpy.types.AddonPreferences):
         name="Halo Reach Tags",
         subtype='FILE_PATH'
     )
+    py360convert_path: bpy.props.StringProperty(
+        name="py360convert path",
+        subtype='DIR_PATH'
+    )
 
     def draw(self, context):
         layout = self.layout
@@ -10887,6 +10897,8 @@ class CR4BAddonPreferences(bpy.types.AddonPreferences):
         layout.row().prop(self, "export_path")
         layout.row().label(text="Directory Shader .blend file:")
         layout.row().prop(self, "node_group_file")
+        layout.row().label(text="Directory of py360convert library:")
+        layout.row().prop(self, "py360convert_path")
         layout.row().label(text="Directory Locations of Tag Files:")
         layout.row().prop(self, "halo3_tag_path")
         layout.row().prop(self, "odst_tag_path")
@@ -10908,6 +10920,79 @@ class ProgressBarPanel(bpy.types.Panel):
         row.label(text="Setting Up Materials:")
         row.prop(progress, "value", text="")
 
+#function that takes in the path of a cubemap and spits out an equirectangular map
+def convert_cubemap_to_equirectangular(cubemap_image_path):
+    og_image_path = cubemap_image_path
+    
+    # Load the cubemap image
+    cubemap_image_path = bpy.context.preferences.addons[__name__].preferences.export_path + "/" + cubemap_image_path + bpy.context.scene.image_format
+    cubemap_image = bpy.data.images.load(cubemap_image_path)
+    cubemap_np = np.array(cubemap_image.pixels[:]).reshape((cubemap_image.size[1], cubemap_image.size[0], 4))  # reshape to 2D array with RGBA channels
+
+    # Check if the image has the correct dimensions
+    height, width, _ = cubemap_np.shape
+    if width != height * 4 / 3:
+        #if not the right dimensions then it is likely a default bitmap so return it
+        return og_image_path
+        
+        # Resize the image to the correct dimensions
+        #new_width = int(height * 4 / 3)
+        #cubemap_np = np.resize(cubemap_np, (height, new_width, 4))
+
+    # Convert the cubemap to an equirectangular image
+    equirectangular_np = py360convert.c2e(cubemap_np, h=800, w=1600, cube_format='dice')
+
+    # Create a new image and assign the pixels
+    equirectangular_image = bpy.data.images.new("Equirectangular Image", width=1600, height=800)
+    equirectangular_image.pixels = equirectangular_np.flatten().tolist()
+
+    # Save the equirectangular image
+    dir_name = os.path.dirname(cubemap_image_path)
+    base_name = os.path.basename(cubemap_image_path)
+    file_name, ext = os.path.splitext(base_name)
+    new_file_name = f"{file_name}_equirectangular{ext}"
+    equirectangular_image_path = os.path.join(dir_name, new_file_name)
+    equirectangular_image.filepath_raw = equirectangular_image_path
+
+    # Depending on the file format entered in the preferences panel change the format of the image
+    image_format = bpy.context.scene.image_format
+    if image_format.startswith('.'):
+        image_format = image_format[1:]  # remove the leading dot
+    image_format = image_format.upper()  # convert to uppercase
+    equirectangular_image.file_format = image_format
+
+    equirectangular_image.save()
+
+    return equirectangular_image_path
+
+
+
+def install_package(package):
+    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+
+class InstallPy360ConvertOperator(bpy.types.Operator):
+    bl_idname = "myaddon.install_py360convert"
+    bl_label = "Install Py360convert"
+
+    def execute(self, context):
+        # Define the path to the py360convert library
+        py360convert_path = bpy.context.preferences.addons[__name__].preferences.py360convert_path
+
+        # Copy the library to Blender's site-packages directory
+        site_packages_path = os.path.join(os.path.dirname(sys.executable), 'lib', 'site-packages')
+        shutil.copytree(py360convert_path, os.path.join(site_packages_path, 'py360convert'))
+
+        if os.path.exists(py360convert_dest_path):
+            self.report({'INFO'}, "Py360convert is already installed!")
+        else:
+            shutil.copytree(py360convert_path, py360convert_dest_path)
+
+            # Install the library
+            install_package("py360convert")
+
+            self.report({'INFO'}, "Py360convert installed successfully")
+        return {'FINISHED'}
+
 
 #Panel Properties
 class CR4BAddonPanel(bpy.types.Panel):
@@ -10919,11 +11004,13 @@ class CR4BAddonPanel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        #spot_light_props = context.scene.spot_light_props
         
         #Area on Panel for Appending node groups
         layout.row().label(text="Append Shader Groups")
         layout.operator("test_addon.append_node_group", text="Append Node Group")
+        
+        layout.operator("myaddon.install_py360convert")
+
         
         # layout.row().label(text="")
         
@@ -10947,194 +11034,6 @@ class CR4BAddonPanel(bpy.types.Panel):
         layout.row().operator("script.start_cr4b_tool")
 
 
-#class for spotlight button properties on panel
-# class SpotLightProperties(bpy.types.PropertyGroup):
-    # light_types = [
-        # ("POINT", "Point", "", 1),
-        # ("SUN", "Sun", "", 2),
-        # ("SPOT", "Spot", "", 3),
-        # ("AREA", "Area", "", 4)
-    # ]
-    # light_type: bpy.props.EnumProperty(
-        # items=light_types,
-        # name="Light Type",
-        # default="SPOT",
-        # description="Choose the type of light to create"
-    # )
-    # light_size: bpy.props.FloatProperty(
-        # name="Size",
-        # description="Size of the Spot Light",
-        # default=1.0,
-        # min=0.1,
-        # max=10.0
-    # )
-    # light_color: bpy.props.FloatVectorProperty(
-        # name="Color",
-        # description="Color of the Spot Light",
-        # default=(1.0, 1.0, 1.0),
-        # min=0.0,
-        # max=1.0,
-        # subtype='COLOR'
-    # )
-    # light_strength: bpy.props.FloatProperty(
-        # name="Strength",
-        # description="Strength of the Spot Light",
-        # default=1.0,
-        # min=0.1,
-        # max=10.0
-    # )
-
-# #Button functionality for Add Light Button
-# class AddSpotLightOperator(bpy.types.Operator):
-    # bl_idname = "object.add_spot_light"
-    # bl_label = "Add Spot Light"
-    # bl_options = {'REGISTER', 'UNDO'}
-
-    # def execute(self, context):
-        # scene = context.scene
-        # spot_light_props = scene.spot_light_props
-        
-        # light_type = spot_light_props.light_type
-        # light_size = spot_light_props.light_size
-        # light_color = spot_light_props.light_color
-        # light_strength = spot_light_props.light_strength
-        
-        # if light_type == 'POINT':
-            # bpy.ops.object.light_add(type='POINT', radius=light_size)
-        # elif light_type == 'SUN':
-            # bpy.ops.object.light_add(type='SUN', radius=light_size)
-        # elif light_type == 'SPOT':
-            # bpy.ops.object.light_add(type='SPOT', radius=light_size)
-        # elif light_type == 'AREA':
-            # bpy.ops.object.light_add(type='AREA', size=light_size)
-        
-        # light = bpy.context.object
-        # light.data.color = light_color
-        # light.data.energy = light_strength
-        
-        # #If viewport is viewed through a Camera
-        # if context.space_data.region_3d.view_perspective == 'CAMERA':
-            # print("passed view perspective if statement")
-            # bpy.ops.view3d.snap_cursor_to_center()
-            # #bpy.ops.object.editmode_toggle()
-            # #bpy.ops.mesh.select_all(action='DESELECT')
-            # #bpy.ops.object.editmode_toggle()
-
-            # # Get the 3D cursor position
-            # # Get the 3D cursor position
-            # # Get the current scene and the active camera
-            # # Get the active camera and the scene
-            # # Get the active camera and the scene
-            # camera = bpy.context.scene.camera
-            # scene = bpy.context.scene
-
-
-            # # Get the active viewport
-            # for area in bpy.context.screen.areas:
-                # if area.type == 'VIEW_3D':
-                    # region = area.regions[-1]
-                    # break
-
-            # # Get the center of the viewport
-            # x, y = region.width // 2, region.height // 2
-
-            # # Get the view direction from the active region_3d
-            # region_3d = bpy.context.space_data.region_3d
-            # ray_origin = region_3d.view_location
-            # ray_direction = region_3d.view_rotation @ mathutils.Vector((0, 0, -1))
-
-            # # Cast a ray from the center of the viewport
-            # depsgraph = bpy.context.evaluated_depsgraph_get()
-            # result = bpy.context.scene.ray_cast(depsgraph, ray_origin, ray_direction)
-
-            # if result[0]:
-                # hit_object = bpy.context.scene.objects[result[3]]
-                # if hit_object is not None and hit_object.type == 'MESH':
-                    # if len(hit_object.data.materials) > 1:
-                        # material_index = result[4]
-                        # hit_material = hit_object.data.materials[material_index]
-                        # print("Hit material: ", hit_material.name)
-                    # else:
-                        # print("Hit object: ", hit_object.name)
-                # else:
-                    # print("Hit object is None or not a mesh")
-            # else:
-                # print("Raycast didn't hit any objects")
-
-
-
-            # # Loop through all the objects in the scene
-            # for obj in scene.objects:
-                # # Check if the object is a MESH type object
-                # if obj.type == 'MESH':
-                    # # Calculate the direction vector from the camera to the object
-                    # direction = obj.location - camera.location
-
-                    # # Cast a ray from the camera in the direction of the object
-                    # result, location, normal, index = obj.ray_cast(camera.location, direction) #.normalized())
-
-                    # # Check if the ray hit the object and that the hit point is in front of the camera
-                    # if result and (location - camera.location).dot(camera.matrix_world.to_quaternion() @ Matrix(camera.data.view_frame())[-1].to_4d().to_3d()) > 0:
-                        # print("The camera is looking at the " + obj.name + " object")
-            
-#test
-            # obj = bpy.context.object
-            # center = bpy.context.region_data.view_location
-            # result, location, normal, index = obj.ray_cast(obj.matrix_world.inverted() @ center, obj.matrix_world.to_quaternion() @ -bpy.context.scene.camera.matrix_world.to_quaternion() @ Vector((0.0, 0.0, -1.0)))
-
-            # if result:
-                # print("result = True")
-        
-            #if bpy.context.object:
-                #bpy.ops.object.select_all        
-                #obj = bpy.context.object
-                #if obj.type == 'MESH':
-                    #print("Object is of type MESH")
-                    # co, no, index = obj.ray_cast(bpy.context.scene.cursor.location, obj.matrix_world.to_quaternion() * Vector((0.0, 0.0, -1.0)))[:3]
-                    # if index != -1:
-                        # light.location = co
-                        # light.rotation_euler = obj.matrix_world.to_quaternion() * no.to_track_quat('Z','Y').to_euler()
-                # Get the active object and the viewport center
-        
-        
-        
-        
-        # obj = bpy.context.object
-        # center = bpy.context.region_data.view_location
-
-        # # Cast a ray from the viewport center and check if it hits the object
-        # result, location, normal, index = obj.ray_cast(obj.matrix_world.inverted() @ center, obj.matrix_world.to_quaternion() @ -bpy.context.scene.camera.matrix_world.to_quaternion() @ (0.0, 0.0, -1.0))
-
-        # if result:
-            # # Create a Spot Light
-            # light_data = bpy.data.lights.new(name="SpotLight", type='SPOT')
-            # light = bpy.data.objects.new(name="SpotLight", object_data=light_data)
-            # bpy.context.scene.collection.objects.link(light)
-
-            # # Place the light at the hit location and align it with the surface normal
-            # light.location = location
-            # light.rotation_mode = 'QUATERNION'
-            # light.rotation_quaternion = normal.to_track_quat('Z', 'Y')                
-
-        #return {'FINISHED'}
-        
-        # obj_at_cursor = bpy.context.scene.objects.active
-        # if obj_at_cursor:
-            # cursor_location = bpy.context.scene.cursor.location
-            # obj_at_cursor.select_set(state=True)
-            # bpy.context.view_layer.objects.active = obj_at_cursor
-            # bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
-            # bpy.context.scene.cursor.location = cursor_location
-            # spot_light.parent = obj_at_cursor
-            # spot_light.location = (0.0, 0.0, 0.0)
-        # else:
-            # spot_light.location = bpy.context.scene.cursor.location
-
-        # scene.collection.objects.link(spot_light)
-        # bpy.context.view_layer.objects.active = spot_light
-        # return {'FINISHED'}
-
-
 #class for appending node groups using button
 class TestAddonAppendNodeGroup(bpy.types.Operator):
     bl_idname = "test_addon.append_node_group"
@@ -11142,7 +11041,7 @@ class TestAddonAppendNodeGroup(bpy.types.Operator):
 
     def execute(self, context):
         filepath = context.preferences.addons[__name__].preferences.node_group_file
-        node_group_name = "[APPEND] Halo 3 Categories" # replace with the name of your node group
+        node_group_name = "[APPEND] Halo Shader Categories" # replace with the name of your node group
 
         if node_group_name in bpy.data.node_groups:
             return {'CANCELLED'}
@@ -11219,6 +11118,10 @@ def update_export_path(self, context):
     print("Export Path:", self.export_path) 
     context.scene.export_path = self.export_path  
     
+def update_py360convert_path(self, context):
+    print("Export Path:", self.py360convert_path) 
+    context.scene.py360convert_path = self.py360convert_path     
+    
 def register():
                     #Add-on Properties
     bpy.utils.register_class(CR4BAddonPreferences)
@@ -11227,8 +11130,9 @@ def register():
     bpy.types.Scene.odst_tag_path = bpy.props.StringProperty(name="Halo 3: ODST Tags Directory", default="", update=update_odst_tag_path)
     bpy.types.Scene.reach_tag_path = bpy.props.StringProperty(name="Halo Reach Tags Directory", default="", update=update_reach_tag_path)
     bpy.types.Scene.export_path = bpy.props.StringProperty(name="Ripped Asset Export Directory", default="", update=update_export_path)
+    bpy.types.Scene.py360convert_path = bpy.props.StringProperty(name="py360Convert Directory", default="", update=update_py360convert_path)
     
-    
+    bpy.utils.register_class(InstallPy360ConvertOperator)
     
                     #Panel Properties
     #Light Tool Properties
@@ -11259,7 +11163,9 @@ def unregister():
     del bpy.types.Scene.odst_tag_path
     del bpy.types.Scene.reach_tag_path
     del bpy.types.Scene.export_path
+    del bpy.types.Scene.py360convert_path
 
+    bpy.utils.unregister_class(InstallPy360ConvertOperator)
 
                     #Panel Properties
     #Light Tool Properties                
