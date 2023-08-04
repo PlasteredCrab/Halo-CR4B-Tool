@@ -1,5 +1,4 @@
-# Halo-3-ODST-CR4B-Tool
-Completely Ready 4 Blender (CR4B Tool)
+# Completely Ready 4 Blender (CR4B Tool)
 
 This tool is called Completely Ready 4 Blender and aims to do most of the work needed to port levels and objects from Halo 3, ODST, and Reach to Blender.
 It accesses the raw tag files in binary and pulls the correct values, colors, scaling info, as well as various texture information needed by said object and tries it's best to setup the Shader nodes for you as well.
