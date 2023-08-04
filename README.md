@@ -6,7 +6,8 @@ It accesses the raw tag files in binary and pulls the correct values, colors, sc
 
 Tool is currently in Open Beta and is ready for public testing on Halo 3 and ODST objects and levels. Reach support coming later as Shader Nodes need to be made.
 
-Video here on how to get it installed and setup: https://youtu.be/749xwvg-GK4
+# Video for what it does and how it is used (needs to be updated for current build)
+https://youtu.be/749xwvg-GK4
 
 Special thanks to Chiefster and Soulburnin for the help making the Shader Nodes used by this tool to make the objects and levels to be as accurate as they can be!
 Without their help, this tool would not have gotten as far as it did so fast :)
