@@ -10424,7 +10424,6 @@ def Start_CR4B_Tool():
                                 
                             elif(ShaderItem.bitmap_list[bitm].curve_option == 6 and bitmap_error != 1): #curve = Default Data
                                 ImageTextureNodeList[bitm + 1].image.colorspace_settings.name = "Linear"
-                                gamma_value = 1
                             else:
                                 print("Curve Data Error!")
                             
@@ -11523,10 +11522,15 @@ def handle_missing_texture(bitmap_path, texture_path):
         
         print("Running Tool.exe")
         #Run Tool.exe to create texture
-        if (run_exe_tool(bitmap_path,texture_path) == False):
+        tool_ran_outcome = run_exe_tool(bitmap_path,texture_path)
+        
+        if (tool_ran_outcome == 0): #failed
             print("Tool.exe had an issue creating texture")
+        
+        elif (tool_ran_outcome == 2): #equirectangular map created
+            print("Created Equirectangular map from cubes!")
             
-        else:
+        else: #created tga texture
             
             #edit the filename of the newly created texture
             
@@ -11609,19 +11613,110 @@ def run_exe_tool(bitmap_path, path_out):
         os.chdir(original_dir)
 
         # Rename the file to get rid of _00_00 UNTIL MAYBE LATER WE WANT TO DO VARIATIONS OF THE BITMAPS LIKE AN ARRAY
-        old_file_path = tga_path + filename + "_00_00.tga"
-        new_file_path = tga_path + filename + ".tga"
-        if os.path.exists(old_file_path):
-            try:
-                os.rename(old_file_path, new_file_path)
-                print(f'Renamed {old_file_path} to {new_file_path}')
-            except FileExistsError:
-                print(f'File {new_file_path} already exists. Did not rename {old_file_path}.')
+        versions = ["_00_00", "_00_01", "_00_02", "_00_03", "_00_04", "_00_05"]
+        image_paths = [tga_path + filename + version + ".tga" for version in versions]
+        if all(os.path.exists(path) for path in image_paths):
+            # If all versions exist, convert them to the desired format and create a cubemap and convert it to an equirectangular map
+            converted_image_paths = []
+            
+            
+            
+            
+            for path in image_paths:
+                image_format = bpy.context.scene.image_format
+    
+                if image_format.startswith('.'):
+                    image_format = image_format[1:]  # remove the leading dot
+                image_format = image_format  # convert to uppercase
+            
+                # Convert the image to the desired format
+                convert_image_format(path, os.path.dirname(path), image_format)
+                # Add the converted image path to the list
+                converted_image_paths.append(os.path.splitext(path)[0] + bpy.context.scene.image_format)
+            
+            #print(str(converted_image_paths))
+            
+            
+            print("converted_image_paths: " + str(converted_image_paths))
+            cubemap_image_path = create_cubemap_and_convert_to_equirectangular(converted_image_paths)
+            
+            
+            print("cubemap_image_path: " + cubemap_image_path)
+            
+            cubemap_image_path = cubemap_image_path.replace(bpy.context.preferences.addons[__name__].preferences.export_path, "")
+            #print(cubemap_image_path)
+            cubemap_image_path = cubemap_image_path.replace(bpy.context.scene.image_format, "")
+            #cubemap_to_convert = os.path.basename(cubemap_image_path)
+            equirectangular_image_paths = convert_cubemap_to_equirectangular(cubemap_image_path)
+            
+            #converted_image_paths[25]
+            
+            return 2 #success! new equirectangular map exists
         else:
-            print(f'File {old_file_path} not found, could not rename')
-            return False
+            # If not all versions exist, continue as normal
+            old_file_path = tga_path + filename + "_00_00.tga"
+            new_file_path = tga_path + filename + ".tga"
+            if os.path.exists(old_file_path):
+                try:
+                    os.rename(old_file_path, new_file_path)
+                    print(f'Renamed {old_file_path} to {new_file_path}')
+                    
+                    return 1 #success! tga now exists
+                except FileExistsError:
+                    print(f'File {new_file_path} already exists. Did not rename {old_file_path}.')
+            
+            else:
+                print(f'File {old_file_path} not found, could not rename')
+                return 0 #failed
+
+def create_cubemap_and_convert_to_equirectangular(image_paths):
+    import py360convert
+    import scipy
+    import numpy as np
+
+    # Load the images
+    images = [bpy.data.images.load(path) for path in image_paths]
+    # Convert the images to numpy arrays and store them in a list
+    cubemaps = [np.array(img.pixels[:]).reshape((img.size[1], img.size[0], 4)) for img in images]
+
+    # Apply transformations
+    cubemaps[5] = np.rot90(cubemaps[5], 2)  # Rotate Down 180 degrees
+    cubemaps[1] = np.rot90(cubemaps[1], -1)  # Rotate Left 90 degrees
+    cubemaps[0] = np.rot90(cubemaps[0], 1)  # Rotate Right 90 degrees
+    cubemaps[2] = np.rot90(cubemaps[2], 2)  # Rotate Back 180 degrees
+
+    # Create a cubemap from the images in dice format
+    cubemap = np.zeros((images[0].size[1]*3, images[0].size[0]*4, 4))
+    cubemap[0:images[0].size[1], images[0].size[0]:images[0].size[0]*2] = cubemaps[5]  # Up   _00_04  for some reason it is index 5 not 4
+    cubemap[images[0].size[1]:images[0].size[1]*2, 0:images[0].size[0]] = cubemaps[1]  # Left  _00_01
+    cubemap[images[0].size[1]:images[0].size[1]*2, images[0].size[0]:images[0].size[0]*2] = cubemaps[3]  # Front   _00_03
+    cubemap[images[0].size[1]:images[0].size[1]*2, images[0].size[0]*2:images[0].size[0]*3] = cubemaps[0]  # Right _00_00
+    cubemap[images[0].size[1]:images[0].size[1]*2, images[0].size[0]*3:images[0].size[0]*4] = cubemaps[2]  # Back  _00_02
+    cubemap[images[0].size[1]*2:images[0].size[1]*3, images[0].size[0]:images[0].size[0]*2] = cubemaps[4]  # Down  _00_05  for some reason it is index 4 not 5
 
 
+    # Save the cubemap
+    cubemap_image = bpy.data.images.new("Cubemap Image", width=cubemap.shape[1], height=cubemap.shape[0])
+    cubemap_image.pixels = cubemap.flatten().tolist()
+
+    cubemap_file_name = os.path.join(os.path.dirname(image_paths[0]), os.path.basename(image_paths[0]).replace("_00_00", ""))
+
+        
+    print("cubemap_file_name: " + cubemap_file_name)
+    
+    cubemap_image.filepath_raw = cubemap_file_name
+    # Depending on the file format entered in the preferences panel change the format of the image
+    image_format = bpy.context.scene.image_format
+    
+    if image_format.startswith('.'):
+        image_format = image_format[1:]  # remove the leading dot
+    image_format = image_format.upper()  # convert to uppercase
+    
+    cubemap_image.file_format = image_format
+    cubemap_image.save()
+    print(f"Saving cubemap image to: {cubemap_file_name}")
+
+    return cubemap_file_name
 
 #function that takes in the path of a cubemap and spits out an equirectangular map
 def convert_cubemap_to_equirectangular(cubemap_image_path):
@@ -11643,13 +11738,9 @@ def convert_cubemap_to_equirectangular(cubemap_image_path):
 
     # Check if the image has the correct dimensions
     height, width, _ = cubemap_np.shape
-    
-    #THIS MIGHT BE NEEDED
-    # if width != height * 4 / 3 or (cubemap_image_path == "" or cubemap_image_path == " "):
-        # #if not the right dimensions then it is likely a default bitmap so return it
-        # if(os.path.basename(og_image_path) == "default_dynamic_cube_map" or os.path.basename(og_image_path) == "default_dynamic_cube_map_bright")
-            # return og_image_path
-        
+    if width != height * 4 / 3 or (cubemap_image_path == "" or cubemap_image_path == " "):
+        #if not the right dimensions then it is likely a default bitmap so return it
+        return og_image_path
         
         # Resize the image to the correct dimensions
         #new_width = int(height * 4 / 3)
