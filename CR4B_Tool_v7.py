@@ -9841,7 +9841,8 @@ def Start_CR4B_Tool():
                             if(ShaderItem.bitmap_list[bitm].curve_option == 0 and bitmap_error != 1): #curve = unknown  CHECK WITH CHIEF
                                 ImageTextureNodeList[bitm + 1].image.colorspace_settings.name = "Linear"                    
                                 #Check library of unknown textures for Gamma values
-                            
+                                print("WARNING: USING UNKNOWN CURVE DATA! curve_option = 0 PLEASE ASK CHIEF!")
+                                gamma_value = 1.95
                             elif(ShaderItem.bitmap_list[bitm].curve_option == 1 and bitmap_error != 1): #curve = xRGB
                                 ImageTextureNodeList[bitm + 1].image.colorspace_settings.name = "Linear"
                                 gamma_value = 1.95
@@ -10415,15 +10416,17 @@ def Start_CR4B_Tool():
                                 
                             elif(ShaderItem.bitmap_list[bitm].curve_option == 4 and bitmap_error != 1): #curve = offset log
                                 ImageTextureNodeList[bitm + 1].image.colorspace_settings.name = "Linear"
-                                
+                                print("WARNING: OFFSET LOG CURVE DATA FOUJD! MIGHT NOT BE ACCURATE")
                                 #unknown at this time ask Chief
-                                #gamma_value = 1
+                                gamma_value = 1
                             elif(ShaderItem.bitmap_list[bitm].curve_option == 5 and bitmap_error != 1): #curve = sRGB
                                 ImageTextureNodeList[bitm + 1].image.colorspace_settings.name = "sRGB"
                                 gamma_value = 2.2
                                 
                             elif(ShaderItem.bitmap_list[bitm].curve_option == 6 and bitmap_error != 1): #curve = Default Data
                                 ImageTextureNodeList[bitm + 1].image.colorspace_settings.name = "Linear"
+                                print("Curve Option 6, please check!")
+                                gamma_value = 1.00
                             else:
                                 print("Curve Data Error!")
                             
