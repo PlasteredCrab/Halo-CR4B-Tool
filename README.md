@@ -10,7 +10,7 @@ https://youtu.be/749xwvg-GK4
 
 # Instructions for this build
 - Run Blender as Administrator and be sure to set the path correctly to the py360convert folder included in this repo. If you do not do these two things, the required Python modules will not be installed.
-- Be sure to set the paths to the CR4BTool-Shaders.blend and H3EK correctly as these are the most important. The Export Assets here folder is also important at the moment due to it needing the default textures, so be sure to set that correctly too while it is still needed.
+- Be sure to set the paths to the CR4BTool-Shaders.blend file and H3EK tags folder (i.e. steamapps/common/H3EK/tags/ ) correctly as these are the most important. The Export Assets here folder is also important at the moment due to it needing the default textures, so be sure to set that correctly too while it is still needed.
 
 # Special Thanks
 - Chiefster and Soulburnin for the help making the Shader Nodes used by this tool to make the objects and levels to be as accurate as they can be! Without their help, this tool would not have gotten as far as it did.
