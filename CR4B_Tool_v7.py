@@ -11543,6 +11543,9 @@ def handle_missing_texture(bitmap_path, texture_path):
             
             print("Converting tga image")
             #convert the texture to needed format
+            
+           
+            
             format = (bpy.context.scene.image_format).replace(".","") #replace . with nothing
             convert_image_format(texture_path + ".tga", output_path, format)
         
@@ -11631,6 +11634,8 @@ def run_exe_tool(bitmap_path, path_out):
                 if image_format.startswith('.'):
                     image_format = image_format[1:]  # remove the leading dot
                 image_format = image_format  # convert to uppercase
+            
+                
             
                 # Convert the image to the desired format
                 convert_image_format(path, os.path.dirname(path), image_format)
@@ -11794,6 +11799,10 @@ def convert_cubemap_to_equirectangular(cubemap_image_path):
         if image_format.startswith('.'):
             image_format = image_format[1:]  # remove the leading dot
         image_format = image_format.upper()  # convert to uppercase
+        
+        if (image_format == "TIF"):
+            image_format = "TIFF"
+            
         
         rgb_equirectangular_image.file_format = image_format
         alpha_equirectangular_image.file_format = image_format
