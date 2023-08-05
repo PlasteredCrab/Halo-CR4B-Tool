@@ -11715,6 +11715,9 @@ def create_cubemap_and_convert_to_equirectangular(image_paths):
         image_format = image_format[1:]  # remove the leading dot
     image_format = image_format.upper()  # convert to uppercase
     
+    if (image_format == "TIF"):
+        image_format = "TIFF"
+        
     cubemap_image.file_format = image_format
     cubemap_image.save()
     print(f"Saving cubemap image to: {cubemap_file_name}")
