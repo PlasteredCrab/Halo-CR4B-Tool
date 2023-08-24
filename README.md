@@ -6,7 +6,7 @@ It accesses the raw tag files in binary and pulls the correct values, colors, sc
 Tool is currently in Open Beta and is ready for public testing on Halo 3 and ODST objects and levels. Reach support coming later as Shader Nodes need to be made.
 
 # Video for what it does and how it is used
-# (Ignore the outdated install part of this video)
+(Ignore the outdated install part of this video. New install process is in the video below)
 https://youtu.be/749xwvg-GK4
 
 # Install Instructions for recent build
