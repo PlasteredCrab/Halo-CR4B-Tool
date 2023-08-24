@@ -11,8 +11,10 @@ https://youtu.be/749xwvg-GK4
 # Instructions for this build
 - Run Blender as Administrator and be sure to set the path correctly to the py360convert folder included in this repo. If you do not do these two things, the required Python modules will not be installed.
 - Be sure to set the paths to the CR4BTool-Shaders.blend file and H3EK tags folder (i.e. steamapps/common/H3EK/tags/ ) correctly as these are the most important. The Export Assets here folder is also important at the moment due to it needing the default textures, so be sure to set that correctly too while it is still needed.
+-To use the .jms and .ass import functions be sure to download and install Halo-Asset-Blender-Development-Toolset here: https://github.com/General-101/Halo-Asset-Blender-Development-Toolset/tree/1f1dbe07378e75c3f7fd31cb03cb82a1f2e693e9
 
 # Special Thanks
 - Chiefster and Soulburnin for the help making the Shader Nodes used by this tool to make the objects and levels to be as accurate as they can be! Without their help, this tool would not have gotten as far as it did.
 - Lord Zedd for giving me some ideas on how to fix Mirror Wrapped textures being incorrect in terms of texture resolution ratios being the key. 
 - Gravemind2401 for his amazing work with Reclaimer, which all of this work was started using models and textures ripped using Reclaimer.
+- General_101 for his great work with the Halo-Asset-Blender-Development-Toolset (which CR4B Tool uses for the importing function for .ass and .jms files)
