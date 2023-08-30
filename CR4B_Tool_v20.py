@@ -20,6 +20,7 @@ import math
 import time
 import os
 import re
+import json
 import struct
 import ntpath
 import sys
@@ -458,8 +459,8 @@ def Start_CR4B_Tool():
        
 
     def convert_to_hex(text):
-        hex_representation = '\\x00' + ''.join([f'\\x{ord(c):02x}' for c in text]) + '\\x66\\x72\\x67\\x74'
-        return hex_representation.encode('utf-8')
+        hex_representation = b'\x00' + bytes(text, 'utf-8') + b'\x66\x72\x67\x74'
+        return hex_representation
 
     def get_ascii_string(file, offset, size):
         temp_string = ""
@@ -2063,7 +2064,91 @@ def Start_CR4B_Tool():
                     temp_alpha = 1.00
                 
             return temp_alpha
-       
+    
+    #return size of string in hex size
+    def string_length_in_hex(input_string):
+        length = len(input_string)
+        hex_length = int(hex(length), 16)
+        return hex_length
+    
+    #Save myself time and mental pain by making it easier to add texture type support
+    def Add_Texture_Support(Offset, texture_type, shaderfile, ShaderItem, Tag_Root, Raw_Tag_Root):
+        if (Offset != 0):
+            #log_to_file("color_mask_map offset: " + str(ColorMaskMap_Offset))
+            log_to_file("")
+            log_to_file(f"[{texture_type}]") 
+            shaderfile.seek(Offset + string_length_in_hex(texture_type) + 0x10 + 0x1)
+            
+            DefaultNeeded = 0
+            
+            #clear old bitmap data
+            Bitmap = bitmap()
+            Bitmap.directory = ""
+            Bitmap.type = ""
+            Bitmap.curve_option = 0
+            Bitmap.width = 0
+            Bitmap.height = 0
+            Bitmap.equi_paths = []
+            
+            #save current data
+            Bitmap.directory = get_dir(shaderfile, Offset + string_length_in_hex(texture_type) + 0x10 + 0x1)
+            log_to_file("Dir: " + Bitmap.directory)
+            Bitmap.type = f"{texture_type}"
+            ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+            ShaderItem.bitmap_list.append(Bitmap)
+            if (Bitmap.directory == "" or Bitmap.directory == " " or Bitmap.directory == "   "):
+                 DefaultNeeded = 1 
+
+            if (DefaultNeeded != 1):
+                #try to do something with the file to get it to see if it exists
+                handle_missing_texture(Bitmap.directory, bpy.context.preferences.addons[__name__].preferences.export_path + "/" + Bitmap.directory)  
+            
+                try:
+                    if (has_prefix != True):
+                        #get Curve for bitmap
+                        Bitmap.curve_option = get_bitmap_curve(Tag_Root + Bitmap.directory + ".bitmap")
+                        
+                        #Get Resolution of bitmap
+                        Bitmap.width = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "width")
+                        Bitmap.height = get_bitmap_resolution(Tag_Root + Bitmap.directory + ".bitmap", "height")
+                    else:
+                        #get Curve for bitmap
+                        Bitmap.curve_option = get_bitmap_curve(Raw_Tag_Root + Bitmap.directory + ".bitmap")
+                        
+                        #Get Resolution of bitmap
+                        Bitmap.width = get_bitmap_resolution(Raw_Tag_Root + Bitmap.directory + ".bitmap", "width")
+                        Bitmap.height = get_bitmap_resolution(Raw_Tag_Root + Bitmap.directory + ".bitmap", "height")
+                except OSError:
+                    log_to_file("Bitmap Directory not referenced. Please use Default Data")
+           
+            Bitmap = get_scale(shaderfile, (Offset + string_length_in_hex(texture_type) + 0x10 + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
+
+            #check scaling is correct:
+            log_to_file("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
+
+            DefaultNeeded = 0
+        else:
+            #bitmap not referenced but might be needed
+            if(is_texture_needed(ShaderItem, texture_type)):
+                log_to_file("")
+                log_to_file(f"[{texture_type}]")
+                #DirOffset = shaderfile.tell()
+                
+                #clear old bitmap data
+                Bitmap = bitmap()
+                Bitmap.directory = ""
+                Bitmap.type = ""
+                Bitmap.curve_option = 0
+                Bitmap.width = 0
+                Bitmap.height = 0
+                Bitmap.equi_paths = []
+                
+                Bitmap.type = texture_type
+                Bitmap.directory = correct_default_dir(texture_type)
+                ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
+                ShaderItem.bitmap_list.append(Bitmap)
+    
+        return ShaderItem
         
     def get_value(file, offset):
         file.seek(offset + 0x84) #skips to 132 bytes to where values live
@@ -4461,6 +4546,9 @@ def Start_CR4B_Tool():
                 SelfIllumMap_Offset = 0x0
                 SelfIllumDetailMap_Offset = 0x0
                 
+                MaterialTexture_Offset = 0x0
+                SpecTintMap_Offset = 0x0
+                
                 #offset for Alpha_Test_Map
                 AlphaTestMap_Offset = 0x0
                 
@@ -4737,10 +4825,25 @@ def Start_CR4B_Tool():
                             
                     try: #check for color_mask_map
                         ColorMaskMap_Offset = shaderfile_read.index(b'\x00\x63\x6F\x6C\x6F\x72\x5F\x6D\x61\x73\x6B\x5F\x6D\x61\x70\x66\x72\x67\x74')
-                        ShaderItem.BaseMap_Offset = ColorMaskMap_Offset
+                        ShaderItem.ColorMaskMap_Offset = ColorMaskMap_Offset
                     except ValueError:
                         if(debug_textures_values_found != 0):                        
-                            log_to_file("color_mask_map not found!")        
+                            log_to_file("color_mask_map not found!")      
+
+                    try: #check for material_texture
+                        MaterialTexture_Offset = shaderfile_read.index(convert_to_hex("material_texture"))
+                        ShaderItem.MaterialTexture_Offset = MaterialTexture_Offset
+                    except ValueError:
+                        if(debug_textures_values_found != 0):                        
+                            log_to_file("material_texture not found!")      
+
+                    try: #check for spec_tint_map
+                        SpecTintMap_Offset = shaderfile_read.index(convert_to_hex("spec_tint_map"))
+                        ShaderItem.SpecTintMap_Offset = SpecTintMap_Offset
+                    except ValueError:
+                        if(debug_textures_values_found != 0):                        
+                            log_to_file("spec_tint_map not found!")
+                            
 
                     #Check for Alpha_Map
                     try: 
@@ -6801,6 +6904,14 @@ def Start_CR4B_Tool():
                     
                     DefaultNeeded = 0
 
+                #Check for material_mexture
+                ShaderItem = Add_Texture_Support(MaterialTexture_Offset, "material_texture", shaderfile, ShaderItem, Tag_Root, Raw_Tag_Root)
+                
+                #Check for spec_tint_map
+                ShaderItem = Add_Texture_Support(SpecTintMap_Offset, "spec_tint_map", shaderfile, ShaderItem, Tag_Root, Raw_Tag_Root)
+
+                
+                
                 
                 
                 #################
@@ -7112,7 +7223,7 @@ def Start_CR4B_Tool():
                     #log_to_file("self_illum_map offset: " + str(SelfIllumMap_Offset))
                     log_to_file("")
                     log_to_file("[detail_bump_m_0]") 
-                    shaderfile.seek(Detail_Bump_M_0_Offset + 0x10 + 0xE + 0x1)
+                    shaderfile.seek(Detail_Bump_M_0_Offset + 0x10 + 0xF + 0x1)
                     
                     #clear old bitmap data
                     Bitmap = bitmap()
@@ -7124,7 +7235,7 @@ def Start_CR4B_Tool():
                     Bitmap.equi_paths = []
                     
                     #save current data
-                    Bitmap.directory = get_dir(shaderfile, Detail_Bump_M_0_Offset + 0x10 + 0xE + 0x1)
+                    Bitmap.directory = get_dir(shaderfile, Detail_Bump_M_0_Offset + 0x10 + 0xF + 0x1)
                     log_to_file("Dir: " + Bitmap.directory)
                     Bitmap.type = "detail_bump_m_0"
                     ShaderItem.bitmap_count = ShaderItem.bitmap_count + 1
@@ -7155,7 +7266,7 @@ def Start_CR4B_Tool():
                             log_to_file("Bitmap Directory not referenced. Please use Default Data")
                     
                     #get scaling data for bitmap
-                    Bitmap = get_scale(shaderfile, (Detail_Bump_M_0_Offset + 0x10 + 0xE + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
+                    Bitmap = get_scale(shaderfile, (Detail_Bump_M_0_Offset + 0x10 + 0xF + 0x1), len(Bitmap.directory), Bitmap) #uniform scaling 
 
                     #check scaling is correct:
                     log_to_file("[" + Bitmap.type + "] Scale: " + str(Bitmap.scale_xy))
@@ -9911,7 +10022,7 @@ def Start_CR4B_Tool():
                 # .shader files
                 ###############
                 
-                if((Shader_Type == 0 or Shader_Type == 4) and ShaderItem.environment_mapping_option == 1): #H3RCategory: environment_mapping - per_pixel
+                if((Shader_Type == 0 or Shader_Type == 4) and (ShaderItem.environment_mapping_option >= 1 and ShaderItem.environment_mapping_option <= 5)): #H3RCategory: environment_mapping - per_pixel
                     ShaderOutputCount = ShaderOutputCount + 1
                 elif((Shader_Type == 0 or Shader_Type == 4) and ShaderItem.environment_mapping_option == 2): #H3RCategory: environment_mapping - dynamic
                     ShaderOutputCount = ShaderOutputCount + 1
@@ -9923,7 +10034,7 @@ def Start_CR4B_Tool():
                 # .shader files
                 ###############
                 
-                if((Shader_Type == 0 or Shader_Type == 4) and ShaderItem.self_illumination_option == 1): #H3RCategory: self_illumination - simple
+                if((Shader_Type == 0 or Shader_Type == 4) and (ShaderItem.self_illumination_option >= 1 and ShaderItem.self_illumination_option <= 11)): #all of them
                     ShaderOutputCount = ShaderOutputCount + 1
                 elif((Shader_Type == 0 or Shader_Type == 4) and ShaderItem.self_illumination_option == 2): #H3RCategory: self_illumination - 3_channel_self_illum
                     ShaderOutputCount = ShaderOutputCount + 1
@@ -9992,9 +10103,23 @@ def Start_CR4B_Tool():
                     ShaderOutputCount = ShaderOutputCount + 1
                 elif((Shader_Type == 0) and ShaderItem.material_model_option == 7): #H3Category: material_model - single_lobe_phong
                     ShaderOutputCount = ShaderOutputCount + 1
+                elif((Shader_Type == 0) and ShaderItem.material_model_option == 8): #H3Category: material_model - car_paint
+                    ShaderOutputCount = ShaderOutputCount + 1
                 elif((Shader_Type == 0) and ShaderItem.material_model_option == 9): #H3Category: material_model - cook_torrance_custom_cube
                     ShaderOutputCount = ShaderOutputCount + 1
-                elif((Shader_Type == 0) and ShaderItem.material_model_option == 10): #H3Category: material_model - single_lobe_phong
+                elif((Shader_Type == 0) and ShaderItem.material_model_option == 10): #H3Category: material_model - cook_torrance_pbr_maps
+                    ShaderOutputCount = ShaderOutputCount + 1
+                elif((Shader_Type == 0) and ShaderItem.material_model_option == 11): #H3Category: material_model - cook_torrance_two_color_spec_tint
+                    ShaderOutputCount = ShaderOutputCount + 1
+                elif((Shader_Type == 0) and ShaderItem.material_model_option == 12): #H3Category: material_model - two_lobe_phong_tint_map                          USING COOK_TORRANCE FOR NOW FIX LATER
+                    ShaderOutputCount = ShaderOutputCount + 1
+                elif((Shader_Type == 0) and ShaderItem.material_model_option == 13): #H3Category: material_model - cook_torrance_scrolling_cube_mask
+                    ShaderOutputCount = ShaderOutputCount + 1
+                elif((Shader_Type == 0) and ShaderItem.material_model_option == 14): #H3Category: material_model - cook_torrance_rim_fresnel
+                    ShaderOutputCount = ShaderOutputCount + 1
+                elif((Shader_Type == 0) and ShaderItem.material_model_option == 15): #H3Category: material_model - cook_torrance_scrolling_cube
+                    ShaderOutputCount = ShaderOutputCount + 1
+                elif((Shader_Type == 0) and ShaderItem.material_model_option == 16): #H3Category: material_model - cook_torrance_from_albedo
                     ShaderOutputCount = ShaderOutputCount + 1
                     
                 #shader_custom    
@@ -10756,7 +10881,7 @@ def Start_CR4B_Tool():
                             pymat_copy.node_tree.links.new(Add3Group.inputs[2], EnvGroup.outputs["Shader"])
                             ShadersConnected = ShadersConnected + 1
                 log_to_file("Shader Outputs Connected: " + str(ShadersConnected))                
-                if ((Shader_Type == 0 or Shader_Type == 4) and (ShaderItem.self_illumination_option == 1 or ShaderItem.self_illumination_option == 2 or ShaderItem.self_illumination_option == 3 or ShaderItem.self_illumination_option == 4 or ShaderItem.self_illumination_option == 5 or ShaderItem.self_illumination_option == 6 or ShaderItem.self_illumination_option == 7)):                
+                if ((Shader_Type == 0 or Shader_Type == 4) and (ShaderItem.self_illumination_option >= 1 and ShaderItem.self_illumination_option <= 11)):                
                     if(ShaderOutputCount <= 2): #if only less than 1 or 2 Shader outputs needed
                         if (ShadersConnected == 0):
                             #log_to_file("test p")
@@ -11883,7 +12008,7 @@ def Start_CR4B_Tool():
                             if((Shader_Type == 0 or Shader_Type == 2 or Shader_Type == 4) and ShaderItem.bitmap_list[bitm].type == "detail_map3"): # and ShaderGroupList[bitm + 1] == "albedo"):
                                 log_to_file("  trying to link detail_map3")
                                 #if albedo option is not constant color
-                                if (ShaderItem.albedo_option == 5 and ShaderItem.material_model_option != 0):
+                                if (ShaderItem.albedo_option == 5):
                                     #log_to_file("  detail 0a")
                                     #- rgb node
                                     #if curve uses Gamma
@@ -12024,8 +12149,61 @@ def Start_CR4B_Tool():
                                     # if(ShaderItem.specular_mask_option == 1):
                                         # #log_to_file("  detail 0d")
                                         # pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+                            
+                            
+                            #material_texture LINK
+                            if((Shader_Type == 0 or Shader_Type == 2 or Shader_Type == 4) and ShaderItem.bitmap_list[bitm].type == "material_texture"): # and ShaderGroupList[bitm + 1] == "albedo"):
+                                log_to_file("  trying to link material_texture")
+                                #if albedo option is not constant color
+                                if (ShaderItem.material_model_option == 10 or ShaderItem.material_model_option == 11):
+                                    #log_to_file("  detail 0a")
+                                    #- rgb node
+                                    #if curve uses Gamma
+                                    # if (ShaderItem.albedo_option == 8): #color_mask
+                                    if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
+                                        #link gamma to albedo
+                                        #log_to_file("  detail 0b")
+                                        pymat_copy.node_tree.links.new(MatModelGroup.inputs["material_texture.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                                                                
+                                        #Edit value of Gamma on node group
+                                        MatModelGroup.inputs["material_texture Gamma Curve"].default_value = gamma_value
+                                        log_to_file("Changing Gamma Value of " + ShaderItem.bitmap_list[bitm].type + " to: " + str(gamma_value))
+                                    
+                                    else:
+                                        #link base_map to albedo
+                                        #log_to_file("  detail 0c")
+                                        pymat_copy.node_tree.links.new(MatModelGroup.inputs["material_texture.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                                                                    
+                                        #Edit value of Gamma on node group
+                                        MatModelGroup.inputs["material_texture Gamma Curve"].default_value = gamma_value
+                                        log_to_file("Changing Gamma Value of " + ShaderItem.bitmap_list[bitm].type + " to: " + str(gamma_value))
 
-
+                            #spec_tint_map LINK
+                            if((Shader_Type == 0 or Shader_Type == 2 or Shader_Type == 4) and ShaderItem.bitmap_list[bitm].type == "spec_tint_map"): # and ShaderGroupList[bitm + 1] == "albedo"):
+                                log_to_file("  trying to link spec_tint_map")
+                                #if albedo option is not constant color
+                                if (ShaderItem.material_model_option == 10 or ShaderItem.material_model_option == 11):
+                                    #log_to_file("  detail 0a")
+                                    #- rgb node
+                                    #if curve uses Gamma
+                                    # if (ShaderItem.albedo_option == 8): #color_mask
+                                    if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
+                                        #link gamma to albedo
+                                        #log_to_file("  detail 0b")
+                                        pymat_copy.node_tree.links.new(MatModelGroup.inputs["spec_tint_map.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                                                                
+                                        #Edit value of Gamma on node group
+                                        MatModelGroup.inputs["spec_tint_map Gamma Curve"].default_value = gamma_value
+                                        log_to_file("Changing Gamma Value of " + ShaderItem.bitmap_list[bitm].type + " to: " + str(gamma_value))
+                                    
+                                    else:
+                                        #link base_map to albedo
+                                        #log_to_file("  detail 0c")
+                                        pymat_copy.node_tree.links.new(MatModelGroup.inputs["spec_tint_map.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                                                                    
+                                        #Edit value of Gamma on node group
+                                        MatModelGroup.inputs["spec_tint_map Gamma Curve"].default_value = gamma_value
+                                        log_to_file("Changing Gamma Value of " + ShaderItem.bitmap_list[bitm].type + " to: " + str(gamma_value))
 
                             #BUMP MAP
                             #log_to_file("before bump")
@@ -13565,8 +13743,8 @@ class CR4B_ScanScenarioStructureBSP(bpy.types.Operator):
             
             print("Trying to read the level list for " + halo_ver)
             
-            #clear all data from the tags_report.txt file within the Export Directory
-            tags_report_path = os.path.join(export_dir, halo_ver + '_level_report.txt')
+            
+            tags_report_path = os.path.join(export_dir + "Reports\\", halo_ver + '_level_report.txt')
 
             
             with open(tags_report_path, 'r') as f:
@@ -13656,7 +13834,7 @@ class CR4B_ScanRenderModel(bpy.types.Operator):
             print("Trying to read the model list for " + halo_ver)
             
             #clear all data from the tags_report.txt file within the Export Directory
-            tags_report_path = os.path.join(export_dir, halo_ver + '_model_report.txt')
+            tags_report_path = os.path.join(export_dir + "Reports\\", halo_ver + '_model_report.txt')
 
             
             with open(tags_report_path, 'r') as f:
@@ -13708,6 +13886,7 @@ def Reclaimer_Report(map_path, export_dir, tag_type, halo_ver):
     #talk to Reclaimer and send a report command to it along with the other arguments
 
     # create the command string
+    #export_dir = export_dir + "Reports\\"
     
     export_dir = remove_ending_backslash(export_dir)
     
@@ -13754,10 +13933,22 @@ def Reclaimer_Export(map_path, tag_file, export_dir, tag_type):
     export_dir = export_dir.strip()
     tag_type = tag_type.strip()
     
+    
     export_dir = remove_ending_backslash(export_dir)
     export_format = bpy.context.scene.file_format_dropdown
+    reclaimer_path = bpy.context.preferences.addons[__name__].preferences.reclaimer_path
+    settings_dir = reclaimer_path + "Settings\\"
     
-    cmd = f'reclaimer export "{map_path}" "{tag_file}" "{export_dir}" {export_format}'
+    cmd = f'reclaimer export "{map_path}" "{tag_file}" "{export_dir}" {export_format} {settings_dir}'
+    
+    #EDIT THE SETTINGS FILE TO MAKE SURE PROMPT DATA FOLDER IS DISABLRD
+    #EDIT THE FIELD IN SETTINGS TO CHANGE THE DATA FOLDER
+    
+    new_data_folder_path = export_dir
+    file_path = settings_dir + "settings.json"
+    update_json_file(file_path, new_data_folder_path)
+    
+    print("Trying to update settings file and setting Data Folder to: " + export_dir)
     
     # if tag_type == "render_model":
         # cmd = f'reclaimer export "{map_path}" "{tag_file}" "{export_dir}" {export_format}' 
@@ -13770,7 +13961,7 @@ def Reclaimer_Export(map_path, tag_file, export_dir, tag_type):
 
     print("Trying to run CMD: " + cmd)
 
-    reclaimer_path = bpy.context.preferences.addons[__name__].preferences.reclaimer_path
+    
 
     try:
         # Change to the directory of the tool
@@ -13996,7 +14187,7 @@ class CR4B_CreateModelReport(bpy.types.Operator):
         return {'FINISHED'}
 
     def create_report(self):
-        export_dir = bpy.context.preferences.addons[__name__].preferences.export_path
+        export_dir = bpy.context.preferences.addons[__name__].preferences.export_path + "Reports\\"
         
         #depending on the options in the preferences build report files      
     #HaloCE
@@ -14012,6 +14203,10 @@ class CR4B_CreateModelReport(bpy.types.Operator):
             #clear all data from the tags_report.txt file within the Export Directory
             tags_report_path = os.path.join(export_dir, halo_ver + '_level_report.txt')
 
+            report_dir = os.path.dirname(tags_report_path)
+            if not os.path.exists(report_dir):
+                os.makedirs(report_dir)
+            
             # Clear existing content in tags_report.txt
             with open(tags_report_path, 'w') as f:
                 f.write("")
@@ -14034,6 +14229,10 @@ class CR4B_CreateModelReport(bpy.types.Operator):
             #clear all data from the tags_report.txt file within the Export Directory
             tags_report_path = os.path.join(export_dir, halo_ver + '_model_report.txt')
 
+            report_dir = os.path.dirname(tags_report_path)
+            if not os.path.exists(report_dir):
+                os.makedirs(report_dir)
+            
             # Clear existing content in tags_report.txt
             with open(tags_report_path, 'w') as f:
                 f.write("")
@@ -14063,6 +14262,10 @@ class CR4B_CreateModelReport(bpy.types.Operator):
             #clear all data from the tags_report.txt file within the Export Directory
             tags_report_path = os.path.join(export_dir, halo_ver + '_level_report.txt')
 
+            report_dir = os.path.dirname(tags_report_path)
+            if not os.path.exists(report_dir):
+                os.makedirs(report_dir)
+            
             # Clear existing content in tags_report.txt
             with open(tags_report_path, 'w') as f:
                 f.write("")
@@ -14084,6 +14287,10 @@ class CR4B_CreateModelReport(bpy.types.Operator):
             #MODELS
             #clear all data from the tags_report.txt file within the Export Directory
             tags_report_path = os.path.join(export_dir, halo_ver + '_model_report.txt')
+
+            report_dir = os.path.dirname(tags_report_path)
+            if not os.path.exists(report_dir):
+                os.makedirs(report_dir)
 
             # Clear existing content in tags_report.txt
             with open(tags_report_path, 'w') as f:
@@ -14113,6 +14320,10 @@ class CR4B_CreateModelReport(bpy.types.Operator):
             #clear all data from the tags_report.txt file within the Export Directory
             tags_report_path = os.path.join(export_dir, halo_ver + '_level_report.txt')
 
+            report_dir = os.path.dirname(tags_report_path)
+            if not os.path.exists(report_dir):
+                os.makedirs(report_dir)
+
             # Clear existing content in tags_report.txt
             with open(tags_report_path, 'w') as f:
                 f.write("")
@@ -14135,6 +14346,10 @@ class CR4B_CreateModelReport(bpy.types.Operator):
             #clear all data from the tags_report.txt file within the Export Directory
             tags_report_path = os.path.join(export_dir, halo_ver + '_model_report.txt')
 
+            report_dir = os.path.dirname(tags_report_path)
+            if not os.path.exists(report_dir):
+                os.makedirs(report_dir)
+            
             # Clear existing content in tags_report.txt
             with open(tags_report_path, 'w') as f:
                 f.write("")
@@ -14163,6 +14378,10 @@ class CR4B_CreateModelReport(bpy.types.Operator):
             #clear all data from the tags_report.txt file within the Export Directory
             tags_report_path = os.path.join(export_dir, halo_ver + '_level_report.txt')
 
+            report_dir = os.path.dirname(tags_report_path)
+            if not os.path.exists(report_dir):
+                os.makedirs(report_dir)
+            
             # Clear existing content in tags_report.txt
             with open(tags_report_path, 'w') as f:
                 f.write("")
@@ -14185,6 +14404,10 @@ class CR4B_CreateModelReport(bpy.types.Operator):
             #clear all data from the tags_report.txt file within the Export Directory
             tags_report_path = os.path.join(export_dir, halo_ver + '_model_report.txt')
 
+            report_dir = os.path.dirname(tags_report_path)
+            if not os.path.exists(report_dir):
+                os.makedirs(report_dir)
+            
             # Clear existing content in tags_report.txt
             with open(tags_report_path, 'w') as f:
                 f.write("")
@@ -14214,6 +14437,10 @@ class CR4B_CreateModelReport(bpy.types.Operator):
             #clear all data from the tags_report.txt file within the Export Directory
             tags_report_path = os.path.join(export_dir, halo_ver + '_level_report.txt')
 
+            report_dir = os.path.dirname(tags_report_path)
+            if not os.path.exists(report_dir):
+                os.makedirs(report_dir)
+            
             # Clear existing content in tags_report.txt
             with open(tags_report_path, 'w') as f:
                 f.write("")
@@ -14236,6 +14463,10 @@ class CR4B_CreateModelReport(bpy.types.Operator):
             #clear all data from the tags_report.txt file within the Export Directory
             tags_report_path = os.path.join(export_dir, halo_ver + '_model_report.txt')
 
+            report_dir = os.path.dirname(tags_report_path)
+            if not os.path.exists(report_dir):
+                os.makedirs(report_dir)
+            
             # Clear existing content in tags_report.txt
             with open(tags_report_path, 'w') as f:
                 f.write("")
@@ -14265,6 +14496,10 @@ class CR4B_CreateModelReport(bpy.types.Operator):
             #clear all data from the tags_report.txt file within the Export Directory
             tags_report_path = os.path.join(export_dir, halo_ver + '_level_report.txt')
 
+            report_dir = os.path.dirname(tags_report_path)
+            if not os.path.exists(report_dir):
+                os.makedirs(report_dir)
+            
             # Clear existing content in tags_report.txt
             with open(tags_report_path, 'w') as f:
                 f.write("")
@@ -14287,6 +14522,10 @@ class CR4B_CreateModelReport(bpy.types.Operator):
             #clear all data from the tags_report.txt file within the Export Directory
             tags_report_path = os.path.join(export_dir, halo_ver + '_model_report.txt')
 
+            report_dir = os.path.dirname(tags_report_path)
+            if not os.path.exists(report_dir):
+                os.makedirs(report_dir)
+            
             # Clear existing content in tags_report.txt
             with open(tags_report_path, 'w') as f:
                 f.write("")
@@ -14316,6 +14555,10 @@ class CR4B_CreateModelReport(bpy.types.Operator):
             #clear all data from the tags_report.txt file within the Export Directory
             tags_report_path = os.path.join(export_dir, halo_ver + '_level_report.txt')
 
+            report_dir = os.path.dirname(tags_report_path)
+            if not os.path.exists(report_dir):
+                os.makedirs(report_dir)
+            
             # Clear existing content in tags_report.txt
             with open(tags_report_path, 'w') as f:
                 f.write("")
@@ -14338,6 +14581,10 @@ class CR4B_CreateModelReport(bpy.types.Operator):
             #clear all data from the tags_report.txt file within the Export Directory
             tags_report_path = os.path.join(export_dir, halo_ver + '_model_report.txt')
 
+            report_dir = os.path.dirname(tags_report_path)
+            if not os.path.exists(report_dir):
+                os.makedirs(report_dir)
+            
             # Clear existing content in tags_report.txt
             with open(tags_report_path, 'w') as f:
                 f.write("")
@@ -14354,7 +14601,22 @@ class CR4B_CreateModelReport(bpy.types.Operator):
 
                 map_index += 1
     
-
+#update Settings.JSON file for data folder    
+def update_json_file(file_path, new_data_folder_path):
+    # Step 1: Read the JSON file into a Python dictionary
+    with open(file_path, 'r') as f:
+        json_data = json.load(f)
+    
+    try:
+        # Navigate to the specific section
+        # Update the "DataFolder" value
+        json_data["PluginSettings"]["Reclaimer.Plugins.BatchExtractPlugin"]["DataFolder"] = new_data_folder_path
+        
+        # Write the updated dictionary back to the JSON file
+        with open(file_path, 'w') as f:
+            json.dump(json_data, f, indent=4)
+    except KeyError as e:
+        print(f"KeyError: {e}. Please ensure that the JSON structure is correct.")
 
 
 class CR4B_FileListUI(bpy.types.UIList):
