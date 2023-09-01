@@ -17,19 +17,26 @@ class SimpleOperator(bpy.types.Operator):
     bl_label = "Apply CR4B Settings"
     
     def execute(self, context):
-        # Here you can define the value you want to set for halo3_tag_path
+        # Here you can define the value you want to be applied into your CR4B Tool Preferences Panel
+        
+        #Path to the Export Assets Here folder
         export_path_value = "C:\\Users\\jeffr\\Documents\\CR4B Tool GitHub\\CR4B Tool v17\\Export Assets Here\\"
         
+        #Path to the CR4BTool_shaders.blend file
         node_group_file_value = "C:\\Users\\jeffr\\Documents\\CR4B Tool GitHub\\CR4B Tool v20\\GitHub\\CR4BTool_shaders.blend"
         
+        #Path to the Python_Modules folder
         python_path_value = "C:\\Users\\jeffr\\Documents\\CR4B Tool GitHub\\CR4B Tool v20\\GitHub\\Python_Modules\\"
         
+        #Path to the tags folder of your various mod tools
         halo3_tag_path_value = "D:\\SteamLibrary\\steamapps\\common\\H3EK\\tags\\"
         odst_tag_path_value = "D:\\SteamLibrary\\steamapps\\common\\H3ODSTEK\\tags\\"
         reach_tag_path_value = "D:\\SteamLibrary\\steamapps\\common\\HREK\\tags\\"
 
+        #Path to the Reclaimer CLI folder
         reclaimer_cli_path = "C:\\Users\\jeffr\\Documents\\CR4B Tool GitHub\\CR4B Tool v20\\GitHub\\Reclaimer CLI\\"
         
+        #Path to the .map files you want to use with Reclaimer CLI
         haloce_map_path = "D:\\SteamLibrary\\steamapps\\common\\Halo The Master Chief Collection\\halo1\\maps\\"
         halo2_map_path = ""
         halo3_map_path = "D:\\Halo Map Files\\Halo 3\\"
@@ -38,7 +45,7 @@ class SimpleOperator(bpy.types.Operator):
         halo4_map_path = "D:\\Halo Map Files\\Halo 4\\"
         halo5_mod_path = ""
 
-        # Name of the other addon you want to modify
+        # Name of the current version of CR4BTool
         addon_name = "CR4B_Tool_v20"
         
         # Accessing preferences from another addon
@@ -68,7 +75,7 @@ class SimplePanel(bpy.types.Panel):
     bl_idname = "PT_SimplePanel"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = 'Tools'
+    bl_category = 'CR4B Setup'
     
     def draw(self, context):
         layout = self.layout
