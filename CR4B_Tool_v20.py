@@ -258,9 +258,10 @@ def Start_CR4B_Tool():
         meter_value = 0.00
         primary_change_color_blend = 0.00
         height_scale = 0.00
-        diffuse_coefficient = 1.00
+        diffuse_coefficient = 1.00                                          #Organism shader has default at 0.00
         specular_coefficient = 0.00
         specular_tint = color_white_rgb #BGR 3 decimal
+        specular_power = 10.00
         fresnel_color = color_gray_rgb #BGR 3 decimal
         roughness = 0.40
         environment_map_specular_contribution = 0.00
@@ -277,6 +278,28 @@ def Start_CR4B_Tool():
         area_specular_contribution = .50
         analytical_specular_contribution = 0.00
         neutral_gray = color_white_rgb #BGR 3 decimal
+        
+        diffuse_tint = color_white_rgb #BGR 3 decimal
+        analytical_specular_coefficient = 0.00
+        area_specular_coefficient = 0.00
+        environment_map_tint = color_white_rgb #BGR 3 decimal
+        rim_tint = color_black_rgb  #BGR 3 decimal
+        ambient_tint = color_white_rgb #BGR 3 decimal
+        environment_map_coefficient = 0.00
+        rim_coefficient = 1.00
+        rim_power = 2.00
+        rim_start = 0.70
+        rim_maps_transition_ratio = 0.00
+        ambient_coefficient = 0.00
+        subsurface_coefficient = 0.00
+        subsurface_tint = color_white_rgb #BGR 3 decimal
+        subsurface_propagation_bias = 0.00
+        subsurface_normal_detail = 0.00
+        transparence_normal_bias = 0.00
+        transparence_tint = color_white_rgb #BGR 3 decimal
+        transparence_normal_detail = 0.00
+        final_tint = color_white_rgb #BGR 3 decimal
+        
         
         
         #terrain stuff
@@ -1930,7 +1953,7 @@ def Start_CR4B_Tool():
         file.seek(offset + 0x84)
         test_float = 0.00
         test_float = struct.unpack('f', file.read(4))[0]
-        log_to_file("test float: " + str(test_float))
+        #log_to_file("test float: " + str(test_float))
         #if (test_float < 0.00 or test_float > 1000): #if float value is too big or too small
         test_float_str = str(test_float)
         if 'e' in test_float_str.lower():
@@ -2070,6 +2093,52 @@ def Start_CR4B_Tool():
         length = len(input_string)
         hex_length = int(hex(length), 16)
         return hex_length
+    
+    #Make my life so much easier by adding support for values and colors way faster
+    def Add_Value_Support(Offset, value_name, value_type, shaderfile, ShaderItem):
+        if(value_type == "float"):
+            if (Offset != 0): #float
+                #save current data
+                if(has_value(shaderfile, Offset + string_length_in_hex(value_name) + 0x1) == True):
+                    value = get_value(shaderfile, Offset + string_length_in_hex(value_name) + 0x1)
+                    setattr(ShaderItem, value_name, value)
+                    log_to_file(f"{value_name}: " + str(value))                    
+                else:
+                    log_to_file(f"{value_name} value/color not found")
+                    
+                #check for function
+                if(has_function(shaderfile, Offset + string_length_in_hex(value_name) + 0x1) == True): #value/color has function
+                    FunctionItem = get_function_data(shaderfile, Offset + string_length_in_hex(value_name) + 0x1, FunctionItem) #grab function data and store it
+                    print_function(FunctionItem) 
+                    
+                    #overrite some data for this item with the function data with halved value for testing
+                    value = (FunctionItem.main_max_value + FunctionItem.main_min_value) / 2
+                    log_to_file("  New Value from function: " + str(value))
+                    setattr(ShaderItem, value_name, value)
+                    ShaderItem.function_list.append(FunctionItem)
+        
+        elif(value_type == "color"):    
+            if (Offset != 0):  #color
+                #save current data
+                if(has_value(shaderfile, Offset + string_length_in_hex(value_name) + 0x1) == True):
+                    value = get_rgb(shaderfile, Offset + string_length_in_hex(value_name) + 0x1, "rgb")
+                    log_to_file(f"{value_name}: " + str(value))                    
+                    setattr(ShaderItem, value_name, value)
+                else:
+                    log_to_file(f"{value_name} value/color not found")
+                    
+                #check for function                       
+                if(has_function(shaderfile, Offset + string_length_in_hex(value_name) + 0x1) == True): #value/color has function
+                    FunctionItem = get_color_function_data(shaderfile, Offset + string_length_in_hex(value_name) + 0x1, FunctionItem) #grab function data and store it
+                    print_function(FunctionItem) 
+                    
+                    #overrite some data for this item with the function data with the first color
+                    value = (FunctionItem.color_1)
+                    log_to_file("  New Value from function: " + str(value))
+                    setattr(ShaderItem, value_name, value)
+                    ShaderItem.function_list.append(FunctionItem)
+    
+        return ShaderItem
     
     #Save myself time and mental pain by making it easier to add texture type support
     def Add_Texture_Support(Offset, texture_type, shaderfile, ShaderItem, Tag_Root, Raw_Tag_Root):
@@ -3852,6 +3921,7 @@ def Start_CR4B_Tool():
                 #no values needed
             if(ShaderItem.material_model_option == 6): #H3Category: material_model - organism
                 ShaderItem.needed_bitmaps.append("specular_map")
+                ShaderItem.needed_bitmaps.append("occlusion_parameter_map")
                 ShaderItem.needed_bitmaps.append("subsurface_map")
                 ShaderItem.needed_bitmaps.append("transparence_map")
             #elif(ShaderItem.material_model_option == 2): #H3Category: material_model - two_lobe_phong
@@ -4549,6 +4619,11 @@ def Start_CR4B_Tool():
                 MaterialTexture_Offset = 0x0
                 SpecTintMap_Offset = 0x0
                 
+                SpecularMap_Offset = 0x0
+                OcclusionParameterMap_Offset = 0x0
+                SubsurfaceMap_Offset = 0x0
+                TransparenceMap_Offset = 0x0
+                
                 #offset for Alpha_Test_Map
                 AlphaTestMap_Offset = 0x0
                 
@@ -4603,6 +4678,33 @@ def Start_CR4B_Tool():
                 Analytical_Specular_Contribution_Offset = 0x0
                 Area_Specular_Contribution_Offset = 0x0
                 Neutral_Gray_Offset = 0x0
+                
+                Specular_Power_Offset = 0x0
+                Diffuse_Tint_Offset = 0x0
+                Analytical_Specular_Coefficient_Offset = 0x0
+                Area_Specular_Coefficient_Offset = 0x0
+                Environment_Map_Tint_Offset = 0x0
+                Rim_Tint_Offset = 0x0
+                Ambient_Tint_Offset = 0x0
+                Environment_Map_Coefficient_Offset = 0x0
+                Rim_Coefficient_Offset = 0x0
+                Rim_Power_Offset = 0x0
+                Rim_Start_Offset = 0x0
+                Rim_Maps_Transition_Ratio_Offset = 0x0
+                Ambient_Coefficient_Offset = 0x0
+                Subsurface_Coefficient_Offset = 0x0
+                Subsurface_Tint_Offset = 0x0
+                Subsurface_Propagation_Bias_Offset = 0x0
+                Subsurface_Normal_Detail_Offset = 0x0
+                Transparence_Coefficient_Offset = 0x0
+                Transparence_Normal_Bias_Offset = 0x0
+                Transparence_Tint_Offset = 0x0
+                Transparence_Normal_Detail_Offset = 0x0
+                Final_Tint_Offset = 0x0
+                
+                
+                
+
 
                 #terrain shaders stuff
                 #bitmaps
@@ -4843,6 +4945,36 @@ def Start_CR4B_Tool():
                     except ValueError:
                         if(debug_textures_values_found != 0):                        
                             log_to_file("spec_tint_map not found!")
+                    
+                    try: #check for specular_map
+                        SpecularMap_Offset = shaderfile_read.index(convert_to_hex("specular_map"))
+                        ShaderItem.SpecularMap_Offset = SpecularMap_Offset
+                    except ValueError:
+                        if(debug_textures_values_found != 0):                        
+                            log_to_file("specular_map not found!")                    
+                    try: #check for occlusion_parameter_map
+                        OcclusionParameterMap_Offset = shaderfile_read.index(convert_to_hex("occlusion_parameter_map"))
+                        ShaderItem.OcclusionParameterMap_Offset = OcclusionParameterMap_Offset
+                    except ValueError:
+                        if(debug_textures_values_found != 0):                        
+                            log_to_file("occlusion_parameter_map not found!")
+                    
+                    try: #check for subsurface_map
+                        SubsurfaceMap_Offset = shaderfile_read.index(convert_to_hex("subsurface_map"))
+                        ShaderItem.SubsurfaceMap_Offset = SubsurfaceMap_Offset
+                    except ValueError:
+                        if(debug_textures_values_found != 0):                        
+                            log_to_file("subsurface_map not found!")
+                    
+                    try: #check for transparence_map
+                        TransparenceMap_Offset = shaderfile_read.index(convert_to_hex("transparence_map"))
+                        ShaderItem.TransparenceMap_Offset = TransparenceMap_Offset
+                    except ValueError:
+                        if(debug_textures_values_found != 0):                        
+                            log_to_file("transparence_map not found!")
+                            
+                            
+                            
                             
 
                     #Check for Alpha_Map
@@ -5121,8 +5253,119 @@ def Start_CR4B_Tool():
                     except ValueError:
                         if(debug_textures_values_found != 0): 
                             log_to_file("neutral_gray not found!")
-                
-        
+                    
+                    try: 
+                        Specular_Power_Offset = shaderfile_read.index(convert_to_hex("specular_power")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("specular_power not found!")
+                    try: 
+                        Diffuse_Tint_Offset = shaderfile_read.index(convert_to_hex("diffuse_tint")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("diffuse_tint not found!")
+                    try: 
+                        Analytical_Specular_Coefficient_Offset = shaderfile_read.index(convert_to_hex("analytical_specular_coefficient")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("analytical_specular_coefficient not found!")
+                    try: 
+                        Area_Specular_Coefficient_Offset = shaderfile_read.index(convert_to_hex("area_specular_coefficient")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("area_specular_coefficient not found!")
+                    try: 
+                        Environment_Map_Tint_Offset = shaderfile_read.index(convert_to_hex("environment_map_tint")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("environment_map_tint not found!")
+                    try: 
+                        Rim_Tint_Offset = shaderfile_read.index(convert_to_hex("rim_tint")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("rim_tint not found!")
+                    try: 
+                        Ambient_Tint_Offset = shaderfile_read.index(convert_to_hex("ambient_tint")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("ambient_tint not found!")
+                    try: 
+                        Environment_Map_Coefficient_Offset = shaderfile_read.index(convert_to_hex("environment_map_coefficient")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("environment_map_coefficient not found!")
+                    try: 
+                        Rim_Coefficient_Offset = shaderfile_read.index(convert_to_hex("rim_coefficient")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("rim_coefficient not found!")
+                    try: 
+                        Rim_Power_Offset = shaderfile_read.index(convert_to_hex("rim_power")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("rim_power not found!")
+                    try: 
+                        Rim_Start_Offset = shaderfile_read.index(convert_to_hex("rim_start")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("rim_start not found!")
+                    try: 
+                        Rim_Maps_Transition_Ratio_Offset = shaderfile_read.index(convert_to_hex("rim_maps_transition_ratio")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("rim_maps_transition_ratio not found!")
+                    try: 
+                        Ambient_Coefficient_Offset = shaderfile_read.index(convert_to_hex("ambient_coefficient")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("ambient_coefficient not found!")
+                    try: 
+                        Subsurface_Coefficient_Offset = shaderfile_read.index(convert_to_hex("subsurface_coefficient")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("subsurface_coefficient not found!")
+                    try: 
+                        Subsurface_Tint_Offset = shaderfile_read.index(convert_to_hex("subsurface_tint")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("subsurface_tint not found!")
+                    try: 
+                        Subsurface_Propagation_Bias_Offset = shaderfile_read.index(convert_to_hex("subsurface_propagation_bias")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("subsurface_propagation_bias not found!")
+                    try: 
+                        Subsurface_Normal_Detail_Offset = shaderfile_read.index(convert_to_hex("subsurface_normal_detail")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("subsurface_normal_detail not found!")
+                    try: 
+                        Transparence_Coefficient_Offset = shaderfile_read.index(convert_to_hex("transparence_coefficient")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("transparence_coefficient not found!")
+                    try: 
+                        Transparence_Normal_Bias_Offset = shaderfile_read.index(convert_to_hex("transparence_normal_bias")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("transparence_normal_bias not found!")
+                    try: 
+                        Transparence_Tint_Offset = shaderfile_read.index(convert_to_hex("transparence_tint")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("transparence_tint not found!")
+                    try: 
+                        Transparence_Normal_Detail_Offset = shaderfile_read.index(convert_to_hex("transparence_normal_detail")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("transparence_normal_detail not found!")
+                    try: 
+                        Final_Tint_Offset = shaderfile_read.index(convert_to_hex("final_tint")) 
+                    except ValueError:
+                        if(debug_textures_values_found != 0): 
+                            log_to_file("final_tint not found!")
+                    
+                    
 
                     #######################
                     #TERRAIN SHADER OFFSETS
@@ -5229,6 +5472,9 @@ def Start_CR4B_Tool():
                     except ValueError:
                         if(debug_textures_values_found != 0): 
                             log_to_file("detail_bump_m_3 not found!") 
+                    
+
+                    
                        
                     ##############
                     #COLORS/VALUES
@@ -6904,13 +7150,23 @@ def Start_CR4B_Tool():
                     
                     DefaultNeeded = 0
 
-                #Check for material_mexture
+                #Check for material_texture
                 ShaderItem = Add_Texture_Support(MaterialTexture_Offset, "material_texture", shaderfile, ShaderItem, Tag_Root, Raw_Tag_Root)
                 
                 #Check for spec_tint_map
                 ShaderItem = Add_Texture_Support(SpecTintMap_Offset, "spec_tint_map", shaderfile, ShaderItem, Tag_Root, Raw_Tag_Root)
 
+                #Check for specular_map
+                ShaderItem = Add_Texture_Support(SpecularMap_Offset, "specular_map", shaderfile, ShaderItem, Tag_Root, Raw_Tag_Root)
                 
+                #Check for occlusion_parameter_map
+                ShaderItem = Add_Texture_Support(OcclusionParameterMap_Offset, "occlusion_parameter_map", shaderfile, ShaderItem, Tag_Root, Raw_Tag_Root)
+                
+                #Check for subsurface_map
+                ShaderItem = Add_Texture_Support(SubsurfaceMap_Offset, "subsurface_map", shaderfile, ShaderItem, Tag_Root, Raw_Tag_Root)
+                
+                #Check for transparence_map
+                ShaderItem = Add_Texture_Support(TransparenceMap_Offset, "transparence_map", shaderfile, ShaderItem, Tag_Root, Raw_Tag_Root)
                 
                 
                 
@@ -9151,6 +9407,30 @@ def Start_CR4B_Tool():
                         log_to_file("  New Value from function: " + str(ShaderItem.neutral_gray))
                         ShaderItem.function_list.append(FunctionItem)
                         
+                Add_Value_Support(Specular_Power_Offset, "specular_power", "float", shaderfile, ShaderItem)        
+                Add_Value_Support(Diffuse_Tint_Offset, "diffuse_tint", "color", shaderfile, ShaderItem)        
+                Add_Value_Support(Analytical_Specular_Coefficient_Offset, "analytical_specular_coefficient", "float", shaderfile, ShaderItem)
+                Add_Value_Support(Area_Specular_Coefficient_Offset, "area_specular_coefficient", "float", shaderfile, ShaderItem)
+                Add_Value_Support(Environment_Map_Tint_Offset, "environment_map_tint", "color", shaderfile, ShaderItem)
+                Add_Value_Support(Rim_Tint_Offset, "rim_tint", "color", shaderfile, ShaderItem)
+                Add_Value_Support(Ambient_Tint_Offset, "ambient_tint", "color", shaderfile, ShaderItem)
+                Add_Value_Support(Environment_Map_Coefficient_Offset, "environment_map_coefficient", "float", shaderfile, ShaderItem)
+                Add_Value_Support(Rim_Coefficient_Offset, "rim_coefficient", "float", shaderfile, ShaderItem)
+                Add_Value_Support(Rim_Power_Offset, "rim_power", "float", shaderfile, ShaderItem)
+                Add_Value_Support(Rim_Start_Offset, "rim_start", "float", shaderfile, ShaderItem)
+                Add_Value_Support(Rim_Maps_Transition_Ratio_Offset, "rim_maps_transition_ratio", "float", shaderfile, ShaderItem)
+                Add_Value_Support(Ambient_Coefficient_Offset, "ambient_coefficient", "float", shaderfile, ShaderItem)
+                Add_Value_Support(Subsurface_Coefficient_Offset, "subsurface_coefficient", "float", shaderfile, ShaderItem)
+                Add_Value_Support(Subsurface_Tint_Offset, "subsurface_tint", "color", shaderfile, ShaderItem)
+                Add_Value_Support(Subsurface_Propagation_Bias_Offset, "subsurface_propagation_bias", "float", shaderfile, ShaderItem)
+                Add_Value_Support(Subsurface_Normal_Detail_Offset, "subsurface_normal_detail", "float", shaderfile, ShaderItem)
+                Add_Value_Support(Transparence_Coefficient_Offset, "transparence_coefficient", "float", shaderfile, ShaderItem)
+                Add_Value_Support(Transparence_Normal_Bias_Offset, "transparence_normal_bias", "float", shaderfile, ShaderItem)
+                Add_Value_Support(Transparence_Tint_Offset, "transparence_tint", "color", shaderfile, ShaderItem)
+                Add_Value_Support(Transparence_Normal_Detail_Offset, "transparence_normal_detail", "float", shaderfile, ShaderItem)
+                Add_Value_Support(Final_Tint_Offset, "final_tint", "color", shaderfile, ShaderItem)
+                
+                
                 ################
                 #TERRAIN SHADERS
                 ################
@@ -10387,7 +10667,7 @@ def Start_CR4B_Tool():
                     ShaderGroupList.append("material")
                     mat_group_made = 1
                 elif((Shader_Type == 0) and ShaderItem.material_model_option == 6): #H3Category: material_model - organism                          USING COOK_TORRANCE FOR NOW FIX LATER
-                    MatModelGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: material_model - cook_torrance")
+                    MatModelGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3Category: material_model - organism")
                     MatModelGroup = apply_group_values(MatModelGroup, ShaderItem, "mat model")
                     #ShaderOutputCount = ShaderOutputCount + 1
                     ShaderGroupList.append("material")  
@@ -10747,13 +11027,13 @@ def Start_CR4B_Tool():
                 ###############
                 
                 #CONNECT "ALBEDO GROUP" TO "MATERIAL MODEL" GROUP
-                if((Shader_Type == 0 or Shader_Type == 4) and ShaderItem.material_model_option != 0 and ShaderItem.material_model_option != 4 and ShaderItem.material_model_option != 3): #every option but "diffuse_only"
+                if((Shader_Type == 0 or Shader_Type == 4) and ShaderItem.material_model_option != 0 and ShaderItem.material_model_option != 4 and ShaderItem.material_model_option != 3 and ShaderItem.material_model_option != 6): #every option but "diffuse_only"
                     pymat_copy.node_tree.links.new(MatModelGroup.inputs["albedo.rgb"], AlbedoGroup.outputs["albedo.rgb"])
                     pymat_copy.node_tree.links.new(MatModelGroup.inputs["albedo.a"], AlbedoGroup.outputs["albedo.a"])
                 
                 
                 
-                if((Shader_Type == 0 or Shader_Type == 4) and (ShaderItem.material_model_option == 0 or ShaderItem.material_model_option == 3)): #if material model is diffuse only
+                if((Shader_Type == 0 or Shader_Type == 4) and (ShaderItem.material_model_option == 0 or ShaderItem.material_model_option == 3 or ShaderItem.material_model_option == 6)): #if material model is diffuse only
                     pymat_copy.node_tree.links.new(MatModelGroup.inputs["albedo.rgb"], AlbedoGroup.outputs["albedo.rgb"])
              
                 if(Shader_Type == 2): #if foliage shader
@@ -10800,7 +11080,7 @@ def Start_CR4B_Tool():
                 #CONNECT END SHADER GROUPS TO "ADD SHADER" NODE
                     #material model group
                 #rint("mat option: " + str(ShaderItem.material_model_option))
-                if ((Shader_Type == 0 or Shader_Type == 4) and (ShaderItem.material_model_option == 0 or ShaderItem.material_model_option == 1 or ShaderItem.material_model_option == 2 or ShaderItem.material_model_option == 3 or ShaderItem.material_model_option == 5 or ShaderItem.material_model_option == 7 or ShaderItem.material_model_option == 9 or ShaderItem.material_model_option == 10)):
+                if ((Shader_Type == 0 or Shader_Type == 4) and (ShaderItem.material_model_option == 0 or ShaderItem.material_model_option == 1 or ShaderItem.material_model_option == 2 or ShaderItem.material_model_option == 3 or ShaderItem.material_model_option == 5 or ShaderItem.material_model_option == 6 or ShaderItem.material_model_option == 7 or ShaderItem.material_model_option == 9 or ShaderItem.material_model_option == 10)):
                     #log_to_file("0")
                     #log_to_file("shaders needed: " + str(ShaderOutputCount))
                     if(ShaderOutputCount <= 2): #if only less than 1 or 2 Shader outputs needed
@@ -12314,7 +12594,132 @@ def Start_CR4B_Tool():
                                 except Exception:
                                     print("There was a bitmap curve data error! Not normal, please look into it.")
 
-                                   
+                            #specular_map
+                            if((Shader_Type == 0 or Shader_Type == 2 or Shader_Type == 4) and ShaderItem.bitmap_list[bitm].type == "specular_map"): # and ShaderGroupList[bitm + 1] == "albedo"):
+                                log_to_file("  trying to link specular_map")
+                                #if albedo option is not constant color
+                                
+                                #if ((ShaderItem.albedo_option == 1 or ShaderItem.albedo_option == 5 or ShaderItem.albedo_option == 6 or ShaderItem.albedo_option == 7 or ShaderItem.albedo_option == 9) and ShaderItem.material_model_option != 0):
+                                if (ShaderItem.material_model_option == 6):
+                                    #log_to_file("  detail 0a")
+                                    #- rgb node
+                                    #if curve uses Gamma
+                                    if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
+                                        #link gamma to albedo
+                                        #log_to_file("  detail 0b")
+                                        pymat_copy.node_tree.links.new(MatModelGroup.inputs["specular_map.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(MatModelGroup.inputs["specular_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+                                    
+                                        #Edit value of Gamma on node group
+                                        MatModelGroup.inputs["specular_map Gamma Curve"].default_value = gamma_value
+                                        log_to_file("Changing Gamma Value of " + ShaderItem.bitmap_list[bitm].type + " to: " + str(gamma_value))
+                                    
+                                    else:
+                                        #link base_map to albedo
+                                        #log_to_file("  detail 0c")
+                                        pymat_copy.node_tree.links.new(MatModelGroup.inputs["specular_map.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(MatModelGroup.inputs["specular_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+                                        
+                                        #Edit value of Gamma on node group
+                                        MatModelGroup.inputs["specular_map Gamma Curve"].default_value = gamma_value
+                                        log_to_file("Changing Gamma Value of " + ShaderItem.bitmap_list[bitm].type + " to: " + str(gamma_value))
+                            
+                            #occlusion_parameter_map
+                            if((Shader_Type == 0 or Shader_Type == 2 or Shader_Type == 4) and ShaderItem.bitmap_list[bitm].type == "occlusion_parameter_map"): 
+                                log_to_file("  trying to link occlusion_parameter_map")
+                                #if albedo option is not constant color
+                                
+                                #if ((ShaderItem.albedo_option == 1 or ShaderItem.albedo_option == 5 or ShaderItem.albedo_option == 6 or ShaderItem.albedo_option == 7 or ShaderItem.albedo_option == 9) and ShaderItem.material_model_option != 0):
+                                if (ShaderItem.material_model_option == 6):
+                                    #log_to_file("  detail 0a")
+                                    #- rgb node
+                                    #if curve uses Gamma
+                                    if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
+                                        #link gamma to albedo
+                                        #log_to_file("  detail 0b")
+                                        pymat_copy.node_tree.links.new(MatModelGroup.inputs["occlusion_parameter_map.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        #pymat_copy.node_tree.links.new(MatModelGroup.inputs["occlusion_parameter_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+                                    
+                                        #Edit value of Gamma on node group
+                                        MatModelGroup.inputs["occlusion_parameter_map Gamma Curve"].default_value = gamma_value
+                                        log_to_file("Changing Gamma Value of " + ShaderItem.bitmap_list[bitm].type + " to: " + str(gamma_value))
+                                    
+                                    else:
+                                        #link base_map to albedo
+                                        #log_to_file("  detail 0c")
+                                        pymat_copy.node_tree.links.new(MatModelGroup.inputs["occlusion_parameter_map.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        #pymat_copy.node_tree.links.new(MatModelGroup.inputs["occlusion_parameter_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+                                        
+                                        #Edit value of Gamma on node group
+                                        MatModelGroup.inputs["occlusion_parameter_map Gamma Curve"].default_value = gamma_value
+                                        log_to_file("Changing Gamma Value of " + ShaderItem.bitmap_list[bitm].type + " to: " + str(gamma_value))
+
+                            
+                            #subsurface_map
+                            if((Shader_Type == 0 or Shader_Type == 2 or Shader_Type == 4) and ShaderItem.bitmap_list[bitm].type == "subsurface_map"): # and ShaderGroupList[bitm + 1] == "albedo"):
+                                log_to_file("  trying to link subsurface_map")
+                                #if albedo option is not constant color
+                                
+                                #if ((ShaderItem.albedo_option == 1 or ShaderItem.albedo_option == 5 or ShaderItem.albedo_option == 6 or ShaderItem.albedo_option == 7 or ShaderItem.albedo_option == 9) and ShaderItem.material_model_option != 0):
+                                if (ShaderItem.material_model_option == 6):
+                                    #log_to_file("  detail 0a")
+                                    #- rgb node
+                                    #if curve uses Gamma
+                                    if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
+                                        #link gamma to albedo
+                                        #log_to_file("  detail 0b")
+                                        pymat_copy.node_tree.links.new(MatModelGroup.inputs["subsurface_map.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(MatModelGroup.inputs["subsurface_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+                                    
+                                        #Edit value of Gamma on node group
+                                        MatModelGroup.inputs["subsurface_map Gamma Curve"].default_value = gamma_value
+                                        log_to_file("Changing Gamma Value of " + ShaderItem.bitmap_list[bitm].type + " to: " + str(gamma_value))
+                                    
+                                    else:
+                                        #link base_map to albedo
+                                        #log_to_file("  detail 0c")
+                                        pymat_copy.node_tree.links.new(MatModelGroup.inputs["subsurface_map.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(MatModelGroup.inputs["subsurface_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+                                        
+                                        #Edit value of Gamma on node group
+                                        MatModelGroup.inputs["subsurface_map Gamma Curve"].default_value = gamma_value
+                                        log_to_file("Changing Gamma Value of " + ShaderItem.bitmap_list[bitm].type + " to: " + str(gamma_value))
+
+                            
+                            
+                            #transparence_map
+                            if((Shader_Type == 0 or Shader_Type == 2 or Shader_Type == 4) and ShaderItem.bitmap_list[bitm].type == "transparence_map"): # and ShaderGroupList[bitm + 1] == "albedo"):
+                                log_to_file("  trying to link transparence_map")
+                                #if albedo option is not constant color
+                                
+                                #if ((ShaderItem.albedo_option == 1 or ShaderItem.albedo_option == 5 or ShaderItem.albedo_option == 6 or ShaderItem.albedo_option == 7 or ShaderItem.albedo_option == 9) and ShaderItem.material_model_option != 0):
+                                if (ShaderItem.material_model_option == 6):
+                                    #log_to_file("  detail 0a")
+                                    #- rgb node
+                                    #if curve uses Gamma
+                                    if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
+                                        #link gamma to albedo
+                                        #log_to_file("  detail 0b")
+                                        pymat_copy.node_tree.links.new(MatModelGroup.inputs["transparence_map.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(MatModelGroup.inputs["transparence_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+                                    
+                                        #Edit value of Gamma on node group
+                                        MatModelGroup.inputs["transparence_map Gamma Curve"].default_value = gamma_value
+                                        log_to_file("Changing Gamma Value of " + ShaderItem.bitmap_list[bitm].type + " to: " + str(gamma_value))
+                                    
+                                    else:
+                                        #link base_map to albedo
+                                        #log_to_file("  detail 0c")
+                                        pymat_copy.node_tree.links.new(MatModelGroup.inputs["transparence_map.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(MatModelGroup.inputs["transparence_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+                                        
+                                        #Edit value of Gamma on node group
+                                        MatModelGroup.inputs["transparence_map Gamma Curve"].default_value = gamma_value
+                                        log_to_file("Changing Gamma Value of " + ShaderItem.bitmap_list[bitm].type + " to: " + str(gamma_value))
+
+                            
+                            
+                            
                             #SPECULAR_MASK_TEXTURE
                             if((Shader_Type == 0 or Shader_Type == 4) and ShaderItem.bitmap_list[bitm].type == "specular_mask_texture" and ShaderItem.specular_mask_option == 2 and ShaderItem.albedo_option != 2):
                                 pymat_copy.node_tree.links.new(AlbedoGroup.inputs["base_map.a/specular_mask"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])                
@@ -13937,16 +14342,20 @@ def Reclaimer_Export(map_path, tag_file, export_dir, tag_type):
     export_dir = remove_ending_backslash(export_dir)
     export_format = bpy.context.scene.file_format_dropdown
     reclaimer_path = bpy.context.preferences.addons[__name__].preferences.reclaimer_path
+    img_format = bpy.context.scene.image_format_dropdown
     settings_dir = reclaimer_path + "Settings\\"
     
-    cmd = f'reclaimer export "{map_path}" "{tag_file}" "{export_dir}" {export_format} {settings_dir}'
+    if(export_format =="dae"):
+        export_format = "collada"
+    
+    cmd = f'reclaimer export "{map_path}" "{tag_file}" "{export_dir}" {export_format} {img_format}'
     
     #EDIT THE SETTINGS FILE TO MAKE SURE PROMPT DATA FOLDER IS DISABLRD
     #EDIT THE FIELD IN SETTINGS TO CHANGE THE DATA FOLDER
     
-    new_data_folder_path = export_dir
-    file_path = settings_dir + "settings.json"
-    update_json_file(file_path, new_data_folder_path)
+    #new_data_folder_path = export_dir
+    #file_path = settings_dir + "settings.json"
+    #update_json_file(file_path, new_data_folder_path)
     
     print("Trying to update settings file and setting Data Folder to: " + export_dir)
     
@@ -14031,6 +14440,8 @@ class CR4B_ImportFile(bpy.types.Operator):
         export_dir = bpy.context.preferences.addons[__name__].preferences.export_path
         
         last_button = context.scene.cr4b_last_button
+    
+        texture_format = context.scene.image_format_dropdown
 
         import_type = ""
         format_type = context.scene.file_format_dropdown
@@ -14144,7 +14555,7 @@ class CR4B_ImportFile(bpy.types.Operator):
                         # Call the other add-on's import function
                         print("trying to import: " + file_path)
                         
-                        bpy.ops.import_scene.amf(filepath=file_path)
+                        bpy.ops.import_scene.amf(filepath=file_path, bitmap_ext=texture_format)
                     except Exception as e:
                         log_to_file(f"AMF importer Could Not Import the file!") 
         elif format_type == "obj":
