@@ -3760,7 +3760,8 @@ def Start_CR4B_Tool():
             return True
         else:
             return False
-            
+          
+  
     def uses_reference_grids(type):
         if (type == "color_mask_map"):
             return True
@@ -4624,6 +4625,9 @@ def Start_CR4B_Tool():
                 SubsurfaceMap_Offset = 0x0
                 TransparenceMap_Offset = 0x0
                 
+                Pallete_Offset = 0x0
+                AlphaMap_Offset = 0x0
+                
                 #offset for Alpha_Test_Map
                 AlphaTestMap_Offset = 0x0
                 
@@ -5365,6 +5369,20 @@ def Start_CR4B_Tool():
                         if(debug_textures_values_found != 0): 
                             log_to_file("final_tint not found!")
                     
+                    ####################
+                    #   DECAL SHADERS
+                    ####################
+                    if (Shader_Type == 6):
+                        try: 
+                            Pallete_Offset = shaderfile_read.index(convert_to_hex("pallete")) 
+                        except ValueError:
+                            if(debug_textures_values_found != 0): 
+                                log_to_file("pallete not found!")
+                        try: 
+                            AlphaMap_Offset = shaderfile_read.index(convert_to_hex("alpha_map")) 
+                        except ValueError:
+                            if(debug_textures_values_found != 0): 
+                                log_to_file("alpha_map not found!")
                     
 
                     #######################
@@ -7168,7 +7186,11 @@ def Start_CR4B_Tool():
                 #Check for transparence_map
                 ShaderItem = Add_Texture_Support(TransparenceMap_Offset, "transparence_map", shaderfile, ShaderItem, Tag_Root, Raw_Tag_Root)
                 
+                #Check for pallete
+                ShaderItem = Add_Texture_Support(Pallete_Offset, "pallete", shaderfile, ShaderItem, Tag_Root, Raw_Tag_Root)
                 
+                #Check for alpha_map
+                ShaderItem = Add_Texture_Support(AlphaMap_Offset, "alpha_map", shaderfile, ShaderItem, Tag_Root, Raw_Tag_Root)
                 
                 #################
                 #TERRAIN SHADERS
@@ -10155,8 +10177,15 @@ def Start_CR4B_Tool():
                     if (ShaderItem.alpha_test_option == 1):
                         pymat_copy.blend_method = Preferred_Blend 
                 
+                #foliage
                 if (Shader_Type == 2):
                     pymat_copy.blend_method = Preferred_Blend
+                    
+                #decals shaders    
+                if (Shader_Type == 6):
+                    if(ShaderItem.blend_mode_option != 0): #if it is not opaque
+                        pymat_copy.blend_method = Preferred_Blend
+                
                 #instantiate_group(bpy.context.object.material_slots[0].material.node_tree.nodes, 'NodeGroup')    
                     
                 log_to_file("Bitmap Count: " + str(ShaderItem.bitmap_count)) 
@@ -10290,9 +10319,40 @@ def Start_CR4B_Tool():
                     last_node_y = AdditiveGroup.location.y
 
 
-
-
-
+                                    ########################################
+                                    #  Blend Mode Group Create Decal Shaders
+                                    ########################################
+                albedo_blend_group_made = 0
+                
+                if(Shader_Type == 6): 
+                    if (ShaderItem.blend_mode_option == 0): #H3RCategory: blend_mode - opaque
+                        # AlphaBlendGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: blend_mode - opaque")
+                        # #AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
+                        # ShaderGroupList.append("alpha_blend")
+                        # ShaderGroupList.append("alpha_blend") #extra option for an additional texture being needed IN the order they get connected
+                        # albedo_blend_group_made = 1
+                        log_to_file("Blend mode is Opaque. Not making Node Group.")
+                    elif (ShaderItem.blend_mode_option == 1 or ShaderItem.blend_mode_option == 2): #H3RCategory: blend_mode - additive or multiply
+                        AlphaBlendGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: blend_mode - additive")
+                        #AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
+                        ShaderGroupList.append("alpha_blend")
+                        ShaderGroupList.append("alpha_blend") #extra option for an additional texture being needed IN the order they get connected
+                        albedo_blend_group_made = 1    
+                            
+                    elif (ShaderItem.blend_mode_option == 3): #H3RCategory: blend_mode - alpha_blend
+                        AlphaBlendGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory: blend_mode - alpha_blend")
+                        #AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
+                        ShaderGroupList.append("alpha_blend")
+                        ShaderGroupList.append("alpha_blend") #extra option for an additional texture being needed IN the order they get connected
+                        albedo_blend_group_made = 1
+                    
+                    if (albedo_blend_group_made == 1):
+                        #locations of group
+                        AlphaBlendGroup.location.x = last_node_x - ADDITIVE_GROUP_HORIZONTAL_SPACING
+                        AlphaBlendGroup.location.y = last_node_y
+                            
+                        last_node_x = AlphaBlendGroup.location.x
+                        last_node_y = AlphaBlendGroup.location.y
 
                                     #  SHADER OUTPUT FIXING
                                     #############################
@@ -10823,6 +10883,46 @@ def Start_CR4B_Tool():
                     ShaderGroupList.append("albedo")
                     albedo_group_made = 1
 
+                
+                albedo_vector_group_made = 0
+
+                                    ####################################
+                                    #  Albedo Group Create Decal Shaders
+                                    ####################################
+                if(Shader_Type == 6):
+                    if (ShaderItem.albedo_option == 0): #H3RCategory_Decal: albedo - diffuse_only
+                        AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory_Decal: albedo - diffuse_only")
+                        AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
+                        ShaderGroupList.append("albedo")
+                        ShaderGroupList.append("albedo") #extra option for an additional texture being needed IN the order they get connected
+                        albedo_group_made = 1
+                    elif (ShaderItem.albedo_option == 1): #H3RCategory_Decal: albedo - palletized
+                        AlbedoVectorGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory_Decal: albedo - palletized vector")
+                        #AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
+                        ShaderGroupList.append("albedo")
+                        ShaderGroupList.append("albedo") #extra option for an additional texture being needed IN the order they get connected
+                        AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory_Decal: albedo - palletized")
+                        #AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
+                        ShaderGroupList.append("albedo")
+                        ShaderGroupList.append("albedo")
+                        albedo_group_made = 1    
+                        albedo_vector_group_made = 1
+                    elif (ShaderItem.albedo_option == 2): #H3RCategory_Decal: albedo - palletized_plus_alpha
+                        AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory_Decal: albedo - palletized_plus_alpha vector")
+                        #AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
+                        ShaderGroupList.append("albedo")
+                        ShaderGroupList.append("albedo") #extra option for an additional texture being needed IN the order they get connected
+                        AlbedoGroup = instantiate_group(pymat_copy.node_tree.nodes, "H3RCategory_Decal: albedo - palletized_plus_alpha")
+                        #AlbedoGroup = apply_group_values(AlbedoGroup, ShaderItem, "albedo")
+                        ShaderGroupList.append("albedo")
+                        ShaderGroupList.append("albedo") 
+                        albedo_group_made = 1    
+                        albedo_vector_group_made = 1
+                    else:
+                        print("ALBEDO GROUP NOT SETUP TO BE MADE YET FOR THIS ALEBDO OPTION FOR DECALS")
+                           
+                
+
 
                 #location of node group
                 if(albedo_group_made == 1):
@@ -10831,6 +10931,14 @@ def Start_CR4B_Tool():
                         
                     alb_group_x = AlbedoGroup.location.x
                     alb_group_y = AlbedoGroup.location.y    
+
+                #location of node group
+                if(albedo_vector_group_made == 1):
+                    AlbedoVectorGroup.location.x = last_node_x - 350
+                    AlbedoVectorGroup.location.y = last_node_y
+                        
+                    alb_group_x = AlbedoVectorGroup.location.x
+                    alb_group_y = AlbedoVectorGroup.location.y
 
                                     ######################
                                     #bump map group create
@@ -11012,11 +11120,13 @@ def Start_CR4B_Tool():
                         # ShaderGroupList.append("m_3")
                         # ShaderGroupList.append("m_3")    
                 
-                
-                
-                                   
-                                   
-                                   
+                                                            
+
+
+
+
+
+                           
                                    
                                    
                                                    ##################
@@ -11076,6 +11186,33 @@ def Start_CR4B_Tool():
                     if(ShaderItem.environment_mapping_option == 2 and (ShaderItem.material_model_option == 1 or ShaderItem.material_model_option == 2 or ShaderItem.material_model_option == 5 or ShaderItem.material_model_option == 7 or ShaderItem.material_model_option == 9 or ShaderItem.material_model_option == 10)): #if environment option is dynamic
                         pymat_copy.node_tree.links.new(EnvGroup.inputs["specular_reflectance_and_roughness.a"], MatModelGroup.outputs["specular_reflectance_and_roughness.a"])
 
+                
+                #  DECAL SHADER GROUP CONNECTIONS
+                
+                # Connect Albedo Vector group to main albedo_group
+                if((Shader_Type == 6) and ShaderItem.blend_mode_option == 0): #albedo option: diffuse only  blend_mode: opaque
+                    #connect the Albedo Group directly to the AddShader
+                    pymat_copy.node_tree.links.new(AddShader.inputs["Shader"], AlbedoGroup.outputs["Shader"])
+                    
+                
+                
+                # DECAL SHADER CONNECT BLEND MODE IF NEEDED
+                if (Shader_Type == 6):
+                    if(ShaderItem.blend_mode_option == 1): #additive
+                        pymat_copy.node_tree.links.new(AlphaBlendGroup.inputs["Shader"], AlbedoGroup.outputs["Shader"])
+                    
+                        pymat_copy.node_tree.links.new(AddShader.inputs["Shader"], AlphaBlendGroup.outputs["Shader"])
+                    
+                    elif(ShaderItem.blend_mode_option == 3): #alpha_blend
+                        print("trying to link AlebdoGroup to AlphaBlendGroup")
+                        pymat_copy.node_tree.links.new(AlphaBlendGroup.inputs["Shader"], AlbedoGroup.outputs["Shader"])
+                        pymat_copy.node_tree.links.new(AlphaBlendGroup.inputs["base_map.a"], AlbedoGroup.outputs["alpha"])
+                        
+                        #connect blend_mode to add shader if it exists
+                        pymat_copy.node_tree.links.new(AddShader.inputs["Shader"], AlphaBlendGroup.outputs["Shader"])
+                
+                
+                
                 
                 #CONNECT END SHADER GROUPS TO "ADD SHADER" NODE
                     #material model group
@@ -11223,7 +11360,8 @@ def Start_CR4B_Tool():
                             #log_to_file("test 6")
                             pymat_copy.node_tree.links.new(material_output.inputs["Surface"], AlphaTestGroup.outputs["Shader"])
                             pymat_copy.node_tree.links.new(AlphaTestGroup.inputs["Shader"], AddShader.outputs["Shader"])
-                
+                if(Shader_Type == 6):
+                    pymat_copy.node_tree.links.new(material_output.inputs["Surface"], AddShader.outputs["Shader"])
                 
                 if ((Shader_Type == 0 or Shader_Type == 3 or Shader_Type == 4) and ShaderOutputCount == 3):
                     if (ShaderItem.alpha_test_option == 0): #alpha test = off
@@ -11246,6 +11384,7 @@ def Start_CR4B_Tool():
                         else:
                             pymat_copy.node_tree.links.new(material_output.inputs["Surface"], AlphaTestGroup.outputs["Shader"])
                             pymat_copy.node_tree.links.new(AlphaTestGroup.inputs["Shader"], Add3Group.outputs["Shader"])
+                    
                       
                 #######################      
                 # .shader_terrain files      
@@ -11517,6 +11656,32 @@ def Start_CR4B_Tool():
                                     log_to_file("default dynamic cubemap has been added to " + ShaderItem.bitmap_list[bitm].type)
                                     #BE SURE TO ADD IN DEFAULT DATA AS WELL LATER
                                     texture_node_made = 1
+                                elif (uses_color_white(ShaderItem.bitmap_list[bitm].type) == True):
+                                    ImageTextureNodeList[bitm + 1].image = bpy.data.images.load(directory + '/' + DEFAULT_BITMAP_DIR + "color_white" + IMAGE_EXTENSION)
+                                    log_to_file("color_white has been added to " + ShaderItem.bitmap_list[bitm].type)
+                                    #BE SURE TO ADD IN DEFAULT DATA AS WELL LATER
+                                    texture_node_made = 1
+                                # elif (uses_monochrome_alpha_grid(ShaderItem.bitmap_list[bitm].type) == True):
+                                    # ImageTextureNodeList[bitm + 1].image = bpy.data.images.load(directory + '/' + DEFAULT_BITMAP_DIR + "monochrome_alpha_grid" + IMAGE_EXTENSION)
+                                    # log_to_file("monochrome_alpha_grid has been added to " + ShaderItem.bitmap_list[bitm].type)
+                                    # #BE SURE TO ADD IN DEFAULT DATA AS WELL LATER
+                                    # texture_node_made = 1
+                                elif (uses_color_red(ShaderItem.bitmap_list[bitm].type) == True):
+                                    ImageTextureNodeList[bitm + 1].image = bpy.data.images.load(directory + '/' + DEFAULT_BITMAP_DIR + "color_red" + IMAGE_EXTENSION)
+                                    log_to_file("color_red has been added to " + ShaderItem.bitmap_list[bitm].type)
+                                    #BE SURE TO ADD IN DEFAULT DATA AS WELL LATER
+                                    texture_node_made = 1
+                                # elif (uses_default_alpha_test(ShaderItem.bitmap_list[bitm].type) == True):
+                                    # ImageTextureNodeList[bitm + 1].image = bpy.data.images.load(directory + '/' + DEFAULT_BITMAP_DIR + "default_alpha_test" + IMAGE_EXTENSION)
+                                    # log_to_file("alpha_test_map has been added to " + ShaderItem.bitmap_list[bitm].type)
+                                    # #BE SURE TO ADD IN DEFAULT DATA AS WELL LATER
+                                    # texture_node_made = 1
+                                # elif (uses_reference_grids(ShaderItem.bitmap_list[bitm].type) == True):
+                                    # ImageTextureNodeList[bitm + 1].image = bpy.data.images.load(directory + '/' + DEFAULT_BITMAP_DIR + "reference_grids" + IMAGE_EXTENSION)
+                                    # log_to_file("reference_grids has been added to " + ShaderItem.bitmap_list[bitm].type)
+                                    # #BE SURE TO ADD IN DEFAULT DATA AS WELL LATER
+                                    # texture_node_made = 1
+                                
                                 
                                 else:
                                     bitmap_error = 1
@@ -12179,7 +12344,19 @@ def Start_CR4B_Tool():
                                             #Edit value of Gamma on node group
                                             AlbedoGroup.inputs["base_map Gamma Curve"].default_value = gamma_value
                                             log_to_file("Changing Gamma Value of " + ShaderItem.bitmap_list[bitm].type + " to: " + str(gamma_value))
-                                    
+                            
+                            elif(Shader_Type == 6 and ShaderItem.bitmap_list[bitm].type == "base_map"): #Decal use of base_map linking
+                                log_to_file("  trying to link base_map")
+                                if (ShaderItem.albedo_option == 0):
+                                    pymat_copy.node_tree.links.new(AlbedoGroup.inputs["base_map.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                    pymat_copy.node_tree.links.new(AlbedoGroup.inputs["base_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+                                if (ShaderItem.albedo_option == 1 or ShaderItem.albedo_option == 2):
+                                    #connect base_map to ALbedoVectorGroup if palletized
+                                    pymat_copy.node_tree.links.new(AlbedoVectorGroup.inputs["base_map.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                           
+                           
+                           
+                           
                                     #- a/spec node
                                     #if spec data comes from diffuse
                                     
@@ -12717,7 +12894,98 @@ def Start_CR4B_Tool():
                                         MatModelGroup.inputs["transparence_map Gamma Curve"].default_value = gamma_value
                                         log_to_file("Changing Gamma Value of " + ShaderItem.bitmap_list[bitm].type + " to: " + str(gamma_value))
 
+                            #PALLETE
+                            if((Shader_Type == 6) and ShaderItem.bitmap_list[bitm].type == "pallete"):
+                                log_to_file("  trying to link pallete")
+                                #if albedo option is not constant color
+                                if (ShaderItem.albedo_option == 1): #palletized
+                                    #log_to_file("  detail 0a")
+                                    #- rgb node
+                                    #if curve uses Gamma
+                                    if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
+                                        #link gamma to albedo
+                                        #log_to_file("  detail 0b")
+                                        
+                                        pymat_copy.node_tree.links.new(ImageTextureNodeList[bitm + 1].inputs["Vector"], AlbedoVectorGroup.outputs["Vector"])
+                                        
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["pallete.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["pallete.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+                                    
+                                        #Edit value of Gamma on node group
+                                        AlbedoGroup.inputs["pallete Gamma Curve"].default_value = gamma_value
+                                        log_to_file("Changing Gamma Value of " + ShaderItem.bitmap_list[bitm].type + " to: " + str(gamma_value))
+                                    
+                                    else:
+                                        #link base_map to albedo
+                                        #log_to_file("  detail 0c")
+                                        pymat_copy.node_tree.links.new(ImageTextureNodeList[bitm + 1].inputs["Vector"], AlbedoVectorGroup.outputs["Vector"])
+                                        
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["pallete.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["pallete.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
+                                    
+                                        #Edit value of Gamma on node group
+                                        AlbedoGroup.inputs["pallete Gamma Curve"].default_value = gamma_value
+                                        log_to_file("Changing Gamma Value of " + ShaderItem.bitmap_list[bitm].type + " to: " + str(gamma_value))
+                                
+                                elif (ShaderItem.albedo_option == 2): #palletized_plus_alpha
+                                    #log_to_file("  detail 0a")
+                                    #- rgb node
+                                    #if curve uses Gamma
+                                    if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
+                                        #link gamma to albedo
+                                        #log_to_file("  detail 0b")
+                                        
+                                        pymat_copy.node_tree.links.new(ImageTextureNodeList[bitm + 1].inputs["Vector"], AlbedoVectorGroup.outputs["Vector"])
+                                        
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["pallete.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])                        
+                                    
+                                        #Edit value of Gamma on node group
+                                        AlbedoGroup.inputs["pallete Gamma Curve"].default_value = gamma_value
+                                        log_to_file("Changing Gamma Value of " + ShaderItem.bitmap_list[bitm].type + " to: " + str(gamma_value))
+                                    
+                                    else:
+                                        #link base_map to albedo
+                                        #log_to_file("  detail 0c")
+                                        pymat_copy.node_tree.links.new(ImageTextureNodeList[bitm + 1].inputs["Vector"], AlbedoVectorGroup.outputs["Vector"])
+                                        
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["pallete.rgb"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                    
+                                        #Edit value of Gamma on node group
+                                        AlbedoGroup.inputs["pallete Gamma Curve"].default_value = gamma_value
+                                        log_to_file("Changing Gamma Value of " + ShaderItem.bitmap_list[bitm].type + " to: " + str(gamma_value))
+                                    #- a/spec node
+                                    #if spec data comes from diffuse
+                                    # if(ShaderItem.specular_mask_option == 1):
+                                        # #log_to_file("  detail 0d")
+                                        # pymat_copy.node_tree.links.new(AlbedoGroup.inputs["detail_map.a"], ImageTextureNodeList[bitm + 1].outputs["Alpha"])
                             
+                            #ALPHA_MAP
+                            if((Shader_Type == 6) and ShaderItem.bitmap_list[bitm].type == "alpha_map"):
+                                log_to_file("  trying to link alpha_map")
+                                #if albedo option is not constant color
+                                if (ShaderItem.albedo_option == 2): #palletized_plus_alpha
+                                    #log_to_file("  detail 0a")
+                                    #- rgb node
+                                    #if curve uses Gamma
+                                    if(ShaderItem.bitmap_list[bitm].curve_option == 1 or ShaderItem.bitmap_list[bitm].curve_option == 2):
+                                        #link gamma to albedo
+                                        #log_to_file("  detail 0b")
+                                        
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["alpha_map.a"], ImageTextureNodeList[bitm + 1].outputs["Color"])                        
+                                    
+                                        #Edit value of Gamma on node group
+                                        AlbedoGroup.inputs["pallete Gamma Curve"].default_value = gamma_value
+                                        log_to_file("Changing Gamma Value of " + ShaderItem.bitmap_list[bitm].type + " to: " + str(gamma_value))
+                                    
+                                    else:
+                                        #link base_map to albedo
+                                        #log_to_file("  detail 0c")
+                                        
+                                        pymat_copy.node_tree.links.new(AlbedoGroup.inputs["alpha_map.a"], ImageTextureNodeList[bitm + 1].outputs["Color"])
+                                    
+                                        #Edit value of Gamma on node group
+                                        AlbedoGroup.inputs["pallete Gamma Curve"].default_value = gamma_value
+                                        log_to_file("Changing Gamma Value of " + ShaderItem.bitmap_list[bitm].type + " to: " + str(gamma_value))
                             
                             
                             #SPECULAR_MASK_TEXTURE
