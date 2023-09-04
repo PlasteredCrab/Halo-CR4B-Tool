@@ -4420,14 +4420,14 @@ def Start_CR4B_Tool():
     for idx, i in enumerate(pymat):
         mat_name = ""
         
-        # If the checkbox is checked, filter the materials to ignore ones with AddShaders or Add3Shaders (to cut down time)
-        if not bpy.context.scene.cr4b_overwrite_materials:
-            pymat = get_materials_without_node_group(node_group_names)
-        else:
-            pymat = bpy.data.materials
+#        # If the checkbox is checked, filter the materials to ignore ones with AddShaders or Add3Shaders (to cut down time)
+#        if not bpy.context.scene.cr4b_overwrite_materials:
+#            pymat = get_materials_without_node_group(node_group_names)
+#        else:
+#            pymat = bpy.data.materials
             
         #get material count for the progress bar and keep the count current
-        total_mats = len(pymat)
+#        total_mats = len(pymat)
         
         #reset has_prefix and prefix
         has_prefix = False
@@ -4584,6 +4584,8 @@ def Start_CR4B_Tool():
                         pymat_copy = pymat.new(name=pymat_copy.name) 
                         log_to_file("Creating new Material in scene: " + pymat_copy.name)
                     #break
+                    
+                    total_mats += 1 
                     
                     #retargets i to be the newly created material
                     #i = pymat_copy #this might need to go at the end of the script
@@ -13561,6 +13563,10 @@ class CR4BAddonPreferences(bpy.types.AddonPreferences):
         name="Reclaimer CLI",
         subtype='FILE_PATH'
     )
+    hirt_path: bpy.props.StringProperty(
+        name="HIRT CLI",
+        subtype='FILE_PATH'
+    )
     haloce_map_path: bpy.props.StringProperty(
         name="Halo CE Maps",
         subtype='FILE_PATH'
@@ -13589,6 +13595,10 @@ class CR4BAddonPreferences(bpy.types.AddonPreferences):
         name="Halo 5 Deploy",
         subtype='FILE_PATH'
     )
+    haloinfinite_map_path: bpy.props.StringProperty(
+        name="Halo Infinite Deploy",
+        subtype='FILE_PATH'
+    )
     
     def draw(self, context):
         layout = self.layout
@@ -13606,6 +13616,8 @@ class CR4BAddonPreferences(bpy.types.AddonPreferences):
         
         layout.row().label(text="Directory Location of the Reclaimer CLI Folder:")
         layout.row().prop(self, "reclaimer_path")
+        layout.row().label(text="Directory Location of the HIRT CLI Folder:")
+        layout.row().prop(self, "hirt_path")
         
         layout.row().label(text="Directory Locations of .map files for each game:")
         layout.row().prop(self, "haloce_map_path")
@@ -13615,6 +13627,7 @@ class CR4BAddonPreferences(bpy.types.AddonPreferences):
         layout.row().prop(self, "haloreach_map_path")
         layout.row().prop(self, "halo4_map_path")
         layout.row().prop(self, "halo5_map_path")
+        layout.row().prop(self, "haloinfinite_map_path")
 
 class ProgressBarPanel(bpy.types.Panel):
     bl_idname = "OBJECT_PT_progress_bar"
@@ -14424,6 +14437,10 @@ def get_file_format_items(self, context):
             ("dae", "dae", "collada"),
             ("ass/jms", "ass/jms", "ass or jms format")
         ]
+    if context.scene.halo_version_dropdown in ("Halo Infinite"):
+        return [
+            ("fbx", "fbx", "fbx format")
+        ]
     else:
         return [
             ("amf", "amf", "amf format"),
@@ -14468,6 +14485,8 @@ class CR4B_ScanScenarioStructureBSP(bpy.types.Operator):
             halo_title = "Halo4"
         elif (halo_title == "Halo 5"):
             halo_title = "Halo5"
+        elif (halo_title == "Halo Infinite"):
+            halo_title = "HaloInfinite"
         
         file_format = context.scene.file_format_dropdown
         
@@ -14495,6 +14514,26 @@ class CR4B_ScanScenarioStructureBSP(bpy.types.Operator):
                 modified_file_name = modify_filename(file_name_without_extension, file_path) # Call the modify function
                 item.name = modified_file_name # Use the modified file name
                 item.path = file_path
+        
+        if (file_format == "fbx" and halo_title == "HaloInfinite"):
+            with open(tags_report_path, 'r') as f:
+                lines = f.readlines()
+            #loop through final version of the tags_report.txt file created to generate list of models and their paths
+            #for loop here that iterates through each line of the tags_report.txt file
+            for line in lines:
+                # Extract map directory
+                if line.startswith('['):
+                    map = line.split('] ')[1].strip()
+                else:
+                    tag = line
+                
+                    #If current line is a tag line then create an entry in the list
+                    item = context.scene.cr4b_file_list.add()
+                    file_name_without_extension = os.path.splitext(os.path.basename(tag))[0]
+                    modified_file_name = modify_filename(file_name_without_extension, tag) # Call the modify function
+                    item.map = map
+                    item.name = modified_file_name # Use the modified file name
+                    item.path = tag
         
         #if format is anything else use Reclaimer to build list
         else:
@@ -14698,6 +14737,112 @@ def Reclaimer_Report(map_path, export_dir, tag_type, halo_ver):
 #export model using Reclaimer
 def Reclaimer_Export(map_path, tag_file, export_dir, tag_type):
     #talk to Reclaimer and send an export command to it along with the other arguments
+
+    # create the command string
+    
+    #remove any bad characters from the beginning and end of the strings
+    map_path = map_path.strip()
+    tag_file = tag_file.strip()
+    export_dir = export_dir.strip()
+    tag_type = tag_type.strip()
+    
+    
+    export_dir = remove_ending_backslash(export_dir)
+    export_format = bpy.context.scene.file_format_dropdown
+    reclaimer_path = bpy.context.preferences.addons[__name__].preferences.reclaimer_path
+    img_format = bpy.context.scene.image_format_dropdown
+    settings_dir = reclaimer_path + "Settings\\"
+    
+    if(export_format =="dae"):
+        export_format = "collada"
+    
+    cmd = f'reclaimer export "{map_path}" "{tag_file}" "{export_dir}" {export_format} {img_format}'
+    
+    #EDIT THE SETTINGS FILE TO MAKE SURE PROMPT DATA FOLDER IS DISABLRD
+    #EDIT THE FIELD IN SETTINGS TO CHANGE THE DATA FOLDER
+    
+    #new_data_folder_path = export_dir
+    #file_path = settings_dir + "settings.json"
+    #update_json_file(file_path, new_data_folder_path)
+    
+    print("Trying to update settings file and setting Data Folder to: " + export_dir)
+    
+    # if tag_type == "render_model":
+        # cmd = f'reclaimer export "{map_path}" "{tag_file}" "{export_dir}" {export_format}' 
+    # elif tag_type == "scenario_structure_bsp":
+        # cmd = f'reclaimer export "{map_path}" "{tag_file}" "{export_dir}" {export_format}' 
+    # elif tag_type == "gbxmodel":
+        # cmd = f'reclaimer export "{map_path}" "{tag_file}" "{export_dir}" {export_format}'
+    # else:
+        # print("unsupported tag type for Reclaimer Export")
+
+    print("Trying to run CMD: " + cmd)
+
+    
+
+    try:
+        # Change to the directory of the tool
+        os.chdir(os.path.dirname(reclaimer_path))
+    
+        final_path = ""
+    
+        # Run the command and capture the output
+        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
+
+        # Print the output
+        print(result.stdout)
+
+    except Exception as e:
+        print(f'HIRT did not like the command it was sent: {str(e)}')
+        
+        pass 
+    pass
+
+#build model report using HIRT
+def HIRT_Report(export_dir, tag_type, halo_ver):
+    #talk to HIRT and send a report command to it along with the other arguments
+
+    # create the command string
+    #export_dir = export_dir + "Reports\\"
+    
+    export_dir = remove_ending_backslash(export_dir)
+    halo_inf_deploy = bpy.context.preferences.addons[__name__].preferences.haloinfinite_map_path
+    halo_inf_deploy = remove_ending_backslash(halo_inf_deploy)
+    
+    if tag_type == "render_model":
+        export_dir = export_dir + "\\Reports\\HaloInfinite_model_report.txt"
+        cmd = f'HaloInfiniteResearchTools tags list -d "{halo_inf_deploy}" -t "mode" -o "{export_dir}"' 
+    elif tag_type == "scenario_structure_bsp":
+        export_dir = export_dir + "\\Reports\\HaloInfinite_level_report.txt"
+        cmd = f'HaloInfiniteResearchTools tags list -d "{halo_inf_deploy}" -t "sbsp" -o "{export_dir}"' 
+    else:
+        print("unsupported tag type for HIRT Report")
+
+    print("Trying to run CMD: " + cmd)
+
+    hirt_path = bpy.context.preferences.addons[__name__].preferences.hirt_path
+
+    try:
+        # Change to the directory of the tool
+        os.chdir(os.path.dirname(hirt_path))
+    
+        final_path = ""
+    
+        # Run the command and capture the output
+        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
+
+        # Print the output
+        print(result.stdout)
+
+    except Exception as e:
+        print(f'HIRT did not like the command it was sent: {str(e)}')
+        
+        pass 
+    pass
+
+#export model using HIRT
+def HIRT_Export(map_path, tag_file, export_dir, tag_type):
+    #talk to HIRT and send an export command to it along with the other arguments
 
     # create the command string
     
@@ -15548,6 +15693,47 @@ class CR4B_CreateModelReport(bpy.types.Operator):
                 Reclaimer_Report(map, export_dir, "render_model", halo_ver)
 
                 map_index += 1
+                
+        #Halo Infinite        
+        if (bpy.context.preferences.addons[__name__].preferences.haloinfinite_map_path != ""):
+            #create level/model report for HCE
+            halo_ver = "HaloInfinite"
+            format = ".module"
+            Map_Root = bpy.context.preferences.addons[__name__].preferences.haloinfinite_map_path
+            
+            map_index = 0 
+            
+            #LEVELS
+            #clear all data from the tags_report.txt file within the Export Directory
+            tags_report_path = os.path.join(export_dir, halo_ver + '_level_report.txt')
+
+            report_dir = os.path.dirname(tags_report_path)
+            if not os.path.exists(report_dir):
+                os.makedirs(report_dir)
+            
+            # Clear existing content in tags_report.txt
+            with open(tags_report_path, 'w') as f:
+                f.write("")
+                    
+            #call function called HIRT_Report() that takes map, export_dir, and "scenario_structure_bsp"
+            HIRT_Report(export_dir, "scenario_structure_bsp", halo_ver)
+            
+            
+            #MODELS
+            #clear all data from the tags_report.txt file within the Export Directory
+            tags_report_path = os.path.join(export_dir, halo_ver + '_model_report.txt')
+
+            report_dir = os.path.dirname(tags_report_path)
+            if not os.path.exists(report_dir):
+                os.makedirs(report_dir)
+            
+            # Clear existing content in tags_report.txt
+            with open(tags_report_path, 'w') as f:
+                f.write("")
+                
+            #call function called HIRT_Report() that takes map, export_dir, and "scenario_structure_bsp"
+            HIRT_Report(export_dir, "render_model", halo_ver)
+
     
 #update Settings.JSON file for data folder    
 def update_json_file(file_path, new_data_folder_path):
@@ -15611,6 +15797,8 @@ class CR4BImportPanel(bpy.types.Panel):
                 layout.row().label(text="Needs: Halo Asset Blender Toolset", icon='INFO')
             elif (context.scene.file_format_dropdown == "amf"):
                 layout.row().label(text="Needs: CLI Reclaimer + Amf Importer", icon='INFO')
+            elif (context.scene.file_format_dropdown == "fbx" and context.scene.halo_version_dropdown == "Halo Infinite"):
+                layout.row().label(text="Needs: CLI HIRT", icon='INFO')
             else:
                 layout.row().label(text="Needs: CLI Reclaimer", icon='INFO')
             
@@ -15857,8 +16045,11 @@ def register():
     bpy.types.Scene.py360convert_path = bpy.props.StringProperty(name="py360Convert Directory", default="", update=update_py360convert_path)
     bpy.types.Scene.cr4b_progress = bpy.props.FloatProperty(min=0.0, max=100.0, default=0.0, subtype='PERCENTAGE', description="CR4B Tool Progress")
     
-    #Reclaimer path preferences
+    #Reclaimer CLI path preferences
     bpy.types.Scene.reclaimer_path = bpy.props.StringProperty(name="Reclaimer CLI Directory", default="")
+    
+    #HIRT CLI path
+    bpy.types.Scene.hirt_path = bpy.props.StringProperty(name="HIRT CLI Directory", default="")
     
     #map files path preferences
     bpy.types.Scene.haloce_map_path = bpy.props.StringProperty(name="Halo CE .map Directory", default="", update=update_haloce_map_path)
@@ -15867,8 +16058,9 @@ def register():
     bpy.types.Scene.halo3odst_map_path = bpy.props.StringProperty(name="Halo 3 ODST .map Directory", default="", update=update_halo3odst_map_path)
     bpy.types.Scene.haloreach_map_path = bpy.props.StringProperty(name="Halo Reach .map Directory", default="", update=update_haloreach_map_path)
     bpy.types.Scene.halo4_map_path = bpy.props.StringProperty(name="Halo 4 .map Directory", default="", update=update_halo4_map_path)
-    bpy.types.Scene.halo5_map_path = bpy.props.StringProperty(name="Halo 5 .map Directory", default="", update=update_halo5_map_path)
-    
+    bpy.types.Scene.halo5_map_path = bpy.props.StringProperty(name="Halo 5 deploy Directory", default="", update=update_halo5_map_path)
+    bpy.types.Scene.haloinfinite_map_path = bpy.props.StringProperty(name="Halo Infinite deploy Directory", default="")
+
     bpy.utils.register_class(CR4B_FileItem)
     bpy.types.Scene.cr4b_file_list = bpy.props.CollectionProperty(type=CR4B_FileItem)
     
@@ -15958,7 +16150,8 @@ def register():
             ("Halo 3: ODST", "Halo 3: ODST", ""),
             ("Halo Reach", "Halo Reach", ""),
             ("Halo 4", "Halo 4", ""),
-            ("Halo 5", "Halo 5", "")
+            ("Halo 5", "Halo 5", ""),
+            ("Halo Infinite", "Halo Infinite", "")
         ],
         update=update_dropdown,
         description="Select Halo game to search"
@@ -15980,7 +16173,7 @@ def register():
     bpy.types.Scene.cr4b_overwrite_materials = bpy.props.BoolProperty(
         name="Overwrite All Materials",
         description="Whether to overwrite materials CR4B Tool did before, which will take longer time",
-        default=True
+        default=False
     )
 
 def unregister():
@@ -15996,6 +16189,7 @@ def unregister():
 
     #reclaimer path
     del bpy.types.Scene.reclaimer_path 
+    del bpy.types.Scene.hirt_path
 
     #map directory
     del bpy.types.Scene.haloce_map_path 
@@ -16005,6 +16199,7 @@ def unregister():
     del bpy.types.Scene.haloreach_map_path
     del bpy.types.Scene.halo4_map_path
     del bpy.types.Scene.halo5_map_path
+    del bpy.types.Scene.haloinfinite_map_path
 
     bpy.utils.unregister_class(CR4B_FileItem)
     del bpy.types.Scene.cr4b_file_list
