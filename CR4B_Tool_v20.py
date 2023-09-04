@@ -10590,7 +10590,7 @@ def Start_CR4B_Tool():
                     # Add5Group = instantiate_group(pymat_copy.node_tree.nodes, "CR4BUtility: Add 5 Shader")    
 
                 #foliage shader
-                if(ShaderItem == 2):
+                if(Shader_Type == 2):
                     #log_to_file("  making add shader")
                     pymat_copy.node_tree.nodes.new('ShaderNodeAddShader')
                     AddShader = pymat_copy.node_tree.nodes.get("Add Shader")
@@ -14863,7 +14863,7 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type):
         export_format = "collada"
     
     cmd = f'reclaimer export "{map_path}" "{tag_file}" "{export_dir}" {export_format} {img_format}'
-    
+    #.\HaloInfiniteResearchTools.exe model export -d "C:\Program Files (x86)\Steam\steamapps\common\Halo Infinite\deploy" -mn "-587312713.mode" -o "D:\borrar.fbx"
     #EDIT THE SETTINGS FILE TO MAKE SURE PROMPT DATA FOLDER IS DISABLRD
     #EDIT THE FIELD IN SETTINGS TO CHANGE THE DATA FOLDER
     
