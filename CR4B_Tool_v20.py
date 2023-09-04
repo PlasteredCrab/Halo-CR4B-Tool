@@ -118,7 +118,8 @@ def Start_CR4B_Tool():
     TEXTURE_NODE_W_GAMMA_HORIZONTAL_SPACING = 50       # horizontal placement of texture node when it has gamma
     TEXTURE_GAMMA_HORIZONTAL_PLACEMENT = 100           # horizontal placement of the gamma nodes
 
-
+    # Default width of Node Groups
+    NODE_GROUP_WIDTH = 300
 
     #DEBUG VALUES
     debug_textures_values_found = 1              # show debug info for found/unfound texture types and values
@@ -295,6 +296,7 @@ def Start_CR4B_Tool():
         subsurface_tint = color_white_rgb #BGR 3 decimal
         subsurface_propagation_bias = 0.00
         subsurface_normal_detail = 0.00
+        transparence_coefficient = 0.00
         transparence_normal_bias = 0.00
         transparence_tint = color_white_rgb #BGR 3 decimal
         transparence_normal_detail = 0.00
@@ -2096,6 +2098,28 @@ def Start_CR4B_Tool():
     
     #Make my life so much easier by adding support for values and colors way faster
     def Add_Value_Support(Offset, value_name, value_type, shaderfile, ShaderItem):
+        FunctionItem = function()
+        FunctionItem.tsgt_offset = 0x0
+        FunctionItem.option = 0
+        FunctionItem.range_toggle = False
+        FunctionItem.function_name = ""
+        FunctionItem.range_name = ""
+        FunctionItem.time_period = 0.00
+        FunctionItem.main_min_value = 0.00
+        FunctionItem.main_max_value = 0.00
+        FunctionItem.left_function_option = 0
+        FunctionItem.left_frequency_value = 0.00
+        FunctionItem.left_phase_value = 0.00
+        FunctionItem.left_min_value = 0.00
+        FunctionItem.left_max_value = 0.00
+        FunctionItem.left_exponent_value = 0.00
+        FunctionItem.right_function_option = 0
+        FunctionItem.right_frequency_value = 0.00
+        FunctionItem.right_phase_value = 0.00
+        FunctionItem.right_min_value = 0.00
+        FunctionItem.right_max_value = 0.00
+        FunctionItem.right_exponent_value = 0.00
+        
         if(value_type == "float"):
             if (Offset != 0): #float
                 #save current data
@@ -4312,11 +4336,20 @@ def Start_CR4B_Tool():
 
 
 
-    #MERGE DUPLICATE MATERIAL NAMES
+    def clean_material_names(materials):
+        for material in materials:
+            if re.match('.*.\d{3}$', material.name):
+                base_name = material.name[:-4]
+                if base_name not in bpy.data.materials:
+                    material.name = base_name
+
     def merge_materials_on_objects(objects, materials):
         # Sort materials by name
         materials_sorted = sorted(materials, key=lambda m: m.name)
 
+        # Clean material names
+        clean_material_names(materials)
+        
         # Find materials with the same name and merge them
         for obj in objects:
             material_slots = [slot for slot in obj.material_slots if slot.material is not None and not slot.is_property_readonly('material')]
@@ -4326,12 +4359,40 @@ def Start_CR4B_Tool():
                 material_name_escaped = re.escape(material_name)
                 material_cond = re.compile('^' + material_name_escaped + '$|^' + material_name_escaped + '.\d{3}$')
                 material_to_change = next(iter([m for m in materials_sorted if re.match(material_cond, m.name)]), None)
+                
                 if material_to_change and material != material_to_change:
                     slot.material = material_to_change
-                    
 
+    # Execute the functions
     merge_materials_on_objects(bpy.data.objects, bpy.data.materials)
 
+
+    def get_materials_without_node_group(node_group_names):
+        filtered_materials = []
+        
+        for mat in bpy.data.materials:
+            if mat.use_nodes:
+                nodes = mat.node_tree.nodes
+                all_node_types = []
+                node_group_names_found = []
+                
+                for node in nodes:
+                    all_node_types.append(node.type)
+                    
+                    if hasattr(node, 'node_tree') and node.node_tree:
+                        node_group_names_found.append(node.node_tree.name)
+                
+                #print(f"All node types in {mat.name}: {all_node_types}")
+                #print(f"Node Groups found in {mat.name}: {node_group_names_found}")
+                
+                # Filter out materials that contain 'ADD_SHADER' node type or any of the specified node group names
+                if all(node_tree_name not in node_group_names for node_tree_name in node_group_names_found) and 'ADD_SHADER' not in all_node_types:
+                    #print(f"Adding {mat.name} to filtered_materials.")
+                    filtered_materials.append(mat)
+                    
+        #print("Filtered Materials: " + str([mat.name for mat in filtered_materials]))
+        return filtered_materials
+    
                                         #################
                                         #START OF PROGRAM 
                                         #################    
@@ -4344,12 +4405,29 @@ def Start_CR4B_Tool():
     pymat = bpy.data.materials
     #log_to_file("---MATERIALS LIST---" + str(bpy.data.materials))
     
+    # node groups in materials to ignore
+    node_group_names = ["AddShader", "CR4BUtility: Add 3 Shader", "CR4BUtility: Add 4 Shader", "CR4BUtility: Add 5 Shader"]
+    
+    # If the checkbox is checked, filter the materials to ignore ones with AddShaders or Add3Shaders (to cut down time)
+    if not bpy.context.scene.cr4b_overwrite_materials:
+        pymat = get_materials_without_node_group(node_group_names)
+    else:
+        pymat = bpy.data.materials
+        
+    # Get the total number of materials for the progress bar
+    total_mats = len(pymat)    
+    
     for idx, i in enumerate(pymat):
         mat_name = ""
         
-        
+        # If the checkbox is checked, filter the materials to ignore ones with AddShaders or Add3Shaders (to cut down time)
+        if not bpy.context.scene.cr4b_overwrite_materials:
+            pymat = get_materials_without_node_group(node_group_names)
+        else:
+            pymat = bpy.data.materials
+            
         #get material count for the progress bar and keep the count current
-        total_mats = len(bpy.data.materials)
+        total_mats = len(pymat)
         
         #reset has_prefix and prefix
         has_prefix = False
@@ -4492,12 +4570,19 @@ def Start_CR4B_Tool():
                     #create a new material with the same name but add a suffix to it and append it to pymat
                     #copy all this new data to that newly created material
                     
-                    # If multiple files found, add a suffix to the material name
-                    suffix = '.' + str(pymat.find(i.name) + 1).zfill(3)
-                    pymat_copy = i.copy()
-                    pymat_copy.name = i.name + suffix
-                    pymat_copy = pymat.new(name=pymat_copy.name) 
-                    log_to_file("Creating new Material in scene: " + pymat_copy.name)
+                    if not bpy.context.scene.cr4b_overwrite_materials:
+                        suffix = '.' + str(next((idx for idx, mat in enumerate(pymat) if mat.name == i.name), -1) + 1).zfill(3)
+                        pymat_copy = i.copy()
+                        pymat_copy.name = i.name + suffix
+                        pymat_copy = bpy.data.materials.new(name=pymat_copy.name)  # Create a new material in bpy.data.materials
+                        log_to_file("Creating new Material in scene: " + pymat_copy.name)
+                    else:
+                        # If multiple files found, add a suffix to the material name
+                        suffix = '.' + str(pymat.find(i.name) + 1).zfill(3)
+                        pymat_copy = i.copy()
+                        pymat_copy.name = i.name + suffix
+                        pymat_copy = pymat.new(name=pymat_copy.name) 
+                        log_to_file("Creating new Material in scene: " + pymat_copy.name)
                     #break
                     
                     #retargets i to be the newly created material
@@ -10513,6 +10598,8 @@ def Start_CR4B_Tool():
                     AddShader.location.x = last_node_x - ADD_SHADER_HORIZONTAL_SPACING
                     AddShader.location.y = last_node_y
                         
+                    #AddShader.width = NODE_GROUP_WIDTH    
+                        
                     last_node_x = AddShader.location.x
                     last_node_y = AddShader.location.y
 
@@ -10521,6 +10608,8 @@ def Start_CR4B_Tool():
                 elif(ShaderOutputCount == 3):
                     Add3Group.location.x = last_node_x - ADD_SHADER_HORIZONTAL_SPACING
                     Add3Group.location.y = last_node_y
+                        
+                    #Add3Group.width = NODE_GROUP_WIDTH    
                         
                     last_node_x = Add3Group.location.x
                     last_node_y = Add3Group.location.y 
@@ -10544,6 +10633,8 @@ def Start_CR4B_Tool():
                     EnvGroup.location.x = last_node_x
                     EnvGroup.location.y = last_node_y - ENVIRONMENT_GROUP_VERTICAL_SPACING
                         
+                    EnvGroup.width = NODE_GROUP_WIDTH    
+                        
                     last_node_x = EnvGroup.location.x
                     last_node_y = EnvGroup.location.y 
                 elif((Shader_Type == 0 or Shader_Type == 4) and ShaderItem.environment_mapping_option == 2): #H3RCategory: environment_mapping - dynamic
@@ -10554,6 +10645,8 @@ def Start_CR4B_Tool():
 
                     EnvGroup.location.x = last_node_x
                     EnvGroup.location.y = last_node_y - ENVIRONMENT_GROUP_VERTICAL_SPACING
+                        
+                    EnvGroup.width = NODE_GROUP_WIDTH    
                         
                     last_node_x = EnvGroup.location.x
                     last_node_y = EnvGroup.location.y 
@@ -10683,6 +10776,7 @@ def Start_CR4B_Tool():
                 if(illum_group_made == 1):
                     SelfIllumGroup.location.x = last_node_x
                     SelfIllumGroup.location.y = last_node_y - SELF_ILLUM_VERTICAL_SPACING
+                    SelfIllumGroup.width = NODE_GROUP_WIDTH    
                         
                     last_node_x = SelfIllumGroup.location.x
                     last_node_y = SelfIllumGroup.location.y         
@@ -10784,6 +10878,7 @@ def Start_CR4B_Tool():
                 if(mat_group_made == 1):
                     MatModelGroup.location.x = end_group_x - 300
                     MatModelGroup.location.y = end_group_y
+                    MatModelGroup.width = NODE_GROUP_WIDTH    
                         
                     mat_group_x = MatModelGroup.location.x
                     mat_group_y = MatModelGroup.location.y         
@@ -10928,6 +11023,7 @@ def Start_CR4B_Tool():
                 if(albedo_group_made == 1):
                     AlbedoGroup.location.x = last_node_x - 350
                     AlbedoGroup.location.y = last_node_y
+                    AlbedoGroup.width = NODE_GROUP_WIDTH    
                         
                     alb_group_x = AlbedoGroup.location.x
                     alb_group_y = AlbedoGroup.location.y    
@@ -10936,7 +11032,8 @@ def Start_CR4B_Tool():
                 if(albedo_vector_group_made == 1):
                     AlbedoVectorGroup.location.x = last_node_x - 350
                     AlbedoVectorGroup.location.y = last_node_y
-                        
+                    AlbedoVectorGroup.width = NODE_GROUP_WIDTH
+                      
                     alb_group_x = AlbedoVectorGroup.location.x
                     alb_group_y = AlbedoVectorGroup.location.y
 
@@ -10982,6 +11079,7 @@ def Start_CR4B_Tool():
                 if(bump_group_made == 1):
                     BumpGroup.location.x = alb_group_x
                     BumpGroup.location.y = alb_group_y - 400
+                    BumpGroup.width = NODE_GROUP_WIDTH    
                         
                     bump_group_x = BumpGroup.location.x
                     bump_group_y = BumpGroup.location.y        
@@ -11005,6 +11103,7 @@ def Start_CR4B_Tool():
                 if(env_reflect_group_made == 1):
                     EnvReflGroup.location.x = alb_group_x
                     EnvReflGroup.location.y = alb_group_y - 600
+                        
                         
                     bump_group_x = EnvReflGroup.location.x
                     bump_group_y = EnvReflGroup.location.y        
@@ -11040,6 +11139,7 @@ def Start_CR4B_Tool():
                     TerrainEnvGroup.location.x = end_group_x
                     TerrainEnvGroup.location.y = end_group_y - 300        
                     
+                    TerrainEnvGroup.width = NODE_GROUP_WIDTH
                     
              
                                     ############################
@@ -11056,6 +11156,7 @@ def Start_CR4B_Tool():
                     #location of node groups
                     TerrainGroup.location.x = end_group_x - 300
                     TerrainGroup.location.y = end_group_y  
+                    TerrainGroup.width = NODE_GROUP_WIDTH
 
                     last_node_x = TerrainGroup.location.x
                     last_node_y = TerrainGroup.location.y
@@ -14692,12 +14793,83 @@ def log_to_file(message, *args):
     except Exception as e:
         print(f"Error writing to log file: {e}")
 
+#Find and delete all unsused materials each time CR4B Tool runs
+def delete_unused_materials():
+    # Create a set to hold all materials that are actually used
+    used_materials = set()
+    
+    # Iterate through all objects in the scene
+    for obj in bpy.data.objects:
+        # Check if the object has material slots
+        if obj.type == 'MESH' and len(obj.material_slots) > 0:
+            # Iterate through material slots and add them to the set
+            for slot in obj.material_slots:
+                if slot.material:
+                    used_materials.add(slot.material.name)
+    
+    # Iterate through all materials and delete the ones that are unused
+    for material in bpy.data.materials:
+        if material.name not in used_materials:
+            # Unlink material
+            material.user_clear()
+            bpy.data.materials.remove(material)
+    
+    print("Unused materials deleted.")
 
+#clean up duplicate textures
+def swap_duplicate_image_textures():
+    # Iterate through all materials in the scene
+    for material in bpy.data.materials:
+        # Ensure the material uses nodes
+        if not material.use_nodes:
+            continue
+
+        # Access the material's node tree
+        nodes = material.node_tree.nodes
+        print("Access the material's node tree")
+        
+        # Iterate through each node in the node tree
+        for node in nodes:
+            # Check if the node is an image texture node
+            print("Check if the node is an image texture node")
+            if node.type == 'TEX_IMAGE':
+                print("1")
+                
+                # Make sure the node has an associated image
+                if node.image:
+                    
+                    # Use regular expression to check if the image name has a '.###'
+                    if re.search(r'\.\d{3}$', node.image.name):
+                        
+                        # Extract the original image name by removing the '.###'
+                        original_name = node.image.name.rsplit('.', 1)[0]
+                        
+                        # Find the original image in the bpy data
+                        original_image = bpy.data.images.get(original_name)
+
+                        # If the original image exists, swap it in
+                        if original_image:
+                            node.image = original_image
+                            
+    # Recursive clean-up of unused data-blocks
+    bpy.ops.outliner.orphans_purge(do_recursive=True)
 
 #logic for importing various file formats (.ass and .jms for example)
 class CR4B_ImportFile(bpy.types.Operator):
     bl_idname = "cr4b.import_file"
     bl_label = "Import File"
+
+    def create_and_move_to_collection(self, collection_name, imported_objects):
+        halo_ver = bpy.context.scene.halo_version_dropdown
+        
+        # Create a new collection with the given name
+        new_collection = bpy.data.collections.new("[" + halo_ver + "] " + collection_name)
+        bpy.context.scene.collection.children.link(new_collection)
+
+        # Move the imported objects to the new collection
+        for obj in imported_objects:
+            bpy.context.collection.objects.unlink(obj)
+            new_collection.objects.link(obj)
 
     def execute(self, context):
         selected_files = [item.path for item in context.scene.cr4b_file_list if item.select]
@@ -14797,6 +14969,10 @@ class CR4B_ImportFile(bpy.types.Operator):
 
         #add try block here maybe to catch Decorators and other bad formats
         
+        
+        # Get list of objects in the scene before import
+        objects_before_import = set(bpy.context.scene.objects)
+        
         #use Halo Blender Asset Development Toolkit to import the models
         if format_type == "ass/jms":
             log_to_file("Using General_101's ass/jms import code")
@@ -14805,6 +14981,24 @@ class CR4B_ImportFile(bpy.types.Operator):
                     try:
                         # Call the other add-on's import function
                         bpy.ops.import_scene.ass(filepath=file_path)
+                    
+                        # Update list of objects after import
+                        objects_after_import = set(bpy.context.scene.objects)
+                        
+                        # Calculate newly imported objects
+                        new_objects = objects_after_import - objects_before_import
+
+                        # Update objects_before_import for the next iteration
+                        objects_before_import = objects_after_import.copy()
+                        
+                        # Select all newly imported objects
+                        for obj in new_objects:
+                            obj.select_set(True)
+
+                        # Create a new collection and move the object there
+                        collection_name = os.path.splitext(os.path.basename(file_path))[0]
+                        self.create_and_move_to_collection(collection_name, new_objects)
+                    
                     except Exception as e:
                         log_to_file(f"Blender Toolset Could Not Import the file!")    
             elif (import_type == "jms"):
@@ -14812,6 +15006,24 @@ class CR4B_ImportFile(bpy.types.Operator):
                     try:    
                         # Call the other add-on's import function
                         bpy.ops.import_scene.jms(filepath=file_path)
+                    
+                        # Update list of objects after import
+                        objects_after_import = set(bpy.context.scene.objects)
+                        
+                        # Calculate newly imported objects
+                        new_objects = objects_after_import - objects_before_import
+
+                        # Update objects_before_import for the next iteration
+                        objects_before_import = objects_after_import.copy()
+                        
+                        # Select all newly imported objects
+                        for obj in new_objects:
+                            obj.select_set(True)
+
+                        # Create a new collection and move the object there
+                        collection_name = os.path.splitext(os.path.basename(file_path))[0]
+                        self.create_and_move_to_collection(collection_name, new_objects)
+                    
                     except Exception as e:
                         log_to_file(f"Blender Toolset Could Not Import the file!") 
         
@@ -14824,6 +15036,24 @@ class CR4B_ImportFile(bpy.types.Operator):
                         print("trying to import: " + file_path)
                         
                         bpy.ops.import_scene.amf(filepath=file_path, bitmap_ext=texture_format)
+                    
+                        # Update list of objects after import
+                        objects_after_import = set(bpy.context.scene.objects)
+                        
+                        # Calculate newly imported objects
+                        new_objects = objects_after_import - objects_before_import
+
+                        # Update objects_before_import for the next iteration
+                        objects_before_import = objects_after_import.copy()
+                        
+                        # Select all newly imported objects
+                        for obj in new_objects:
+                            obj.select_set(True)
+
+                        # Create a new collection and move the object there
+                        collection_name = os.path.splitext(os.path.basename(file_path))[0]
+                        self.create_and_move_to_collection(collection_name, new_objects)
+                    
                     except Exception as e:
                         log_to_file(f"AMF importer Could Not Import the file!") 
         elif format_type == "obj":
@@ -14834,6 +15064,24 @@ class CR4B_ImportFile(bpy.types.Operator):
                         print("trying to import: " + file_path)
                         
                         bpy.ops.wm.obj_import(filepath=file_path)
+                    
+                        # Update list of objects after import
+                        objects_after_import = set(bpy.context.scene.objects)
+                        
+                        # Calculate newly imported objects
+                        new_objects = objects_after_import - objects_before_import
+
+                        # Update objects_before_import for the next iteration
+                        objects_before_import = objects_after_import.copy()
+                        
+                        # Select all newly imported objects
+                        for obj in new_objects:
+                            obj.select_set(True)
+
+                        # Create a new collection and move the object there
+                        collection_name = os.path.splitext(os.path.basename(file_path))[0]
+                        self.create_and_move_to_collection(collection_name, new_objects)
+                    
                     except Exception as e:
                         log_to_file(f"Blender OBJ Could Not Import the file!") 
         elif format_type == "dae":
@@ -14844,13 +15092,34 @@ class CR4B_ImportFile(bpy.types.Operator):
                         print("trying to import: " + file_path)
                         
                         bpy.ops.wm.collada_import(filepath=file_path)
+                    
+                        # Update list of objects after import
+                        objects_after_import = set(bpy.context.scene.objects)
+                        
+                        # Calculate newly imported objects
+                        new_objects = objects_after_import - objects_before_import
+
+                        # Update objects_before_import for the next iteration
+                        objects_before_import = objects_after_import.copy()
+                        
+                        # Select all newly imported objects
+                        for obj in new_objects:
+                            obj.select_set(True)
+
+                        # Create a new collection and move the object there
+                        collection_name = os.path.splitext(os.path.basename(file_path))[0]
+                        self.create_and_move_to_collection(collection_name, new_objects)
+                    
                     except Exception as e:
                         log_to_file(f"Blender Collada Could Not Import the file!")
         #use Blender's built in import code
         else: 
             log_to_file("Using Blender's import code")
             
-        # You can now pass selected_files to another function
+            
+        # Deselect all items in the UI list after importing
+        for item in context.scene.cr4b_file_list:
+            item.select = False
         
         
         return {'FINISHED'}
@@ -15402,7 +15671,8 @@ class CR4BAddonPanel(bpy.types.Panel):
         layout.row().prop(context.scene, "image_format_dropdown")
         layout.row().label(text="Select Colorspace to use")
         layout.row().prop(context.scene, "colorspace_dropdown")
-        layout.prop(context.scene, "cr4b_save_to_file")
+        #layout.prop(context.scene, "cr4b_save_to_file")
+        layout.prop(context.scene, "cr4b_overwrite_materials")
         layout.row().label(text="Start CR4B Tool")
         layout.row().operator("script.start_cr4b_tool")
         
@@ -15506,10 +15776,15 @@ class StartCR4BTool(bpy.types.Operator):
                 data_to.node_groups = [node_group_name]
 
         
-        if context.scene.cr4b_save_to_file:
-            file_path = bpy.context.preferences.addons[__name__].preferences.export_path + "[CR4B_console_log].txt"
-            with open(file_path, 'w') as log_file:
-                log_file.write("")  # Writing an empty string to wipe the file
+        #if context.scene.cr4b_save_to_file:
+        
+        #create new log file
+        file_path = bpy.context.preferences.addons[__name__].preferences.export_path + "[CR4B_console_log].txt"
+        with open(file_path, 'w') as log_file:
+            log_file.write("")  # Writing an empty string to wipe the file
+        
+        #delete unused materials before each pass
+        delete_unused_materials()
         
         context.scene.cr4b_tool_running = True
         self.task = Start_CR4B_Tool()  # Create a generator object
@@ -15522,6 +15797,9 @@ class StartCR4BTool(bpy.types.Operator):
 
     def finish(self, context):
         context.scene.cr4b_tool_running = False  # Set the state to not running
+        
+        # Run the function to swap out duplicate image textures
+        swap_duplicate_image_textures()
         wm = context.window_manager
         wm.event_timer_remove(self._timer)
 
@@ -15668,7 +15946,7 @@ def register():
 
     bpy.types.Scene.cr4b_save_to_file = bpy.props.BoolProperty(
         name="Save Console Logging to file",
-        default=False
+        default=True
     )
     
     bpy.types.Scene.halo_version_dropdown = bpy.props.EnumProperty(
@@ -15697,6 +15975,13 @@ def register():
     bpy.utils.register_class(CR4BImportPanel)
     bpy.utils.register_class(CR4BAddonPanel)
     bpy.utils.register_class(StartCR4BTool)
+
+    #overwrite materials checkbox
+    bpy.types.Scene.cr4b_overwrite_materials = bpy.props.BoolProperty(
+        name="Overwrite All Materials",
+        description="Whether to overwrite materials CR4B Tool did before, which will take longer time",
+        default=True
+    )
 
 def unregister():
      
@@ -15773,6 +16058,8 @@ def unregister():
     bpy.utils.unregister_class(StartCR4BTool)
     bpy.utils.unregister_class(CR4BAddonPanel)
     bpy.utils.unregister_class(CR4BImportPanel)
+
+    del bpy.types.Scene.cr4b_overwrite_materials
 
 if __name__ == "__main__":
     register()
