@@ -4382,16 +4382,45 @@ def Start_CR4B_Tool():
                     if hasattr(node, 'node_tree') and node.node_tree:
                         node_group_names_found.append(node.node_tree.name)
                 
-                #print(f"All node types in {mat.name}: {all_node_types}")
-                #print(f"Node Groups found in {mat.name}: {node_group_names_found}")
-                
                 # Filter out materials that contain 'ADD_SHADER' node type or any of the specified node group names
                 if all(node_tree_name not in node_group_names for node_tree_name in node_group_names_found) and 'ADD_SHADER' not in all_node_types:
-                    #print(f"Adding {mat.name} to filtered_materials.")
                     filtered_materials.append(mat)
-                    
-        #print("Filtered Materials: " + str([mat.name for mat in filtered_materials]))
+            else:
+                # Handle materials without nodes here. For example, you could directly append them to filtered_materials
+                filtered_materials.append(mat)
+        
         return filtered_materials
+    
+    
+    #Modify materials in Blender that contain specific keywords in their names
+    def modify_materials_on_visible_objects(name_keywords):
+        for obj in bpy.data.objects:
+            if obj.type == 'MESH' and not obj.hide_viewport:
+                for slot in obj.material_slots:
+                    material = slot.material
+                    for keyword in name_keywords:
+                        if keyword in material.name:
+                            # Enable 'Use Nodes':
+                            material.use_nodes = True
+                            nodes = material.node_tree.nodes
+                            
+                            # Remove Principled BSDF, if it exists
+                            principled_bsdf = nodes.get('Principled BSDF')
+                            if principled_bsdf:
+                                nodes.remove(principled_bsdf)
+                            
+                            # Create and connect a Transparent BSDF node
+                            transparent_bsdf = nodes.new(type='ShaderNodeBsdfTransparent')
+                            material_output = nodes.get('Material Output')
+                            material.node_tree.links.new(transparent_bsdf.outputs['BSDF'], material_output.inputs['Surface'])
+                            
+                            # Set Blend mode to "Alpha Clip"
+                            material.blend_method = 'CLIP'
+                            
+                            
+    # automatically hide any object with these material names
+    hide_keywords = ["+seamsealer", "+sky", "+portal"]
+    modify_materials_on_visible_objects(hide_keywords)
     
                                         #################
                                         #START OF PROGRAM 
@@ -4416,6 +4445,8 @@ def Start_CR4B_Tool():
         
     # Get the total number of materials for the progress bar
     total_mats = len(pymat)    
+    print("Total number of materials to process: " + str(total_mats))
+    
     
     for idx, i in enumerate(pymat):
         mat_name = ""
@@ -4586,7 +4617,7 @@ def Start_CR4B_Tool():
                     #break
                     
                     total_mats += 1 
-                    
+                    print("Total number of materials to process: " + str(total_mats))
                     #retargets i to be the newly created material
                     #i = pymat_copy #this might need to go at the end of the script
                     
@@ -14191,233 +14222,374 @@ class InstallPy360ConvertOperator(bpy.types.Operator):
 
 #for modifying the names of filenames before they are displayed in the List view
 def modify_filename(file_name, Tag_Root):
+    halo_ver = bpy.context.scene.halo_version_dropdown
     # Check the file_name and modify it as needed
     
     #SCENARIO_STRUCTURE_BSP
     
-    #print(Tag_Root)
-    
-    #Halo 3 Multiplayer
-    if (file_name == "armory"):
-        file_name = file_name + " - (Rat's Nest)"
-    elif (file_name == "bunkerworld"):
-        file_name = file_name + " - (Standoff)"
-    elif (file_name == "chillout"):
-        file_name = file_name + " - (Cold Storage)"
-    elif (file_name == "chill"):
-        file_name = file_name + " - (Narrows)"
-    elif (file_name == "construct"):
-        file_name = file_name + " - (Construct)"
-    elif (file_name == "cyberdyne"):
-        file_name = file_name + " - (The Pit)"
-    elif (file_name == "deadlock"):
-        file_name = file_name + " - (Highground)"    
-    elif (file_name == "descent"):
-        file_name = file_name + " - (Assembly)"
-    elif (file_name == "docks"):
-        file_name = file_name + " - (Longshore)"
-    elif (file_name == "fortress"):
-        file_name = file_name + " - (Citadel)"
-    elif (file_name == "ghosttown"):
-        file_name = file_name + " - (Ghost Town)"
-    elif (file_name == "guardian"):
-        file_name = file_name + " - (Guardian)"
-    elif (file_name == "isolation"):
-        file_name = file_name + " - (Isolation)"
-    elif (file_name == "lockout"):
-        file_name = file_name + " - (Blackout)"    
-    elif (file_name == "midship"):
-        file_name = file_name + " - (Heretic)"
-    elif (file_name == "riverworld"):
-        file_name = file_name + " - (Valhalla)"
-    elif (file_name == "s3d_edge"):
-        file_name = file_name + " - (Edge)"
-    elif (file_name == "s3d_turf"):
-        file_name = file_name + " - (Icebox)"
-    elif (file_name == "s3d_waterfall"):
-        file_name = file_name + " - (Waterfall)"
-    elif (file_name == "salvation"):
-        file_name = file_name + " - (Epitaph)"
-    elif (file_name == "sandbox"):
-        file_name = file_name + " - (Sandbox)"    
-    elif (file_name == "shrine"):
-        file_name = file_name + " - (Sandtrap)"
-    elif (file_name == "sidewinder"):
-        file_name = file_name + " - (Avalanche)"
-    elif (file_name == "snowbound"):
-        file_name = file_name + " - (Snowbound)"
-    elif (file_name == "spacecamp"):
-        file_name = file_name + " - (Orbital)"
-    elif (file_name == "warehouse"):
-        file_name = file_name + " - (Foundry)"
-    elif (file_name == "zanzibar"):
-        file_name = file_name + " - (Last Resort)"
 
+    if halo_ver == "Halo CE":
     
-    #Halo 3 Campaign
-    # elif ("010_bsp" in file_name and "010_jungle" in Tag_Root):
-        # file_name = file_name + " (The Arrival)"
-    elif ("010_bsp" in file_name):
-        file_name = file_name + " - (Sierra 117)"
-    elif ("020_bsp" in file_name):
-        file_name = file_name + " - (Crow's Nest)"
-    elif ("030_bsp" in file_name):
-        file_name = file_name + " - (Tsavo Highway)"
-    elif ("040_bsp" in file_name):
-        file_name = file_name + " - (The Storm)"
-    elif ("050_bsp" in file_name):
-        file_name = file_name + " - (Floodgate)"
-    elif ("070_bsp" in file_name):
-        file_name = file_name + " - (The Ark)"    
-    elif ("100_citadel" in Tag_Root and "bsp_" in file_name):
-        file_name = file_name + " - (The Covenant)"
-    elif ("110_bsp" in file_name):
-        file_name = file_name + " - (Cortana)"
-    elif ("120_bsp" in file_name):
-        file_name = file_name + " - (Halo)"
-    elif ("130_bsp" in file_name):
-        file_name = file_name + " - (Epilogue)"
+    #Halo CE Campaign Levels
+        if (file_name == "a10_space" or file_name == "a10a" or file_name == "a10b" or file_name == "a10c" or file_name == "a10d" or file_name == "a10e" or file_name == "a10f" or file_name == "a10g" or file_name == "a10_space"):
+            file_name = file_name + " - (Pillar of Autumn)"
+        elif (file_name == "a30_a" or file_name == "a30_b"):
+            file_name = file_name + " - (Halo)"
+        elif (file_name == "a50_control" or file_name == "a50_exterior" or file_name == "a50_hangar" or file_name == "a50_muster"):
+            file_name = file_name + " - (The Truth and Reconciliation)"
+        elif (file_name == "b30a" or file_name == "b30b"):
+            file_name = file_name + " - (The Silent Cartographer)"
+        elif (file_name == "b40_a" or file_name == "b40_a1" or file_name == "b40_a2" or file_name == "b40_a3" or file_name == "b40_b" or file_name == "b40_b1" or file_name == "b40_b2" or file_name == "b40_b3" or file_name == "b40_b4" or file_name == "b40_b5" or file_name == "b40_c" or file_name == "b40_c1" or file_name == "b40_c2"):
+            file_name = file_name + " - (Assault on the Control Room)"
+        elif (file_name == "c10_exteriora" or file_name == "c10_exteriorb" or file_name == "c10_interiora" or file_name == "c10_interiorb" or file_name == "c10_interiorc" or file_name == "c10_interiord"):
+            file_name = file_name + " - (343 Guilty Spark)"
+        elif ("c20" in file_name):
+            file_name = file_name + " - (The Library)"
+        elif (file_name == "c40_a" or file_name == "c40_a1" or file_name == "c40_a2" or file_name == "c40_a3" or file_name == "c40_b" or file_name == "c40_b1" or file_name == "c40_b2" or file_name == "c40_b3" or file_name == "c40_b4" or file_name == "c40_b5" or file_name == "c40_c" or file_name == "c40_c1" or file_name == "c40_c2"):
+            file_name = file_name + " - (Two Betrayals)"
+        elif ("d20" in file_name):
+            file_name = file_name + " - (Keyes)"
+        elif ("d40" in file_name and "door" not in file_name):
+            file_name = file_name + " - (The Maw)"
+            
+    #Halo CE Multiplayer Levels
+        elif (file_name == "beavercreek"):
+            file_name = file_name + " - (Battle Creek)"
+        elif (file_name == "bloodgulch"):
+            file_name = file_name + " - (Blood Gulch)"
+        elif (file_name == "boardingaction"):
+            file_name = file_name + " - (Boarding Action)"
+        elif (file_name == "chillout"):
+            file_name = file_name + " - (Chill Out)"
+        elif (file_name == "putput"):
+            file_name = file_name + " - (Chiron TL-34)"
+        elif (file_name == "damnation"):
+            file_name = file_name + " - (Damnation)"
+        elif (file_name == "dangercanyon"):
+            file_name = file_name + " - (Danger Canyon)"
+        elif (file_name == "deathisland"):
+            file_name = file_name + " - (Death Island)"
+        elif (file_name == "carousel"):
+            file_name = file_name + " - (Derelict)"
+        elif (file_name == "gephyrophobia"):
+            file_name = file_name + " - (Gephyrophobia)"
+        elif (file_name == "hangemhigh"):
+            file_name = file_name + " - (Hang 'Em High)"
+        elif (file_name == "icefields"):
+            file_name = file_name + " - (Ice Fields)"
+        elif (file_name == "infinity"):
+            file_name = file_name + " - (Infinity)"
+        elif (file_name == "longest"):
+            file_name = file_name + " - (Longest)"
+        elif (file_name == "prisoner"):
+            file_name = file_name + " - (Prisoner)"
+        elif (file_name == "ratrace"):
+            file_name = file_name + " - (Rat Race)"
+        elif (file_name == "sidewinder"):
+            file_name = file_name + " - (Sidewinder)"
+        elif (file_name == "timberland"):
+            file_name = file_name + " - (Timberland)"
+        elif (file_name == "wizard"):
+            file_name = file_name + " - (Wizard)"
+
+        #Halo CE Campaign Skies
+        if("sky\\" in Tag_Root):
+            if ("\\space\\" in Tag_Root):
+                file_name = file_name + " - (Pillar of Autumn & Boarding Action Skybox)"
+            elif ("\\skydusk0\\" in Tag_Root):
+                file_name = file_name + " - (Halo Skybox)"
+            elif ("\\skynight0\\" in Tag_Root):
+                file_name = file_name + " - (The Truth and Reconciliation Skybox)"
+            elif ("\\clear afternoon\\" in Tag_Root):
+                file_name = file_name + " - (The Silent Cartographer, Danger Canyon & Death Island Skybox)"
+            # elif ("\\ \\" in Tag_Root):
+                # file_name = file_name + " - (Assault on the Control Room Skybox)"                 NO SKYBOX MODEL
+            # elif ("\\ \\" in Tag_Root):
+                # file_name = file_name + " - (343 Guilty Spark Skybox)"                            NO SKYBOX MODEL
+            # elif ("\\ \\" in Tag_Root):
+                # file_name = file_name + " - (The Library Skybox)"                                 NO SKYBOX MODEL
+            # elif ("\\ \\" in Tag_Root):
+                # file_name = file_name + " - (Two Betrayals Skybox)"                               NO SKYBOX MODEL
+            elif ("\\sky_start\\" in Tag_Root):
+                file_name = file_name + " - (Keyes Skybox)"
+            elif ("\\skyofdoom\\" in Tag_Root):
+                file_name = file_name + " - (The Maw Skybox)"
+
+        #Halo CE Multiplayer Skies
+            elif ("\\mp clear afternoon\\" in Tag_Root):
+                file_name = file_name + " - (Battle Creek, Blood Gluch, Hang 'Em High, Prisoner, & Wizard Skybox)"
+            # elif ("\\ \\" in Tag_Root):
+                # file_name = file_name + " - (Chill Out Skybox)"                                   NO SKYBOX MODEL
+            # elif ("\\ \\" in Tag_Root):
+                # file_name = file_name + " - (Chiron TL-34 Skybox)"                                NO SKYBOX MODEL
+            elif ("\\mp_dusk\\" in Tag_Root):
+                file_name = file_name + " - (Damnation Skybox)"
+            elif ("\\skydusk0\\" in Tag_Root):
+                file_name = file_name + " - (Death Island Skybox)"
+            elif ("\\sky_x10\\" in Tag_Root):
+                file_name = file_name + " - (Derelict Skybox)"
+            elif ("\\sky_gephyrophobia\\" in Tag_Root):
+                file_name = file_name + " - (Gephyrophobia Skybox)"
+            elif ("\\sky_icefields\\" in Tag_Root):
+                file_name = file_name + " - (Ice Fields Skybox)"
+            elif ("\\sky_infinity\\" in Tag_Root):
+                file_name = file_name + " - (Infinity Skybox)"
+            # elif ("\\skydusk0\\" in Tag_Root):
+                # file_name = file_name + " - (Rat Race Skybox)"                                    NO SKYBOX MODEL
+            elif ("\\sky_sidewinder\\" in Tag_Root):
+                file_name = file_name + " - (Sidewinder & Longest Skybox)"
+            elif ("\\sky_timberland\\" in Tag_Root):
+                file_name = file_name + " - (Timberland Skybox)"
+            elif ("\\sky_ui\\" in Tag_Root):
+                file_name = file_name + " - (Main menu Skybox)"
+                
+    if halo_ver == "Halo 2":
+        print("halo_ver = Halo 2")
+    #Halo 2 Campaign
+    
+    #Halo 2 Multiplayer (Classic)
+    
+    if halo_ver == "Halo 3":
+        #Halo 3 Multiplayer
+        if (file_name == "armory"):
+            file_name = file_name + " - (Rat's Nest)"
+        elif (file_name == "bunkerworld"):
+            file_name = file_name + " - (Standoff)"
+        elif (file_name == "chillout"):
+            file_name = file_name + " - (Cold Storage)"
+        elif (file_name == "chill"):
+            file_name = file_name + " - (Narrows)"
+        elif (file_name == "construct"):
+            file_name = file_name + " - (Construct)"
+        elif (file_name == "cyberdyne"):
+            file_name = file_name + " - (The Pit)"
+        elif (file_name == "deadlock"):
+            file_name = file_name + " - (Highground)"    
+        elif (file_name == "descent"):
+            file_name = file_name + " - (Assembly)"
+        elif (file_name == "docks"):
+            file_name = file_name + " - (Longshore)"
+        elif (file_name == "fortress"):
+            file_name = file_name + " - (Citadel)"
+        elif (file_name == "ghosttown"):
+            file_name = file_name + " - (Ghost Town)"
+        elif (file_name == "guardian"):
+            file_name = file_name + " - (Guardian)"
+        elif (file_name == "isolation"):
+            file_name = file_name + " - (Isolation)"
+        elif (file_name == "lockout"):
+            file_name = file_name + " - (Blackout)"    
+        elif (file_name == "midship"):
+            file_name = file_name + " - (Heretic)"
+        elif (file_name == "riverworld"):
+            file_name = file_name + " - (Valhalla)"
+        elif (file_name == "s3d_edge"):
+            file_name = file_name + " - (Edge)"
+        elif (file_name == "s3d_turf"):
+            file_name = file_name + " - (Icebox)"
+        elif (file_name == "s3d_waterfall"):
+            file_name = file_name + " - (Waterfall)"
+        elif (file_name == "salvation"):
+            file_name = file_name + " - (Epitaph)"
+        elif (file_name == "sandbox"):
+            file_name = file_name + " - (Sandbox)"    
+        elif (file_name == "shrine"):
+            file_name = file_name + " - (Sandtrap)"
+        elif (file_name == "sidewinder"):
+            file_name = file_name + " - (Avalanche)"
+        elif (file_name == "snowbound"):
+            file_name = file_name + " - (Snowbound)"
+        elif (file_name == "spacecamp"):
+            file_name = file_name + " - (Orbital)"
+        elif (file_name == "warehouse"):
+            file_name = file_name + " - (Foundry)"
+        elif (file_name == "zanzibar"):
+            file_name = file_name + " - (Last Resort)"
+
         
-    #Halo 3: ODST Campaign    
-    elif (file_name == "c100" or file_name == "c100b"):
-        file_name = file_name + " - (Prepare to Drop)"
-    elif (file_name == "c200" or file_name == "c300" or ("c200" in Tag_Root and file_name == "l200_020")):
-        file_name = file_name + " - (Costal Highway)"
-    elif ("l300" in Tag_Root and ("h100_" in file_name or "l300_" in file_name)):
-        file_name = file_name + " - (Costal Highway)" #again for some reason
-    elif ("sc100" in Tag_Root and ("h100_" in file_name)):
-        file_name = file_name + " - (Tayari Plaza)" 
-    elif ("sc110" in Tag_Root and ("h100_" in file_name or "sc110_" in file_name)):
-        file_name = file_name + " - (Uplift Reserve)" 
-    elif ("sc120" in Tag_Root and ("h100_" in file_name)):
-        file_name = file_name + " - (Kizingo Blvd)" 
-    elif ("sc130" in file_name):
-        file_name = file_name + " - (Oni Alpha Site)" 
-    elif ("sc140" in file_name):
-        file_name = file_name + " - (New Mombasa Police Dep. HQ)"
-    elif ("sc150" in Tag_Root and ("bsp_" in file_name or "h100_" in file_name)):
-        file_name = file_name + " - (Kikiwani Station)"
-    elif ("h100_" in file_name):
-        file_name = file_name + " - (Mombasa Streets)"    
-    elif ("l200_" in file_name):
-        file_name = file_name + " - (Data Hive)"
+        #Halo 3 Campaign
+        # elif ("010_bsp" in file_name and "010_jungle" in Tag_Root):
+            # file_name = file_name + " (The Arrival)"
+        elif ("010_bsp" in file_name):
+            file_name = file_name + " - (Sierra 117)"
+        elif ("020_bsp" in file_name):
+            file_name = file_name + " - (Crow's Nest)"
+        elif ("030_bsp" in file_name):
+            file_name = file_name + " - (Tsavo Highway)"
+        elif ("040_bsp" in file_name):
+            file_name = file_name + " - (The Storm)"
+        elif ("050_bsp" in file_name):
+            file_name = file_name + " - (Floodgate)"
+        elif ("070_bsp" in file_name):
+            file_name = file_name + " - (The Ark)"    
+        elif ("100_citadel" in Tag_Root and "bsp_" in file_name):
+            file_name = file_name + " - (The Covenant)"
+        elif ("110_bsp" in file_name):
+            file_name = file_name + " - (Cortana)"
+        elif ("120_bsp" in file_name):
+            file_name = file_name + " - (Halo)"
+        elif ("130_bsp" in file_name):
+            file_name = file_name + " - (Epilogue)"
         
+        # RENDER_MODEL Halo 3     
+         
+            #Halo 3 Multiplayer Skyboxes
+        if("\\sky\\" in Tag_Root):
+            if ("\\armory\\" in Tag_Root):
+                file_name = file_name + " - (Rat's Nest Skybox)"
+            elif ("\\bunkerworld\\" in Tag_Root):
+                file_name = file_name + " - (Standoff Skybox)"
+            elif ("\\chillout\\" in Tag_Root):
+                file_name = file_name + " - (Cold Storage Skybox)"
+            elif ("\\chill\\" in Tag_Root):
+                file_name = file_name + " - (Narrows Skybox)"
+            elif ("\\construct\\" in Tag_Root):
+                file_name = file_name + " - (Construct Skybox)"
+            elif ("\\cyberdyne\\" in Tag_Root):
+                file_name = file_name + " - (The Pit Skybox)"
+            elif ("\\deadlock\\" in Tag_Root):
+                file_name = file_name + " - (Highground Skybox)"    
+            elif ("\\descent\\" in Tag_Root):
+                file_name = file_name + " - (Assembly Skybox)"
+            elif ("\\docks\\" in Tag_Root):
+                file_name = file_name + " - (Longshore Skybox)"
+            elif ("\\fortress\\" in Tag_Root):
+                file_name = file_name + " - (Citadel Skybox)"
+            elif ("\\ghosttown\\" in Tag_Root):
+                file_name = file_name + " - (Ghost Town Skybox)"
+            elif ("\\guardian\\" in Tag_Root):
+                file_name = file_name + " - (Guardian Skybox)"
+            elif ("\\isolation\\" in Tag_Root):
+                file_name = file_name + " - (Isolation Skybox)"
+            elif ("\\lockout\\" in Tag_Root):
+                file_name = file_name + " - (Blackout Skybox)"    
+            elif ("\\midship\\" in Tag_Root):
+                file_name = file_name + " - (Heretic Skybox)"
+            elif ("\\riverworld\\" in Tag_Root):
+                file_name = file_name + " - (Valhalla Skybox)"
+            elif ("\\s3d_edge\\" in Tag_Root):
+                file_name = file_name + " - (Edge Skybox)"
+            elif ("\\s3d_turf\\" in Tag_Root):
+                file_name = file_name + " - (Icebox Skybox)"
+            elif ("\\s3d_waterfall\\" in Tag_Root):
+                file_name = file_name + " - (Waterfall Skybox)"
+            elif ("\\salvation\\" in Tag_Root):
+                file_name = file_name + " - (Epitaph Skybox)"
+            elif ("\\sandbox\\" in Tag_Root):
+                file_name = file_name + " - (Sandbox Skybox)"    
+            elif ("\\shrine\\" in Tag_Root):
+                file_name = file_name + " - (Sandtrap Skybox)"
+            elif ("\\sidewinder\\" in Tag_Root):
+                file_name = file_name + " - (Avalanche Skybox)"
+            elif ("\\snowbound\\" in Tag_Root):
+                file_name = file_name + " - (Snowbound Skybox)"
+            elif ("\\spacecamp\\" in Tag_Root):
+                file_name = file_name + " - (Orbital Skybox)"
+            elif ("\\warehouse\\" in Tag_Root):
+                file_name = file_name + " - (Foundry Skybox)"
+            elif ("\\zanzibar\\" in Tag_Root):
+                file_name = file_name + " - (Last Resort Skybox)"
+            
+            #Halo 3 Campaign Skyboxes
+            elif ("\\010_jungle\\" in Tag_Root):
+                file_name = file_name + " - (Sierra 117 Skybox)"
+            elif ("\\020_base\\" in Tag_Root):
+                file_name = file_name + " - (Crow's Nest Skybox)"
+            elif ("\\030_outskirts\\" in Tag_Root):
+                file_name = file_name + " - (Tsavo Highway Skybox)"
+            elif ("\\040_voi\\" in Tag_Root):
+                file_name = file_name + " - (The Storm Skybox)"
+            elif ("\\050_floodvoi\\" in Tag_Root):
+                file_name = file_name + " - (Floodgate Skybox)"
+            elif ("\\055_shadow\\" in Tag_Root):
+                file_name = file_name + " - (Unknown Skybox)"
+            elif ("\\070_waste\\" in Tag_Root):
+                file_name = file_name + " - (The Ark Skybox)"    
+            elif ("\\100_citadel\\" in Tag_Root):
+                file_name = file_name + " - (The Covenant Skybox)"
+            elif ("\\110_hc\\" in Tag_Root):
+                file_name = file_name + " - (Cortana Skybox)"
+            elif ("\\120_halo\\" in Tag_Root):
+                file_name = file_name + " - (Halo Skybox)"
+            elif ("\\130_epilogue\\" in Tag_Root):
+                file_name = file_name + " - (Epilogue Skybox)"
+
+    if halo_ver == "Halo 3: ODST":
+        #Halo 3: ODST Campaign    
+        if (file_name == "c100" or file_name == "c100b"):
+            file_name = file_name + " - (Prepare to Drop)"
+        elif (file_name == "c200" or file_name == "c300" or ("c200" in Tag_Root and file_name == "l200_020")):
+            file_name = file_name + " - (Costal Highway)"
+        elif ("l300" in Tag_Root and ("h100_" in file_name or "l300_" in file_name)):
+            file_name = file_name + " - (Costal Highway)" #again for some reason
+        elif ("sc100" in Tag_Root and ("h100_" in file_name)):
+            file_name = file_name + " - (Tayari Plaza)" 
+        elif ("sc110" in Tag_Root and ("h100_" in file_name or "sc110_" in file_name)):
+            file_name = file_name + " - (Uplift Reserve)" 
+        elif ("sc120" in Tag_Root and ("h100_" in file_name)):
+            file_name = file_name + " - (Kizingo Blvd)" 
+        elif ("sc130" in file_name):
+            file_name = file_name + " - (Oni Alpha Site)" 
+        elif ("sc140" in file_name):
+            file_name = file_name + " - (New Mombasa Police Dep. HQ)"
+        elif ("sc150" in Tag_Root and ("bsp_" in file_name or "h100_" in file_name)):
+            file_name = file_name + " - (Kikiwani Station)"
+        elif ("h100_" in file_name):
+            file_name = file_name + " - (Mombasa Streets)"    
+        elif ("l200_" in file_name):
+            file_name = file_name + " - (Data Hive)"
+    
+    if halo_ver == "Halo Reach":
+        print("halo_ver = Halo Reach")
         
-    # RENDER_MODEL Halo 3     
-     
-        #Halo 3 Multiplayer Skyboxes
-    elif("\\sky\\" in Tag_Root):
-        if ("\\armory\\" in Tag_Root):
-            file_name = file_name + " - (Rat's Nest Skybox)"
-        elif ("\\bunkerworld\\" in Tag_Root):
-            file_name = file_name + " - (Standoff Skybox)"
-        elif ("\\chillout\\" in Tag_Root):
-            file_name = file_name + " - (Cold Storage Skybox)"
-        elif ("\\chill\\" in Tag_Root):
-            file_name = file_name + " - (Narrows Skybox)"
-        elif ("\\construct\\" in Tag_Root):
-            file_name = file_name + " - (Construct Skybox)"
-        elif ("\\cyberdyne\\" in Tag_Root):
-            file_name = file_name + " - (The Pit Skybox)"
-        elif ("\\deadlock\\" in Tag_Root):
-            file_name = file_name + " - (Highground Skybox)"    
-        elif ("\\descent\\" in Tag_Root):
-            file_name = file_name + " - (Assembly Skybox)"
-        elif ("\\docks\\" in Tag_Root):
-            file_name = file_name + " - (Longshore Skybox)"
-        elif ("\\fortress\\" in Tag_Root):
-            file_name = file_name + " - (Citadel Skybox)"
-        elif ("\\ghosttown\\" in Tag_Root):
-            file_name = file_name + " - (Ghost Town Skybox)"
-        elif ("\\guardian\\" in Tag_Root):
-            file_name = file_name + " - (Guardian Skybox)"
-        elif ("\\isolation\\" in Tag_Root):
-            file_name = file_name + " - (Isolation Skybox)"
-        elif ("\\lockout\\" in Tag_Root):
-            file_name = file_name + " - (Blackout Skybox)"    
-        elif ("\\midship\\" in Tag_Root):
-            file_name = file_name + " - (Heretic Skybox)"
-        elif ("\\riverworld\\" in Tag_Root):
-            file_name = file_name + " - (Valhalla Skybox)"
-        elif ("\\s3d_edge\\" in Tag_Root):
-            file_name = file_name + " - (Edge Skybox)"
-        elif ("\\s3d_turf\\" in Tag_Root):
-            file_name = file_name + " - (Icebox Skybox)"
-        elif ("\\s3d_waterfall\\" in Tag_Root):
-            file_name = file_name + " - (Waterfall Skybox)"
-        elif ("\\salvation\\" in Tag_Root):
-            file_name = file_name + " - (Epitaph Skybox)"
-        elif ("\\sandbox\\" in Tag_Root):
-            file_name = file_name + " - (Sandbox Skybox)"    
-        elif ("\\shrine\\" in Tag_Root):
-            file_name = file_name + " - (Sandtrap Skybox)"
-        elif ("\\sidewinder\\" in Tag_Root):
-            file_name = file_name + " - (Avalanche Skybox)"
-        elif ("\\snowbound\\" in Tag_Root):
-            file_name = file_name + " - (Snowbound Skybox)"
-        elif ("\\spacecamp\\" in Tag_Root):
-            file_name = file_name + " - (Orbital Skybox)"
-        elif ("\\warehouse\\" in Tag_Root):
-            file_name = file_name + " - (Foundry Skybox)"
-        elif ("\\zanzibar\\" in Tag_Root):
-            file_name = file_name + " - (Last Resort Skybox)"
+        #Halo Reach Campaign
+        if (file_name == "m10_008"):
+            file_name = file_name + " - (Noble Actual)"
+        elif (file_name == "m10_020" or file_name == "m10_040" or file_name == "m10_050" or file_name == "m10_070" or file_name == "m10_080" or file_name == "m10_009" or file_name == "m10_085"):
+            file_name = file_name + " - (Winter Contingency)"
+        elif (file_name == "m20_002" or file_name == "m20_005" or file_name == "m20_030" or file_name == "m20_040" or file_name == "m20_003"):
+            file_name = file_name + " - (ONI: Sword Base)"
+        elif (file_name == "m30_070" or file_name == "m30_010" or file_name == "m30_020" or file_name == "m30_040" or file_name == "m30_045" or file_name == "m30_hidden" or file_name == "m30_025"):
+            file_name = file_name + " - (Nightfall)"
+        elif (file_name == "m35_000" or file_name == "m35_050" or file_name == "m35_055" or file_name == "m35_070" or file_name == "m35_075" or file_name == "m35_080" or file_name == "m35_100" or file_name == "m35_110" or file_name == "m35_115" or file_name == "m35_120" or file_name == "m35_130" or file_name == "m35_hidden" or file_name == "m35_001" or file_name == "m35_spire_top"):
+            file_name = file_name + " - (Tip of the Spear)"
+        elif (file_name == "m45_000" or file_name == "m35_050" or file_name == "m45_005" or file_name == "m45_010" or file_name == "m45_015" or file_name == "m45_019" or file_name == "m45_020" or file_name == "m45_025" or file_name == "m45_030" or file_name == "m45_040" or file_name == "m45_065" or file_name == "m45_070" or file_name == "m45_080" or file_name == "m45_090"):
+            file_name = file_name + " - (Long Night of Solace)"
+        elif (file_name == "m50_010" or file_name == "m50_020" or file_name == "m50_030" or file_name == "m50_040" or file_name == "m50_050" or file_name == "m50_060" or file_name == "m50_070" or file_name == "m50_080" or file_name == "m50_001" or file_name == "m50_003"):
+            file_name = file_name + " - (Exodus)"
+        elif (file_name == "m52_000" or file_name == "m52_040" or file_name == "m52_010" or file_name == "m52_020" or file_name == "m52_030" or file_name == "m52_cinematic" or file_name == "m52_001"):
+            file_name = file_name + " - (New Alexandria)"
+        elif (file_name == "m20_005" or file_name == "m20_010" or file_name == "m20_015" or file_name == "m20_042" or file_name == "m20_080" or file_name == "m20_090" or file_name == "m20_003"):
+            file_name = file_name + " - (The Package)"
+        elif (file_name == "m70_005" or file_name == "m70_020" or file_name == "m70_030" or file_name == "m70_040" or file_name == "m70_050" or file_name == "m70_060" or file_name == "m70_070" or file_name == "m70_080" or file_name == "m70_090"):
+            file_name = file_name + " - (The Pillar of Autumn)"
+        elif (file_name == "m70_a_credits"):
+            file_name = file_name + " - (Epilogue)"
+        elif (file_name == "m70_bonus_000"):
+            file_name = file_name + " - (Lone Wolf)"
         
-        #Halo 3 Campaign Skyboxes
-        elif ("\\010_jungle\\" in Tag_Root):
-            file_name = file_name + " - (Sierra 117 Skybox)"
-        elif ("\\020_base\\" in Tag_Root):
-            file_name = file_name + " - (Crow's Nest Skybox)"
-        elif ("\\030_outskirts\\" in Tag_Root):
-            file_name = file_name + " - (Tsavo Highway Skybox)"
-        elif ("\\040_voi\\" in Tag_Root):
-            file_name = file_name + " - (The Storm Skybox)"
-        elif ("\\050_floodvoi\\" in Tag_Root):
-            file_name = file_name + " - (Floodgate Skybox)"
-        elif ("\\055_shadow\\" in Tag_Root):
-            file_name = file_name + " - (Unknown Skybox)"
-        elif ("\\070_waste\\" in Tag_Root):
-            file_name = file_name + " - (The Ark Skybox)"    
-        elif ("\\100_citadel\\" in Tag_Root):
-            file_name = file_name + " - (The Covenant Skybox)"
-        elif ("\\110_hc\\" in Tag_Root):
-            file_name = file_name + " - (Cortana Skybox)"
-        elif ("\\120_halo\\" in Tag_Root):
-            file_name = file_name + " - (Halo Skybox)"
-        elif ("\\130_epilogue\\" in Tag_Root):
-            file_name = file_name + " - (Epilogue Skybox)"
+        #Halo Reach Multiplayer
+
+    if halo_ver == "Halo 4":
+        print("halo_ver = Halo 4")
+            #Halo 4 Campaign
+            
+            #Halo 4 Multiplayer
+            
+    if halo_ver == "Halo 5":
+        print("halo_ver = Halo 5")
+            #Halo 5 Campaign
+            
+            #Halo 5 Multiplayer
+            
+    if halo_ver == "Halo Infinite":
+        print("halo_ver = Halo Infinite")
+            #Halo Infinite Campaign
+            
+            #Halo Infinite Multiplayer
         
     if("\\decorators\\" in Tag_Root):
         file_name = file_name + " - (Decorator: Will not Import)"
-        
-    #More later for dlc or added files etc    
-    # elif (file_name == "riverworld"):
-        # file_name = file_name + " (Valhalla)"
-    # elif (file_name == "s3d_edge"):
-        # file_name = file_name + " (Edge)"
-    # elif (file_name == "s3d_turf"):
-        # file_name = file_name + " (Icebox)"
-    # elif (file_name == "s3d_waterfall"):
-        # file_name = file_name + " (Waterfall)"
-    # elif (file_name == "salvation"):
-        # file_name = file_name + " (Epitaph)"
-    # elif (file_name == "sandbox"):
-        # file_name = file_name + " (Sandbox)"    
-    # elif (file_name == "shrine"):
-        # file_name = file_name + " (Sandtrap)"
-    # elif (file_name == "sidewinder"):
-        # file_name = file_name + " (Avalanche)"
-    # elif (file_name == "snowbound"):
-        # file_name = file_name + " (Snowbound)"
-    # elif (file_name == "spacecamp"):
-        # file_name = file_name + " (Orbital)"
-    # elif (file_name == "warehouse"):
-        # file_name = file_name + " (Foundry)"
-    # elif (file_name == "zanzibar"):
-        # file_name = file_name + " (Last Resort)"
-    # elif (file_name == "bunkerworld"):
-        # file_name = file_name + " (Standoff)"    
-    # elif (file_name == "bunkerworld"):
-        # file_name = file_name + " (Standoff)"
 
     return file_name
 
@@ -14492,6 +14664,7 @@ class CR4B_ScanScenarioStructureBSP(bpy.types.Operator):
         
         #if format is ass/jms then use this logic
         if (file_format == "ass/jms"):
+            print("Loading levels available for ass/jms")
             if(bpy.context.scene.halo_version_dropdown == "Halo 3"):
                 log_to_file("Using Halo 3 Tags")
                 Tag_Root = bpy.context.preferences.addons[__name__].preferences.halo3_tag_path 
@@ -14515,7 +14688,8 @@ class CR4B_ScanScenarioStructureBSP(bpy.types.Operator):
                 item.name = modified_file_name # Use the modified file name
                 item.path = file_path
         
-        if (file_format == "fbx" and halo_title == "HaloInfinite"):
+        elif (file_format == "fbx" and halo_title == "HaloInfinite"):
+            print("Loading levels available for fbx")
             with open(tags_report_path, 'r') as f:
                 lines = f.readlines()
             #loop through final version of the tags_report.txt file created to generate list of models and their paths
@@ -14537,6 +14711,7 @@ class CR4B_ScanScenarioStructureBSP(bpy.types.Operator):
         
         #if format is anything else use Reclaimer to build list
         else:
+            print("Loading levels available for Reclaimer")
             if(bpy.context.scene.halo_version_dropdown == "Halo CE"):
                 halo_ver = "HaloCE"
             elif(bpy.context.scene.halo_version_dropdown == "Halo 2"):
@@ -14809,11 +14984,13 @@ def HIRT_Report(export_dir, tag_type, halo_ver):
     halo_inf_deploy = bpy.context.preferences.addons[__name__].preferences.haloinfinite_map_path
     halo_inf_deploy = remove_ending_backslash(halo_inf_deploy)
     
+    #export_dir = "D:\HIRT Report Dump"
+    
     if tag_type == "render_model":
-        export_dir = export_dir + "\\Reports\\HaloInfinite_model_report.txt"
+        export_dir = export_dir + "\\HaloInfinite_model_report.txt"
         cmd = f'HaloInfiniteResearchTools tags list -d "{halo_inf_deploy}" -t "mode" -o "{export_dir}"' 
     elif tag_type == "scenario_structure_bsp":
-        export_dir = export_dir + "\\Reports\\HaloInfinite_level_report.txt"
+        export_dir = export_dir + "\\HaloInfinite_level_report.txt"
         cmd = f'HaloInfiniteResearchTools tags list -d "{halo_inf_deploy}" -t "sbsp" -o "{export_dir}"' 
     else:
         print("unsupported tag type for HIRT Report")
@@ -14971,12 +15148,12 @@ def swap_duplicate_image_textures():
 
         # Access the material's node tree
         nodes = material.node_tree.nodes
-        print("Access the material's node tree")
+        #print("Access the material's node tree")
         
         # Iterate through each node in the node tree
         for node in nodes:
             # Check if the node is an image texture node
-            print("Check if the node is an image texture node")
+            #print("Check if the node is an image texture node")
             if node.type == 'TEX_IMAGE':
                 print("1")
                 

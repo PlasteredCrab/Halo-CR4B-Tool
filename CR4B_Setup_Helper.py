@@ -36,6 +36,8 @@ class SimpleOperator(bpy.types.Operator):
         #Path to the Reclaimer CLI folder
         reclaimer_cli_path = "C:\\Users\\jeffr\\Documents\\CR4B Tool GitHub\\CR4B Tool v20\\GitHub\\Reclaimer CLI\\"
         
+        hirt_cli_path = "D:\\Halo Infinite\\HIRT (urium tool)\\HIRT CLI (9-3-2023)\\"
+        
         #Path to the .map files you want to use with Reclaimer CLI
         haloce_map_path = "D:\\SteamLibrary\\steamapps\\common\\Halo The Master Chief Collection\\halo1\\maps\\"
         halo2_map_path = ""
@@ -44,6 +46,7 @@ class SimpleOperator(bpy.types.Operator):
         haloreach_map_path = "D:\\Halo Map Files\\Halo Reach\\"
         halo4_map_path = "D:\\Halo Map Files\\Halo 4\\"
         halo5_mod_path = ""
+        haloinfinite_mod_path = ""
 
         # Name of the current version of CR4BTool
         addon_name = "CR4B_Tool_v20"
@@ -58,6 +61,7 @@ class SimpleOperator(bpy.types.Operator):
         bpy.context.preferences.addons[addon_name].preferences.reach_tag_path = reach_tag_path_value
         
         bpy.context.preferences.addons[addon_name].preferences.reclaimer_path = reclaimer_cli_path
+        bpy.context.preferences.addons[addon_name].preferences.reclaimer_path = hirt_cli_path
         
         bpy.context.preferences.addons[addon_name].preferences.haloce_map_path = haloce_map_path
         bpy.context.preferences.addons[addon_name].preferences.halo2_map_path = halo2_map_path
@@ -66,6 +70,7 @@ class SimpleOperator(bpy.types.Operator):
         bpy.context.preferences.addons[addon_name].preferences.haloreach_map_path = haloreach_map_path
         bpy.context.preferences.addons[addon_name].preferences.halo4_map_path = halo4_map_path
         bpy.context.preferences.addons[addon_name].preferences.halo5_map_path = halo5_mod_path
+        bpy.context.preferences.addons[addon_name].preferences.halo5_map_path = haloinfinite_mod_path
 
         self.report({'INFO'}, "Preferences Applied")
         return {'FINISHED'}
