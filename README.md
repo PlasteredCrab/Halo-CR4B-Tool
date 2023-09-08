@@ -3,7 +3,19 @@
 This tool is called Completely Ready 4 Blender and aims to do most of the work needed to port levels and objects from Halo 3, ODST, and Reach to Blender.
 It accesses the raw tag files in binary and pulls the correct values, colors, scaling info, as well as various texture information needed by said object and tries it's best to setup the Shader nodes for you as well.
 
+[Batch Importing / Exporting Assets from Halo games]
+This tool just got a major update that allows for batch importing and exporting of:
+- Halo CE         Models / Levels / Textures
+- Halo 2          Models / Levels / Textures
+- Halo 3          Models / Levels / Textures
+- Halo 3 ODST     Models / Levels / Textures
+- Halo Reach      Models / Levels / Textures
+- Halo 5          Models / Textures
+- Halo Infinite   Models / Textures
+
 Tool is currently in Open Beta and is ready for public testing on Halo 3 and ODST objects and levels. Reach support coming later as Shader Nodes need to be made.
+
+
 
 Support this tool and other tools I work on by donating a coffee: https://ko-fi.com/plasteredcrab
 
