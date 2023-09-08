@@ -13,6 +13,8 @@ This tool just got a major update that allows for batch importing and exporting 
 - Halo 5          Models / Textures
 - Halo Infinite   Models / Textures
 
+Video coming soon to show how to get it setup for these features.
+
 Tool is currently in Open Beta and is ready for public testing on Halo 3 and ODST objects and levels. Reach support coming later as Shader Nodes need to be made.
 
 Support this tool and other tools I work on by donating a coffee: https://ko-fi.com/plasteredcrab
