@@ -15,8 +15,6 @@ This tool just got a major update that allows for batch importing and exporting 
 
 Tool is currently in Open Beta and is ready for public testing on Halo 3 and ODST objects and levels. Reach support coming later as Shader Nodes need to be made.
 
-
-
 Support this tool and other tools I work on by donating a coffee: https://ko-fi.com/plasteredcrab
 
 # Video for what it does and how it is used
