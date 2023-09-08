@@ -1,4 +1,4 @@
-# Completely Ready 4 Blender (CR4B Tool)
+# Halo Completely Ready 4 Blender (Halo CR4B Tool)
 
 This tool is called Completely Ready 4 Blender and aims to do most of the work needed to port levels and objects from Halo 3, ODST, and Reach to Blender.
 It accesses the raw tag files in binary and pulls the correct values, colors, scaling info, as well as various texture information needed by said object and tries it's best to setup the Shader nodes for you as well.
@@ -20,5 +20,7 @@ Install Video: https://youtu.be/xhRq8ChDz3s
 # Special Thanks
 - Chiefster and Soulburnin for the help making the Shader Nodes used by this tool to make the objects and levels to be as accurate as they can be! Without their help, this tool would not have gotten as far as it did.
 - Lord Zedd for giving me some ideas on how to fix Mirror Wrapped textures being incorrect in terms of texture resolution ratios being the key. 
-- Gravemind2401 for his amazing work with Reclaimer, which all of this work was started using models and textures ripped using Reclaimer.
-- General_101 for his great work with the Halo Asset Blender Development Toolkit 
+- Gravemind2401 for his amazing work with Reclaimer, which all of this work was started using models and textures ripped using Reclaimer. And for help making changes to the custom build of Reclaimer that CR4B Tool uses for importing
+- General_101 for his great work with the Halo Asset Blender Development Toolkit
+- Gamergotten for his Halo5Bitmap Exporter for Xbox files since he changed it to accept commandline arguments which allows for CR4B Tool to batch import / export Halo 5 models and textures from Xbox
+- Urium86 for his tool HIRT which he changed to allow for Command Line functions to be sent to it by CR4B Tool which allows for Halo Infinite Importing / Exporting
