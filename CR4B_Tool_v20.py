@@ -14657,13 +14657,115 @@ def modify_filename(file_name, Tag_Root):
             file_name = file_name + " - (Waterfront)"
                 
                 
-    #if halo_ver == "Halo 4":
-        #print("halo_ver = Halo 4")
-            #Halo 4 Campaign
-            
-            #Halo 4 Multiplayer
+    if halo_ver == "Halo 4":
+    
+        bs_to_filter = ["crates", "crate", "device_machine", "device_machines", "device_control", "device_controls", "sky", "scenery", "vehicles", "props", "models", "fx"]
 
-            #Halo 4 Spartan Ops
+            #Halo 4 Campaign
+        if (file_name == "m05_prologue_bsp01"):
+            file_name = file_name + " - (Prologue)"
+        elif ("environments\\solo\\m10_crash\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (Dawn)"
+        elif ("environments\\solo\\m020\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (Requiem)"
+        elif ("environments\\solo\\m30_cryptum\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (Forerunner)"
+        elif ("environments\\solo\\m40_invasion\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (Infinity)"
+        elif ("environments\\solo\\m60_rescue\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (Reclaimer)"
+        elif ("environments\\solo\\m70_liftoff\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (Shutdown)"
+        elif ("environments\\solo\\m80_delta\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (Composer)"
+        elif ("environments\\solo\\m90_sacrifice\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (Midnight)"
+        # # elif (file_name == " "):
+            # # file_name = file_name + " - (Epilogue)"                                               NO BSP
+        
+        # #Halo 4 Multiplayer
+        elif (file_name == "ca_blood_cavern_000"):
+            file_name = file_name + " - (Abandon)"
+        elif (file_name == "ca_warhouse" or file_name == "ca_warhouse_planet"):
+            file_name = file_name + " - (Adrift)"
+        elif (file_name == "z05_cliffside_000"):
+            file_name = file_name + " - (Complex)"
+        elif (file_name == "ca_spiderweb_bsp01"):
+            file_name = file_name + " - (Daybreak)"
+        elif (file_name == "ca_forge_erosion_bsp01" or file_name == "ca_forge_erosion_bsp02"):
+            file_name = file_name + " - (Erosion)"
+        elif (file_name == "ca_blood_crash_bsp01"):
+            file_name = file_name + " - (Exile)"
+        elif (file_name == "dlc_forge_island_bsp01" or file_name == "dlc_forge_island_vista"):
+            file_name = file_name + " - (Forge Island)"
+        elif (file_name == "zd_02_grind_bsp01"):
+            file_name = file_name + " - (Harvest)"
+        elif (file_name == "wraparound_000"):
+            file_name = file_name + " - (Haven)"
+        elif (file_name == "ca_forge_bonanza" or file_name == "ca_forge_bonanza_space"):
+            file_name = file_name + " - (Impact)"
+        elif (file_name == "ca_port_bsp"):
+            file_name = file_name + " - (Landfall)"
+        elif (file_name == "ca_gore_valley" or file_name == "ca_gore_valley_vista"):
+            file_name = file_name + " - (Longbow)"
+        elif (file_name == "ca_canyon_bsp" or file_name == "ca_canyon_bsp_vista"):
+            file_name = file_name + " - (Meltdown)"
+        elif (file_name == "ca_deadlycrossing_bsp01"):
+            file_name = file_name + " - (Monolith)"
+        elif (file_name == "ca_basin_bsp01"):
+            file_name = file_name + " - (Outcast)"
+        elif (file_name == "ca_highrise" or file_name == "ca_highrise_vista"):
+            file_name = file_name + " - (Perdition)"
+        elif (file_name == "ca_creeper_bsp01"):
+            file_name = file_name + " - (Pitfall)"
+        elif (file_name == "z11_valhalla_bsp01"):
+            file_name = file_name + " - (Ragnarok)"
+        elif (file_name == "ca_forge_ravine_bsp" or file_name == "ca_forge_ravine_vista"):
+            file_name = file_name + " - (Ravine)"
+        elif (file_name == "dlc_dejewel_bsp01"):
+            file_name = file_name + " - (Shatter)"
+        elif (file_name == "ca_rattler" or file_name == "ca_rattler_vista"):
+            file_name = file_name + " - (Skyline)"
+        elif (file_name == "ca_tower_bsp" or file_name == "ca_tower_vista"):
+            file_name = file_name + " - (Solace)"
+        elif (file_name == "ca_dropoff_bsp01"):
+            file_name = file_name + " - (Vertigo)"
+        elif (file_name == "ca_redoubt_bsp" or file_name == "ca_redoubt_bsp_vista"):
+            file_name = file_name + " - (Vortex)"
+        elif (file_name == "ff152_vortex_bsp01" or file_name == "ff152_vortex_vista"):
+            file_name = file_name + " - (Wreckage)"
+    
+        # #Halo 4 Spartan Ops
+        elif ("levels\\firefight\\dlc01_engine\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (Infinity)"
+        elif ("\\levels\\firefight\\dlc01_factory\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (Lockup)"
+        elif ("\\levels\\firefight\\ff81_courtyard\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (The Gate)"
+        elif ("\\levels\\firefight\\ff81_scurve\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (The Cauldron)"
+        elif ("\\levels\\firefight\\ff84_temple\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (The Refuge)"
+        elif ("\\levels\\firefight\\ff86_sniperally\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (Sniper Alley)"
+        elif ("\\levels\\firefight\\ff87_chopperbowl\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (Quarry)"
+        elif ("\\levels\\firefight\\ff90_fortsw\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (Fortress)"
+        elif ("\\levels\\firefight\\ff91_complex\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (Galileo Base)"
+        elif ("\\levels\\firefight\\ff92_valhalla\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (Two Giants)"
+        elif ("\\levels\\firefight\\ff151_mezzanine\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (Control)"
+        elif ("\\levels\\firefight\\ff152_vortex\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (Cyclone)"
+        elif ("\\levels\\firefight\\ff153_caverns\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (Warrens)"
+        elif ("\\levels\\firefight\\ff154_hillside\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (Apex)"
+        elif ("\\levels\\firefight\\ff155_breach\\" in Tag_Root and not any(bs_to_filter in Tag_Root for bs_to_filter in bs_to_filter)):
+            file_name = file_name + " - (Harvester)"
 
     #if halo_ver == "Halo 5":
         #print("halo_ver = Halo 5")
@@ -14672,7 +14774,8 @@ def modify_filename(file_name, Tag_Root):
             #Halo 5 Multiplayer
 
             #Halo 5 Warzone
-            
+    
+    #check with old season tag IDs first and then add more later
     if halo_ver == "Halo Infinite":
         #print("halo_ver = Halo Infinite")
         if("924480375" in file_name):
@@ -14695,7 +14798,7 @@ def modify_filename(file_name, Tag_Root):
             file_name = file_name + " - (Bandit Rifle)"    
         elif("1498488748" in file_name):
             file_name = file_name + " - (Bulldog Shotgun)"    
-        elif("974571486" in file_name):
+        elif("974571486" in file_name or "sidearm_pistol" in file_name):
             file_name = file_name + " - (Sidekick Pistol)"    
         elif("941943561" in file_name):
             file_name = file_name + " - (MA40 Assault Rifle)"    
@@ -14722,7 +14825,7 @@ def modify_filename(file_name, Tag_Root):
         elif("62007302" in file_name):
             file_name = file_name + " - (Shock Grenade)"    
         elif("312820998" in file_name):
-            file_name = file_name + " - (Plasma Grenade (or Bomb maybe))"    
+            file_name = file_name + " - (Plasma Grenade)"    
         elif("552379143" in file_name):
             file_name = file_name + " - (Wraith Turret)"    
         elif("608118536" in file_name):
@@ -14840,7 +14943,7 @@ def modify_filename(file_name, Tag_Root):
         elif("-1203023176" in file_name):
             file_name = file_name + " - (SPI Core Power Station)"    
         elif("-322246977" in file_name):
-            file_name = file_name + " - (Spartan Eukland)"    
+            file_name = file_name + " - (Spartan Eklund)"    
         elif("1026077388" in file_name):
             file_name = file_name + " - (Spartan Dihn)"    
         elif("75368167" in file_name):
@@ -14849,8 +14952,12 @@ def modify_filename(file_name, Tag_Root):
             file_name = file_name + " - (Wraith)"    
         elif("-411513959" in file_name):
             file_name = file_name + " - (Grunt Target Dummy)"    
-            
-            
+        elif("-1719286772" in file_name):
+            file_name = file_name + " - (Military Crate)"    
+        elif("1497786893" in file_name):
+            file_name = file_name + " - (Bomb)"    
+        elif("2069611535" in file_name):
+            file_name = file_name + " - (Container)"    
             #Halo Infinite Campaign
             
             #Halo Infinite Multiplayer
@@ -14970,10 +15077,11 @@ class CR4B_ScanScenarioStructureBSP(bpy.types.Operator):
                 # Extract map directory
                 tag = line
             
+            
                 #If current line is a tag line then create an entry in the list
                 item = context.scene.cr4b_file_list.add()
                 file_name_without_extension = os.path.splitext(os.path.basename(tag))[0]
-                modified_file_name = file_name_without_extension.split("_")[1] # Call the modify function
+                modified_file_name = file_name_without_extension.split("sbsp\\")[1] # Call the modify function
                 modified_file_name = modify_filename(modified_file_name, tag) # Call the modify function
                 item.name = modified_file_name # Use the modified file name
                 item.path = tag
@@ -15107,17 +15215,36 @@ class CR4B_ScanRenderModel(bpy.types.Operator):
                 lines = f.readlines()
             #loop through final version of the tags_report.txt file created to generate list of models and their paths
             #for loop here that iterates through each line of the tags_report.txt file
+            line_num = 0
+            
+            #tell user what is happening
+            context.scene.cr4b_header_suffix = " model list is building!"
+            
+            
             for line in lines:
+                
+                
                 # Extract map directory
                 tag = line
             
+                
                 #If current line is a tag line then create an entry in the list
                 item = context.scene.cr4b_file_list.add()
                 file_name_without_extension = os.path.splitext(os.path.basename(tag))[0]
-                modified_file_name = file_name_without_extension.split("_")[1] # Call the modify function
+                #print(file_name_without_extension)
+                #modified_file_name = file_name_without_extension.split("mode\\")[1] # Call the modify function
+                
+                modified_file_name = file_name_without_extension
+                #send in modified_file_name to check if old Season Tag names exist for it
+                #print(modified_file_name)
+                modified_file_name = CheckOldSeasonNames(modified_file_name, "mode", export_dir)
+                
                 modified_file_name = modify_filename(modified_file_name, tag) # Call the modify function
                 item.name = modified_file_name # Use the modified file name
                 item.path = tag
+                
+                #print(str(line_num) + "/" + str(len(lines)))
+                line_num = line_num + 1
         
         #if format is anything else use Reclaimer to build list
         else:
@@ -15169,6 +15296,44 @@ class CR4B_ScanRenderModel(bpy.types.Operator):
         context.scene.cr4b_header_suffix = " Models"
         
         return {'FINISHED'}
+
+#function for replacing IDs in the UI list with old known Tag IDs
+def CheckOldSeasonNames(input_str, tag_type, export_dir):
+    if tag_type == "mode":
+        old_tag_list_path = export_dir + "\\Reports\\HaloInfiniteS2_mode_tags.txt"
+    elif tag_type == "rtgo":
+        old_tag_list_path = export_dir + "\\Reports\\HaloInfiniteS2_rtgo_tags.txt"
+    elif tag_type == "sbsp":
+        old_tag_list_path = export_dir + "\\Reports\\HaloInfiniteS2_sbsp_tags.txt"
+    elif tag_type == "pmdf":
+        old_tag_list_path = export_dir + "\\Reports\\HaloInfiniteS2_pmdf_tags.txt"
+    
+    print("in CheckOldSeasonNames")
+    
+    #Split the string
+    query_code = input_str.split('_')[0]
+    
+    print("Checking for: " + query_code)
+    
+    # Open the file and read line by line
+    with open(old_tag_list_path, 'r') as f:
+        for line in f:
+            # Splitting the line based on " :"
+            code, path = line.strip().split(" :")
+            # Step 3: Check the left half against query_code
+            if query_code == code:
+                # Step 4: Extract the basename 
+                base_name = os.path.basename(path)
+                # Check if "{g}" is in the basename
+                if '{g}' in base_name:
+                    # Return the parent directory's name
+                    return os.path.basename(os.path.dirname(path))
+                else:
+                    return (base_name + "[" + input_str + "]")
+
+
+    # If no matches found, return starting string back
+    return (input_str + " - (Season 3+ model)")
 
 # Functions for file extraction
 def Tool_Ass_Extract(files):
@@ -15301,6 +15466,621 @@ def Reclaimer_Export(map_path, tag_file, export_dir, tag_type):
         
         pass 
     pass
+    
+#gather all CMSW tag data from CMSW JSON    
+def get_cmsw_tag_data(cmsw_tag_object, hirt_path, deploy_dir, export_dir):
+    cmsw_id = cmsw_tag_object.Ref_id_int
+
+    #send cmsw ID to HIRT to get JSON file
+    
+    
+    #path to current cmsw json
+    cmsw_json_path = "example\\cmsw_file.json"
+    
+    # read JSON file and build style_list for every entry of styles
+    with open(cmsw_json_path, 'r') as file:
+        data = json.load(file)
+        
+        # Populate the swatch cmsw_tag_object with data from the JSON
+        cmsw_tag_object.Parent = data["Parent"]["Value"]["Path"]
+        cmsw_tag_object.colorAndRoughnessTextureTransform = [data["colorAndRoughnessTextureTransform"]["Value"]["X"], data["colorAndRoughnessTextureTransform"]["Value"]["Y"]]
+        cmsw_tag_object.normalTextureTransform = [data["normalTextureTransform"]["Value"]["X"], data["normalTextureTransform"]["Value"]["Y"]]
+        cmsw_tag_object.colorGradientMap = data["colorGradientMap"]["Value"]["Path"]
+        cmsw_tag_object.gradientTopColor = [data["gradientTopColor"]["Value"]["R_value"], data["gradientTopColor"]["Value"]["G_value"], data["gradientTopColor"]["Value"]["B_value"]]
+        cmsw_tag_object.gradientMidColor = [data["gradientMidColor"]["Value"]["R_value"], data["gradientMidColor"]["Value"]["G_value"], data["gradientMidColor"]["Value"]["B_value"]]
+        cmsw_tag_object.gradientBottomColor = [data["gradientBottomColor"]["Value"]["R_value"], data["gradientBottomColor"]["Value"]["G_value"], data["gradientBottomColor"]["Value"]["B_value"]]
+        cmsw_tag_object.roughnessWhite = data["roughnessWhite"]["Value"]
+        cmsw_tag_object.roughnessBlack = data["roughnessBlack"]["Value"]
+        cmsw_tag_object.normalDetailMap = data["normalDetailMap"]["Value"]["Path"]
+        cmsw_tag_object.metallic = data["metallic"]["Value"]
+        cmsw_tag_object.ior = data["ior"]["Value"]
+        cmsw_tag_object.albedoTintSpec = data["albedoTintSpec"]["Value"]
+        cmsw_tag_object.scratchColor = [data["scratchColor"]["Value"]["R_value"], data["scratchColor"]["Value"]["G_value"], data["scratchColor"]["Value"]["B_value"]]
+        cmsw_tag_object.scratchBrightness = data["scratchBrightness"]["Value"]
+        cmsw_tag_object.scratchRoughness = data["scratchRoughness"]["Value"]
+        cmsw_tag_object.scratchMetallic = data["scratchMetallic"]["Value"]
+        cmsw_tag_object.scratchIOR = data["scratchIOR"]["Value"]
+        cmsw_tag_object.scratchAlbedoTintSpec = data["scratchAlbedoTintSpec"]["Value"]
+        cmsw_tag_object.sssIntensity = data["sssIntensity"]["Value"]
+        cmsw_tag_object.emissiveIntensity = data["emissiveIntensity"]["Value"]
+        cmsw_tag_object.emissiveAmount = data["emissiveAmount"]["Value"]    
+        
+        
+    return cmsw_tag_object
+    
+#gather all RUCY tag data from RUCY JSON
+def get_rucy_tag_data(rucy_tag_object, hirt_path, deploy_dir, export_dir):
+    rucy_id = rucy_tag_object.Ref_id_int
+
+    #send rucy ID to HIRT to get JSON file
+    
+    
+    #path to current rucs json
+    rucy_json_path = "example\\rucy_file.json"
+    
+    # read JSON file and build data
+    with open(rucy_json_path, 'r') as file:
+        data = json.load(file)
+
+        # Process the globalDamageSwatch from the info section
+        if "info" in data:
+            info_data = data["info"]
+            
+            if "globalDamageSwatch" in data["info"]:
+                swatch_data = data["info"]["globalDamageSwatch"]
+                
+                # Initialize PreSwatch object
+                pre_swatch = PreSwatch()
+                
+                # Set PreSwatch attributes
+                pre_swatch.elementID = swatch_data.get("elementID", {}).get("Value", 0)
+                pre_swatch.Description = swatch_data.get("Description", {}).get("Value", "")
+                
+                #build new swatch class object from here
+                swatch_obj = swatch()
+                swatch_obj.Ref_id_int = swatch_data.get("Swatch", {}).get("Value", {}).get("Ref_id_int", [])
+                
+                #append swatch cmsw tag to PreSwatch
+                pre_swatch.Swatch.append(get_cmsw_tag_data(swatch_obj, hirt_path, deploy_dir, export_dir))
+                
+                pre_swatch.gradientColorFlag = swatch_data.get("gradientColorFlag", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.gradientTopColor = [
+                    swatch_data.get("gradientTopColor", {}).get("Value", {}).get("R_value", 0),
+                    swatch_data.get("gradientTopColor", {}).get("Value", {}).get("G_value", 0),
+                    swatch_data.get("gradientTopColor", {}).get("Value", {}).get("B_value", 0)
+                ]
+                pre_swatch.gradientMidColor = [
+                    swatch_data.get("gradientMidColor", {}).get("Value", {}).get("R_value", 0),
+                    swatch_data.get("gradientMidColor", {}).get("Value", {}).get("G_value", 0),
+                    swatch_data.get("gradientMidColor", {}).get("Value", {}).get("B_value", 0)
+                ]
+                pre_swatch.gradientBottomColor = [
+                    swatch_data.get("gradientBottomColor", {}).get("Value", {}).get("R_value", 0),
+                    swatch_data.get("gradientBottomColor", {}).get("Value", {}).get("G_value", 0),
+                    swatch_data.get("gradientBottomColor", {}).get("Value", {}).get("B_value", 0)
+                ]
+                pre_swatch.roughnessOffset = swatch_data.get("roughnessOffset", {}).get("Value", 0)
+                pre_swatch.scratchColorFlag = swatch_data.get("scratchColorFlag", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.scratchColor = [
+                    swatch_data.get("scratchColor", {}).get("Value", {}).get("R_value", 0),
+                    swatch_data.get("scratchColor", {}).get("Value", {}).get("G_value", 0),
+                    swatch_data.get("scratchColor", {}).get("Value", {}).get("B_value", 0)
+                ]
+                pre_swatch.scratchRoughnessOffset = swatch_data.get("scratchRoughnessOffset", {}).get("Value", 0)
+                pre_swatch.Use_Emissive = swatch_data.get("Use Emissive?", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.emissiveIntensity = swatch_data.get("emissiveIntensity", {}).get("Value", 0)
+                pre_swatch.emissiveAmount = swatch_data.get("emissiveAmount", {}).get("Value", 0)
+                pre_swatch.Use_Alpha = swatch_data.get("Use Alpha?", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.Use_Subsurface_Scattering = swatch_data.get("Use Subsurface Scattering?", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.Hero_Reveal = swatch_data.get("Hero Reveal", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.Color_Blend = swatch_data.get("Color Blend", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.Normal_Blend = swatch_data.get("Normal Blend", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.Ignore_Texel_Density_Scalar = swatch_data.get("Ignore Texel Density Scalar", {}).get("Value", {}).get("Selected", "")
+                
+                # Append the PreSwatch object to the globalDamageSwatch attribute of the rucy_tag_object
+                rucy_tag_object.globalDamageSwatch.append(pre_swatch)
+            
+            #get heroDamageSwatch data
+            if "heroDamageSwatch" in data["info"]:
+                swatch_data = data["info"]["heroDamageSwatch"]
+                
+                # Initialize PreSwatch object
+                pre_swatch = PreSwatch()
+                
+                # Set PreSwatch attributes
+                pre_swatch.elementID = swatch_data.get("elementID", {}).get("Value", 0)
+                pre_swatch.Description = swatch_data.get("Description", {}).get("Value", "")
+                
+                #build new swatch class object from here
+                swatch_obj = swatch()
+                swatch_obj.Ref_id_int = swatch_data.get("Swatch", {}).get("Value", {}).get("Ref_id_int", [])
+                
+                #append swatch cmsw tag to PreSwatch
+                pre_swatch.Swatch.append(get_cmsw_tag_data(swatch_obj, hirt_path, deploy_dir, export_dir))
+                
+                pre_swatch.gradientColorFlag = swatch_data.get("gradientColorFlag", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.gradientTopColor = [
+                    swatch_data.get("gradientTopColor", {}).get("Value", {}).get("R_value", 0),
+                    swatch_data.get("gradientTopColor", {}).get("Value", {}).get("G_value", 0),
+                    swatch_data.get("gradientTopColor", {}).get("Value", {}).get("B_value", 0)
+                ]
+                pre_swatch.gradientMidColor = [
+                    swatch_data.get("gradientMidColor", {}).get("Value", {}).get("R_value", 0),
+                    swatch_data.get("gradientMidColor", {}).get("Value", {}).get("G_value", 0),
+                    swatch_data.get("gradientMidColor", {}).get("Value", {}).get("B_value", 0)
+                ]
+                pre_swatch.gradientBottomColor = [
+                    swatch_data.get("gradientBottomColor", {}).get("Value", {}).get("R_value", 0),
+                    swatch_data.get("gradientBottomColor", {}).get("Value", {}).get("G_value", 0),
+                    swatch_data.get("gradientBottomColor", {}).get("Value", {}).get("B_value", 0)
+                ]
+                pre_swatch.roughnessOffset = swatch_data.get("roughnessOffset", {}).get("Value", 0)
+                pre_swatch.scratchColorFlag = swatch_data.get("scratchColorFlag", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.scratchColor = [
+                    swatch_data.get("scratchColor", {}).get("Value", {}).get("R_value", 0),
+                    swatch_data.get("scratchColor", {}).get("Value", {}).get("G_value", 0),
+                    swatch_data.get("scratchColor", {}).get("Value", {}).get("B_value", 0)
+                ]
+                pre_swatch.scratchRoughnessOffset = swatch_data.get("scratchRoughnessOffset", {}).get("Value", 0)
+                pre_swatch.Use_Emissive = swatch_data.get("Use Emissive?", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.emissiveIntensity = swatch_data.get("emissiveIntensity", {}).get("Value", 0)
+                pre_swatch.emissiveAmount = swatch_data.get("emissiveAmount", {}).get("Value", 0)
+                pre_swatch.Use_Alpha = swatch_data.get("Use Alpha?", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.Use_Subsurface_Scattering = swatch_data.get("Use Subsurface Scattering?", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.Hero_Reveal = swatch_data.get("Hero Reveal", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.Color_Blend = swatch_data.get("Color Blend", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.Normal_Blend = swatch_data.get("Normal Blend", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.Ignore_Texel_Density_Scalar = swatch_data.get("Ignore Texel Density Scalar", {}).get("Value", {}).get("Selected", "")
+                
+                # Append the PreSwatch object to the globalDamageSwatch attribute of the rucy_tag_object
+                rucy_tag_object.heroDamageSwatch.append(pre_swatch)
+            
+            #get globalEmissiveSwatch data
+            if "globalEmissiveSwatch" in data["info"]:
+                swatch_data = data["info"]["globalEmissiveSwatch"]
+                
+                # Initialize PreSwatch object
+                pre_swatch = PreSwatch()
+                
+                # Set PreSwatch attributes
+                pre_swatch.elementID = swatch_data.get("elementID", {}).get("Value", 0)
+                pre_swatch.Description = swatch_data.get("Description", {}).get("Value", "")
+                
+                #build new swatch class object from here
+                swatch_obj = swatch()
+                swatch_obj.Ref_id_int = swatch_data.get("Swatch", {}).get("Value", {}).get("Ref_id_int", [])
+                
+                #append swatch cmsw tag to PreSwatch
+                pre_swatch.Swatch.append(get_cmsw_tag_data(swatch_obj, hirt_path, deploy_dir, export_dir))
+                
+                pre_swatch.gradientColorFlag = swatch_data.get("gradientColorFlag", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.gradientTopColor = [
+                    swatch_data.get("gradientTopColor", {}).get("Value", {}).get("R_value", 0),
+                    swatch_data.get("gradientTopColor", {}).get("Value", {}).get("G_value", 0),
+                    swatch_data.get("gradientTopColor", {}).get("Value", {}).get("B_value", 0)
+                ]
+                pre_swatch.gradientMidColor = [
+                    swatch_data.get("gradientMidColor", {}).get("Value", {}).get("R_value", 0),
+                    swatch_data.get("gradientMidColor", {}).get("Value", {}).get("G_value", 0),
+                    swatch_data.get("gradientMidColor", {}).get("Value", {}).get("B_value", 0)
+                ]
+                pre_swatch.gradientBottomColor = [
+                    swatch_data.get("gradientBottomColor", {}).get("Value", {}).get("R_value", 0),
+                    swatch_data.get("gradientBottomColor", {}).get("Value", {}).get("G_value", 0),
+                    swatch_data.get("gradientBottomColor", {}).get("Value", {}).get("B_value", 0)
+                ]
+                pre_swatch.roughnessOffset = swatch_data.get("roughnessOffset", {}).get("Value", 0)
+                pre_swatch.scratchColorFlag = swatch_data.get("scratchColorFlag", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.scratchColor = [
+                    swatch_data.get("scratchColor", {}).get("Value", {}).get("R_value", 0),
+                    swatch_data.get("scratchColor", {}).get("Value", {}).get("G_value", 0),
+                    swatch_data.get("scratchColor", {}).get("Value", {}).get("B_value", 0)
+                ]
+                pre_swatch.scratchRoughnessOffset = swatch_data.get("scratchRoughnessOffset", {}).get("Value", 0)
+                pre_swatch.Use_Emissive = swatch_data.get("Use Emissive?", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.emissiveIntensity = swatch_data.get("emissiveIntensity", {}).get("Value", 0)
+                pre_swatch.emissiveAmount = swatch_data.get("emissiveAmount", {}).get("Value", 0)
+                pre_swatch.Use_Alpha = swatch_data.get("Use Alpha?", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.Use_Subsurface_Scattering = swatch_data.get("Use Subsurface Scattering?", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.Hero_Reveal = swatch_data.get("Hero Reveal", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.Color_Blend = swatch_data.get("Color Blend", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.Normal_Blend = swatch_data.get("Normal Blend", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.Ignore_Texel_Density_Scalar = swatch_data.get("Ignore Texel Density Scalar", {}).get("Value", {}).get("Selected", "")
+                
+                # Append the PreSwatch object to the globalDamageSwatch attribute of the rucy_tag_object
+                rucy_tag_object.globalEmissiveSwatch.append(pre_swatch)
+            
+            
+            #get grimeSwatch data
+            if "grimeSwatch" in data["info"]:
+                swatch_data = data["info"]["grimeSwatch"]
+                
+                # Initialize PreSwatch object
+                pre_swatch = PreSwatch()
+                
+                # Set PreSwatch attributes
+                pre_swatch.elementID = swatch_data.get("elementID", {}).get("Value", 0)
+                pre_swatch.Description = swatch_data.get("Description", {}).get("Value", "")
+                
+                #build new swatch class object from here
+                swatch_obj = swatch()
+                swatch_obj.Ref_id_int = swatch_data.get("Swatch", {}).get("Value", {}).get("Ref_id_int", [])
+                
+                #append swatch cmsw tag to PreSwatch
+                pre_swatch.Swatch.append(get_cmsw_tag_data(swatch_obj, hirt_path, deploy_dir, export_dir))
+                
+                pre_swatch.gradientColorFlag = swatch_data.get("gradientColorFlag", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.gradientTopColor = [
+                    swatch_data.get("gradientTopColor", {}).get("Value", {}).get("R_value", 0),
+                    swatch_data.get("gradientTopColor", {}).get("Value", {}).get("G_value", 0),
+                    swatch_data.get("gradientTopColor", {}).get("Value", {}).get("B_value", 0)
+                ]
+                pre_swatch.gradientMidColor = [
+                    swatch_data.get("gradientMidColor", {}).get("Value", {}).get("R_value", 0),
+                    swatch_data.get("gradientMidColor", {}).get("Value", {}).get("G_value", 0),
+                    swatch_data.get("gradientMidColor", {}).get("Value", {}).get("B_value", 0)
+                ]
+                pre_swatch.gradientBottomColor = [
+                    swatch_data.get("gradientBottomColor", {}).get("Value", {}).get("R_value", 0),
+                    swatch_data.get("gradientBottomColor", {}).get("Value", {}).get("G_value", 0),
+                    swatch_data.get("gradientBottomColor", {}).get("Value", {}).get("B_value", 0)
+                ]
+                pre_swatch.roughnessOffset = swatch_data.get("roughnessOffset", {}).get("Value", 0)
+                pre_swatch.scratchColorFlag = swatch_data.get("scratchColorFlag", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.scratchColor = [
+                    swatch_data.get("scratchColor", {}).get("Value", {}).get("R_value", 0),
+                    swatch_data.get("scratchColor", {}).get("Value", {}).get("G_value", 0),
+                    swatch_data.get("scratchColor", {}).get("Value", {}).get("B_value", 0)
+                ]
+                pre_swatch.scratchRoughnessOffset = swatch_data.get("scratchRoughnessOffset", {}).get("Value", 0)
+                pre_swatch.Use_Emissive = swatch_data.get("Use Emissive?", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.emissiveIntensity = swatch_data.get("emissiveIntensity", {}).get("Value", 0)
+                pre_swatch.emissiveAmount = swatch_data.get("emissiveAmount", {}).get("Value", 0)
+                pre_swatch.Use_Alpha = swatch_data.get("Use Alpha?", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.Use_Subsurface_Scattering = swatch_data.get("Use Subsurface Scattering?", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.Hero_Reveal = swatch_data.get("Hero Reveal", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.Color_Blend = swatch_data.get("Color Blend", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.Normal_Blend = swatch_data.get("Normal Blend", {}).get("Value", {}).get("Selected", "")
+                pre_swatch.Ignore_Texel_Density_Scalar = swatch_data.get("Ignore Texel Density Scalar", {}).get("Value", {}).get("Selected", "")
+                
+                # Append the PreSwatch object to the globalDamageSwatch attribute of the rucy_tag_object
+                rucy_tag_object.grimeSwatch.append(pre_swatch)
+            
+            #get rest of main info data
+            rucy_tag_object.emissiveAmount = info_data.get("emissiveAmount", {}).get("Value", 0)
+            rucy_tag_object.emissiveIntensity = info_data.get("emissiveIntensity", {}).get("Value", 0)
+            rucy_tag_object.scratchAmount = info_data.get("scratchAmount", {}).get("Value", 0)
+            rucy_tag_object.grimeAmount = info_data.get("grimeAmount", {}).get("Value", 0)
+
+
+        # Process the regions
+        if "regions" in data:
+            for reg in data["regions"]:
+                new_region = region()
+                new_region.name = reg["name"]["Value"]
+                new_region.coatingMaterialOverride = reg["coatingMaterialOverride"]["Value"]
+                
+                if "intentions" in reg:
+                    for intent in reg["intentions"]:
+                        new_intention = intentions()
+                        new_intention.name = intent["name"]["Value"]
+                        
+                        if "info" in intent:
+                            pre_swatch = PreSwatch()
+                            
+                            info_data = intent["info"]
+                            
+                            pre_swatch.elementID = info_data.get("elementID", {}).get("Value", 0)
+                            pre_swatch.Description = info_data.get("Description", {}).get("Value", "")
+                            
+                            #build new swatch class object from here
+                            swatch_obj = swatch()
+                            swatch_obj.Ref_id_int = info_data.get("Swatch", {}).get("Value", {}).get("Ref_id_int", [])
+                            
+                            #append swatch cmsw tag to PreSwatch
+                            pre_swatch.Swatch.append(get_cmsw_tag_data(swatch_obj, hirt_path, deploy_dir, export_dir))
+                            
+                            
+                            pre_swatch.gradientColorFlag = info_data.get("gradientColorFlag", {}).get("Value", {}).get("Selected", "")
+                            
+                            gradientTopColor = info_data.get("gradientTopColor", {}).get("Value", {})
+                            pre_swatch.gradientTopColor = [gradientTopColor.get("R_value", 0), gradientTopColor.get("G_value", 0), gradientTopColor.get("B_value", 0)]
+                            
+                            gradientMidColor = info_data.get("gradientMidColor", {}).get("Value", {})
+                            pre_swatch.gradientMidColor = [gradientMidColor.get("R_value", 0), gradientMidColor.get("G_value", 0), gradientMidColor.get("B_value", 0)]
+                            
+                            gradientBottomColor = info_data.get("gradientBottomColor", {}).get("Value", {})
+                            pre_swatch.gradientBottomColor = [gradientBottomColor.get("R_value", 0), gradientBottomColor.get("G_value", 0), gradientBottomColor.get("B_value", 0)]
+                            
+                            pre_swatch.roughnessOffset = info_data.get("roughnessOffset", {}).get("Value", 0)
+                            pre_swatch.scratchColorFlag = info_data.get("scratchColorFlag", {}).get("Value", {}).get("Selected", "")
+                            
+                            scratchColor = info_data.get("scratchColor", {}).get("Value", {})
+                            pre_swatch.scratchColor = [scratchColor.get("R_value", 0), scratchColor.get("G_value", 0), scratchColor.get("B_value", 0)]
+                            
+                            pre_swatch.scratchRoughnessOffset = info_data.get("scratchRoughnessOffset", {}).get("Value", 0)
+                            pre_swatch.Use_Emissive = info_data.get("Use Emissive?", {}).get("Value", {}).get("Selected", "")
+                            pre_swatch.emissiveIntensity = info_data.get("emissiveIntensity", {}).get("Value", 0)
+                            pre_swatch.emissiveAmount = info_data.get("emissiveAmount", {}).get("Value", 0)
+                            pre_swatch.Use_Alpha = info_data.get("Use Alpha?", {}).get("Value", {}).get("Selected", "")
+                            pre_swatch.Use_Subsurface_Scattering = info_data.get("Use Subsurface Scattering?", {}).get("Value", {}).get("Selected", "")
+                            pre_swatch.Hero_Reveal = info_data.get("Hero Reveal", {}).get("Value", {}).get("Selected", "")
+                            pre_swatch.Color_Blend = info_data.get("Color Blend", {}).get("Value", {}).get("Selected", "")
+                            pre_swatch.Normal_Blend = info_data.get("Normal Blend", {}).get("Value", {}).get("Selected", "")
+                            pre_swatch.Ignore_Texel_Density_Scalar = info_data.get("Ignore Texel Density Scalar", {}).get("Value", {}).get("Selected", "")
+    
+                            new_intention.infoSwatch.append(pre_swatch)
+                        
+                        new_region.intentions_list.append(new_intention)
+                
+                rucy_tag_object.regions_list.append(new_region)
+
+    return rucy_tag_object
+
+
+#gather all RUCS tag data from RUCS JSON
+def get_rucs_tag_data(rucs_tag_object, hirt_path, deploy_dir, export_dir):
+    rucs_id = rucs_tag_object.Ref_id_int
+
+    #send rucs ID to HIRT to get JSON file
+    
+    
+    #path to current rucs json
+    rucs_json_path = "example\\mat_file.json"
+    
+    # read JSON file and build style_list for every entry of styles
+    with open(rucs_json_path, 'r') as file:
+        data = json.load(file)
+    
+        if "styles" in data:
+            for entry in data["styles"]:
+                # Initialize style object
+                sty = style()
+                
+                sty.name = entry.get("name", {}).get("Value", "")
+                sty.variantName = entry.get("variantName", {}).get("Value", "")
+                sty.Ref_id_int = entry.get("styleRef", {}).get("Value", {}).get("Ref_id_int", "")
+                
+                #go and complete the rest of the style class object and send it back
+                sty = get_rucy_tag_data(sty, hirt_path, deploy_dir, export_dir)
+                
+                # Append to style_list of rucs_tag_object
+                rucs_tag_object.style_list.append(sty)
+    
+
+    return rucs_tag_object
+
+#gather all MAT tag data from MAT JSON
+def get_mat_tag_data(mat_tag_object, hirt_path, deploy_dir, export_dir):
+    mat_id = mat_tag_object.Ref_id_int
+
+    #send mat ID to HIRT to get JSON file
+    
+    #path to current mat json
+    mat_json_path = "example\\mat_file.json"
+    
+    
+    
+    # read JSON file and build material_parameter_list for every entry of material parameters
+    with open(mat_json_path, 'r') as file:
+        data = json.load(file)
+        
+        if "material parameters" in data:
+            for entry in data["material parameters"]:
+                # initialize class object
+                mat_param = material_parameter()
+
+                mat_param.parameter_name = entry.get("parameter name", {}).get("Value", "")
+                mat_param.parameter_type = entry.get("parameter type", {}).get("Value", {}).get("Selected", "")
+                mat_param.bitmap_ID = entry.get("bitmap", {}).get("Value", {}).get("Ref_id_int", "")
+                mat_param.real = entry.get("real", {}).get("Value", 0)
+                mat_param.color = [
+                    entry.get("color", {}).get("Value", {}).get("A_value", 0),
+                    entry.get("color", {}).get("Value", {}).get("R_value", 0),
+                    entry.get("color", {}).get("Value", {}).get("G_value", 0),
+                    entry.get("color", {}).get("Value", {}).get("B_value", 0)
+                ]
+                mat_param.vector = [
+                    entry.get("vector", {}).get("Value", {}).get("X", 0),
+                    entry.get("vector", {}).get("Value", {}).get("Y", 0),
+                    entry.get("vector", {}).get("Value", {}).get("Z", 0)
+                ]
+
+                mat_tag_object.material_parameter_list.append(mat_param)
+        
+        #get bitmap_list        
+        if "postprocess definition" in data:
+            for entry in data["postprocess definition"]:
+                for texture in entry.get("textures", []):
+                    bitmap_ref = texture.get("bitmap reference", {}).get("Value", {})
+                    ref_id = bitmap_ref.get("Ref_id_int", None)
+                    if ref_id is not None:
+                        mat_tag_object.bitmap_list.append(ref_id)
+                        
+        # get material_style_info
+        if "style info" in data:
+            for entry in data["style info"]:
+                mat_style_inf = mat_style_info()
+                mat_style = material_style_tag()
+
+                #start building material style tag data
+                mat_style.material_style = [x.get("Value", {}).get("Ref_id_int", "") for x in entry.get("material style", [])]
+
+                #finish getting material style info data
+                mat_style_inf.region_name = entry.get("region name", {}).get("Value", "")
+                mat_style_inf.base_intention = entry.get("base intention", {}).get("Value", "")
+                mat_style_inf.mask_0_red_channel_intention = entry.get("mask 0 red channel intention", {}).get("Value", "")
+                mat_style_inf.mak_0_green_channel_intention = entry.get("mask 0 green channel intention", {}).get("Value", "")
+                mat_style_inf.mask_0_blue_channel_intention = entry.get("mask 0 blue channel intention", {}).get("Value", "")
+                mat_style_inf.mask_1_red_channel_intention = entry.get("mask 1 red channel intention", {}).get("Value", "")
+                mat_style_inf.mask_1_green_channel_intention = entry.get("mask 1 green channel intention", {}).get("Value", "")
+                mat_style_inf.mask_1_blue_channel_intention = entry.get("mask 1 blue channel intention", {}).get("Value", "")
+                mat_style_inf.num_layers = entry.get("Number of Supported Layers For Material Shader Based On Mask Textures", {}).get("Value", {}).get("Selected", "")
+
+                #get remaining material style tag data
+                mat_style = get_rucs_tag_data(mat_style, deploy_dir, export_dir)
+                
+                #append completed mat_style class object
+                mat_style_inf.material_style.append(mat_style)
+                
+                #after getting all field append the complete mat_style_info object
+                mat_tag_object.mat_style_info_list.append(mat_style_inf)   
+
+    #send back completed mat_tag_object
+    return mat_tag_object
+
+def get_mode_tag_data(mode_tag_object, hirt_path, deploy_dir, export_dir):
+    mode_id = mode_tag_object.ID 
+    
+    #send mode ID to HIRT to get JSON file
+    
+    
+    #read JSON file and grab list of all mat tag IDs 
+
+
+    #send mat IDs to new function called get_mat_tag_data for each mat ID
+    for mat_id in mat_id_list:
+        #initialize Mat object
+        mat_tag_object = material_tag()
+        mat_tag_object.Ref_id_int = mat_id
+        
+        mode_tag_object.material_list.append(get_mat_tag_data(mat_tag_object))
+
+
+    #send back completed mode tag object
+    return mode_tag_object
+
+## CLASSES FOR HALO INFINITE TAGS
+
+# render_model MODE tag class
+class mode_tag:
+    ID = ""
+    material_list = []
+    
+
+# material MAT tag class
+class material_tag:
+    Ref_id_int = ""
+    material_parameter_list = []
+    mat_style_info_list = []
+    bitmap_list = [] #in the postprocess definition field
+
+class material_parameter:
+    parameter_name = ""
+    parameter_type = ""
+    bitmap_ID = ""
+    real = 0
+    color = [] # RGB
+    vector = [] #XYZ
+    
+# class texture:
+    # bitmap_ID = ""
+
+
+# class mat_style info
+class mat_style_info:
+    material_style = [] # to store the material style tag data
+    region_name = ""
+    base_intention = ""
+    mask_0_red_channel_intention = ""
+    mak_0_green_channel_intention = ""
+    mask_0_blue_channel_intention = ""
+    mask_1_red_channel_intention = ""
+    mask_1_green_channel_intention = ""
+    mask_1_blue_channel_intention = ""
+    num_layers = ""
+    
+# class for RUCS tag info    
+class material_style_tag:
+    Ref_id_int = ""
+    style_list = []
+    #visorSwatch =  ""
+    
+# class for style RUCY tag
+class style:
+    Ref_id_int = ""         #from RUCS tag
+    name = ""               #from RUCS tag
+    variantName = ""        #from RUCS tag
+    globalDamageSwatch = [] 
+    heroDamageSwatch = []
+    globalEmissiveSwatch = []
+    emissiveAmount = 0
+    emissiveIntensity = 0
+    scratchAmount = 0
+    grimeSwatch = []
+    grimeAmount = 0
+    regions_list = []
+    
+# stores the region data from RUCY tag    
+class region:
+    name = ""
+    coatingMaterialOverride = ""
+    intentions_list = []
+
+class intentions:
+    name = ""
+    infoSwatch = []
+
+
+class PreSwatch:
+    elementID = 0
+    Description = ""
+    Swatch = []
+    gradientColorFlag = ""
+    gradientTopColor = [] #RGB
+    gradientMidColor = [] #RGB
+    gradientBottomColor = [] #RGB
+    roughnessOffset = 0
+    
+    scratchColorFlag = ""
+    scratchColor = [] #RGB
+    scratchRoughnessOffset = 0
+    
+    Use_Emissive = ""
+    emissiveIntensity = 0
+    emissiveAmount = 0
+    
+    Use_Alpha = ""
+    Use_Subsurface_Scattering = ""
+    Hero_Reveal = ""
+    Color_Blend = ""
+    Normal_Blend = ""
+    Ignore_Texel_Density_Scalar = ""
+    
+# class for swatch CMSW tag info
+class swatch:
+    Ref_id_int = "" #from RUCY tag
+    Parent = ""
+    
+    #Base
+    colorAndRoughnessTextureTransform = [] #XY
+    normalTextureTransform = [] #XY
+    colorGradientMap = ""
+    gradientTopColor = [] #RGB
+    gradientMidColor = [] #RGB
+    gradientBottomColor = [] #RGB
+    roughnessWhite = 0
+    roughnessBlack = 0
+    normalDetailMap = ""
+    metallic = 0
+    ior = 0
+    albedoTintSpec = 0
+    
+    #Scratches
+    scratchColor = [] #RGB
+    scratchBrightness = 0
+    scratchRoughness = 0
+    scratchMetallic = 0
+    scratchIOR = 0
+    scratchAlbedoTintSpec = 0
+    
+    #Subsurface
+    sssIntensity = 0
+    
+    #Emissive
+    emissiveIntensity = 0
+    emissiveAmount = 0
+    
 
 #parses the json sent to it and retrives Mat IDs for Get_Mat_ID
 def read_and_extract_ref_id(path_to_json):
@@ -15325,7 +16105,7 @@ def Get_Mat_ID(path):
             # Read JSON and get Ref_id_int values
             ref_id_int_list = read_and_extract_ref_id(full_path)
             # Delete the JSON file
-            os.remove(full_path)
+            #os.remove(full_path)
             return ref_id_int_list
     return []
 
@@ -15559,7 +16339,20 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type):
                 print("Exporting Bitmap ID: " + f'{bitm_id}')
                 print("------------------------------------")
                 
-                
+            
+
+            # ITERATE THROUGH EACH MAT tag JSON and get all RUC tag IDs and generate JSON for each of those
+            #as well as region name and base intention
+           
+            
+            
+            
+            
+            
+            
+            
+
+            
             #read the JSON file to get list of bitm IDs to be extracted and send them to the right folder
             #for bitm_id in json_file:
                 
@@ -17221,7 +18014,73 @@ class CR4B_CreateModelReport(bpy.types.Operator):
                 
             #call function called HIRT_Report() that takes map, export_dir, and "scenario_structure_bsp"
             HIRT_Report(export_dir, "render_model", halo_ver)
+            
+            print(report_dir)
+            
+            #if HaloInfiniteS2TagList.txt exists then use it to make new reports 
+            if os.path.exists(report_dir + "\\HaloInfiniteS2TagList.txt"):
+                print("HaloInfiniteS2TagList.txt found. Trying to build mini tag reports based of old season names.")
+                
+                print(report_dir)
+                
+                HaloInfiniteS2_mode_tags_path = report_dir + "\\HaloInfiniteS2_mode_tags.txt"  # render_model tags
+                HaloInfiniteS2_rtgo_tags_path = report_dir + "\\HaloInfiniteS2_rtgo_tags.txt"  # runtime_geo tags
+                HaloInfiniteS2_sbsp_tags_path = report_dir + "\\HaloInfiniteS2_bsps_tags.txt"  # scenario_structure_bsp tags
+                HaloInfiniteS2_pmdf_tags_path = report_dir + "\\HaloInfiniteS2_pmdf_tags.txt"  # armor fx tags
+                HaloInfiniteS2_cmsw_tags_path = report_dir + "\\HaloInfiniteS2_cmsw_tags.txt"  # swatch tags
+                
+                # Clear existing content 
+                with open(HaloInfiniteS2_mode_tags_path, 'w') as f:
+                    f.write("")
+                # Clear existing content 
+                with open(HaloInfiniteS2_rtgo_tags_path, 'w') as f:
+                    f.write("")
+                # Clear existing content
+                with open(HaloInfiniteS2_sbsp_tags_path, 'w') as f:
+                    f.write("")
+                # Clear existing content 
+                with open(HaloInfiniteS2_pmdf_tags_path, 'w') as f:
+                    f.write("")
+                # Clear existing content 
+                with open(HaloInfiniteS2_cmsw_tags_path, 'w') as f:
+                    f.write("")
+                
+                #create content for all needed tag reports
+                Halo_Infinite_Tag_List_Report(report_dir + "\\HaloInfiniteS2TagList.txt", report_dir)
+            else:
+                print("Old Halo Infinite Tag List not found")
+                
+                
+#to help with processing each line of the old season tags for Halo Infinite                
+def process_line_based_on_tags(line, report_dir):
+    # Define tag-to-path mapping
+    tag_file_mapping = {
+        ".render_model": os.path.join(report_dir, "HaloInfiniteS2_mode_tags.txt"),
+        ".runtime_geo": os.path.join(report_dir, "HaloInfiniteS2_rtgo_tags.txt"),
+        ".scenario_structure_bsp": os.path.join(report_dir, "HaloInfiniteS2_bsps_tags.txt"),
+        ".particle_model": os.path.join(report_dir, "HaloInfiniteS2_pmdf_tags.txt")
+    }
 
+    # Check each tag in the mapping
+    for tag, file_path in tag_file_mapping.items():
+        if tag in line and "resource_handle" not in line:
+            with open(file_path, 'a') as f:
+                f.write(line)                
+                
+                
+#create mini tag reports based on old Tag IDs and file names from old seasons
+def Halo_Infinite_Tag_List_Report(report_file_path, report_dir):
+    print ("Scanning old tags file")
+    
+    # Read each line from report_file_path
+    with open(report_file_path, 'r') as f:
+        lines = f.readlines()
+
+    # Process each line
+    for line in lines:
+        process_line_based_on_tags(line, report_dir)
+        
+    
     
 #update Settings.JSON file for data folder    
 def update_json_file(file_path, new_data_folder_path):
