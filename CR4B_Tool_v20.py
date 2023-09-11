@@ -15327,13 +15327,16 @@ def CheckOldSeasonNames(input_str, tag_type, export_dir):
                 # Check if "{g}" is in the basename
                 if '{g}' in base_name:
                     # Return the parent directory's name
-                    return os.path.basename(os.path.dirname(path))
+                    new_base_name = (os.path.basename(os.path.dirname(path)) + " - [" + input_str + "]")
+                    return new_base_name
                 else:
-                    return (base_name + "[" + input_str + "]")
+                    new_base_name = (base_name + " - [" + input_str + "]")
+                    return new_base_name
 
 
     # If no matches found, return starting string back
-    return (input_str + " - (Season 3+ model)")
+    new_input_str = (input_str + " - (Season 3+ model)")
+    return new_input_str
 
 # Functions for file extraction
 def Tool_Ass_Extract(files):
