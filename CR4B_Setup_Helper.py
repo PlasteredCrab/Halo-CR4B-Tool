@@ -36,7 +36,7 @@ class SimpleOperator(bpy.types.Operator):
         #Path to the Reclaimer CLI folder
         reclaimer_cli_path = "C:\\Users\\jeffr\\Documents\\CR4B Tool GitHub\\CR4B Tool v20\\GitHub\\Reclaimer CLI\\"
         
-        hirt_path = "D:\\Halo Infinite\\HIRT (urium tool)\\HIRT CLI (9-8-2023)\\"
+        hirt_path = "C:\\Users\\jeffr\\Documents\\CR4B Tool GitHub\\CR4B Tool v20\\GitHub\\HIRT CLI\\"
         
         h5bitmaptool_path = "D:\\Halo Stuff\\Halo 5 Xbox Bitmap extractor\\Halo 5 Xbox Extractor CLI\\bitmap converter\\"
         
