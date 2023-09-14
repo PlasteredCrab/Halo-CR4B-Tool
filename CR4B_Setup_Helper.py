@@ -20,7 +20,7 @@ class SimpleOperator(bpy.types.Operator):
         # Here you can define the value you want to be applied into your CR4B Tool Preferences Panel
         
         #Path to the Export Assets Here folder
-        export_path_value = "C:\\Users\\jeffr\\Documents\\CR4B Tool GitHub\\CR4B Tool v17\\Export Assets Here\\"
+        export_path_value = "C:\\Users\\jeffr\\Documents\\CR4B Tool GitHub\\CR4B Tool v20\\GitHub\\Export Assets Here\\"
         
         #Path to the CR4BTool_shaders.blend file
         node_group_file_value = "C:\\Users\\jeffr\\Documents\\CR4B Tool GitHub\\CR4B Tool v20\\GitHub\\CR4BTool_shaders.blend"
@@ -51,7 +51,7 @@ class SimpleOperator(bpy.types.Operator):
         haloinfinite_map_path = "G:\\SteamLibrary\\steamapps\\common\\Halo Infinite\\deploy\\"
 
         # Name of the current version of CR4BTool
-        addon_name = "CR4B_Tool_v20"
+        addon_name = "CR4B_Tool_v21"
         
         # Accessing preferences from another addon
         bpy.context.preferences.addons[addon_name].preferences.export_path = export_path_value
