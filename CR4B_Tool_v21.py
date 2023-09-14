@@ -16265,6 +16265,141 @@ def Get_Bitm_ID(path):
                             master_ref_id_list.append(ref_id_int)
     return master_ref_id_list
 
+#returns list of all bitmap IDs used by a pmdf tag ID
+def get_pmdf_bitm_list(input_str, export_dir):  #input_str is expected to be something like "A54SA3D_-184563782"
+    filename = export_dir + "\\Reports\\prt3_ref_list.json"
+    
+    # Extract the number after the underscore from the input string
+    if "_" in input_str:
+        target_ref_id = int(input_str.split('_')[1])
+    else:
+        target_ref_id = int(input_str)  # Convert the string to an integer
+
+    # Load the JSON file
+    with open(filename, 'r') as f:
+        data = json.load(f)
+
+    # Iterate over each entry in the list to find the matching model_ref
+    for entry in data:
+        if entry['model_ref'] == target_ref_id:
+            return entry['bitmap_references']
+
+    # If no matches are found, return an empty list
+    return []
+
+
+#read all JSON files for prt3 tags and make new report list
+def create_new_prt3_list(export_dir):
+    prt3_dir = export_dir + "\\prt3\\"
+    
+    new_prt3_file = export_dir + "\\prt3_ref_list.json"
+    
+    json_files = scan_directory_for_jsons(prt3_dir)
+
+    processed_data = []
+    for filepath in json_files:
+        result = process_prt3_json_file(filepath)
+        if result:
+            processed_data.append(result)
+
+    with open(new_prt3_file, 'w') as f:
+        json.dump(processed_data, f, indent=4)
+        
+# used by create_new_prt3_list()
+def scan_directory_for_jsons(directory):
+    return [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.json')]
+
+def process_prt3_json_file(filepath):
+    with open(filepath, 'r') as f:
+        data = json.load(f)
+    
+    print("Data type:", type(data))
+    if isinstance(data, list):
+        print("First few list entries:", data[:3])
+    elif isinstance(data, dict):
+        print("Keys in the dictionary:", list(data.keys()))
+    
+    print("test1")
+    model_ref = data.get('Model', {}).get('Value', {}).get('Ref_id_int', -1)
+    
+    if model_ref == -1:
+        return None
+
+    bitmap_references = []
+
+    # Ensure we're inside "actual material?" before proceeding
+    if 'actual material?' in data:
+        postprocess_definitions = data['actual material?'].get('postprocess definition', [])
+        print("test2")
+        for definition in postprocess_definitions:
+            textures = definition.get('textures', [])
+            for texture in textures:
+                bitmap_ref = texture.get('bitmap reference')
+                print("test3")
+                if bitmap_ref:
+                    ref_int_id = bitmap_ref.get('Value', {}).get('Ref_id_int', -1)
+                    print("test4")
+                    if ref_int_id != -1:
+                        bitmap_references.append(ref_int_id)
+                    else:
+                        # Log any missing Ref_id_int values
+                        print(f"Missing Ref_id_int in bitmap reference in file {filepath}")
+
+    material_shader_ref = data.get('actual material?', {}).get('material shader', {}).get('Value', {}).get('Ref_id_int', -1)
+    print("test5")
+    
+    return {
+        'filename': os.path.basename(filepath),
+        'model_ref': model_ref,
+        'bitmap_references': bitmap_references,
+        'material_shader_ref': material_shader_ref
+    }
+
+#this creates JSON files for every single prt3 file in the game (ONLY DO ONCE PER SEASON)
+def scan_prt3_list(export_dir):
+    hirt_path = bpy.context.preferences.addons[__name__].preferences.hirt_path
+    prt3_list_dir = os.path.join(export_dir, "HaloInfinite_prt3_report.txt")
+    #prt3_JSON_dir = os.path.join(export_dir, "HaloInfinite_prt3_JSON")
+    halo_inf_deploy = bpy.context.preferences.addons[__name__].preferences.haloinfinite_map_path
+    halo_inf_deploy = remove_ending_backslash(halo_inf_deploy)
+    
+    
+    # Check if the file exists
+    if not os.path.exists(prt3_list_dir):
+        print(f"The file {prt3_list_dir} does not exist!")
+        return
+
+    # Read the prt3 file and create JSON files for each one (THIS TAKES FOREVER)
+    with open(prt3_list_dir, 'r') as file:
+        for line in file:
+            # Split by '_' and then split the second part by '.'
+            parts = line.strip().split('_')
+            if len(parts) > 1:
+                prt3_id = parts[1].split('.')[0]               
+
+                cmd = f'HaloInfiniteResearchTools tags export onpath -d "{halo_inf_deploy}" -o "{export_dir}" -ti "{prt3_id}" -tif true -jp false -co true'
+
+            try:
+                print("Trying to run prt3 JSON CMD: " + cmd)
+                
+                # Change to the directory of the tool
+                os.chdir(os.path.dirname(hirt_path))
+            
+                final_path = ""
+            
+                # Run the command and capture the output
+                result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
+
+                # Print the output
+                print(result.stdout)
+                
+            except Exception as e:
+                print(f'HIRT did not like the command it was sent: {str(e)}')
+                
+                pass 
+            pass
+
+
 #build model report using HIRT
 def HIRT_Report(export_dir, tag_type, halo_ver):
     #talk to HIRT and send a report command to it along with the other arguments
@@ -16291,9 +16426,12 @@ def HIRT_Report(export_dir, tag_type, halo_ver):
         export_dir = (og_export_dir + "\\HaloInfinite_pmdf_report.txt")
         export_dir_list.append(export_dir)
         cmd_list.append(f'HaloInfiniteResearchTools tags list -d "{halo_inf_deploy}" -t "pmdf" -o "{export_dir}"')    
-            
+        export_dir = (og_export_dir + "\\HaloInfinite_prt3_report.txt")
+        export_dir_list.append(export_dir)
+        cmd_list.append(f'HaloInfiniteResearchTools tags list -d "{halo_inf_deploy}" -t "prt3" -o "{export_dir}"')
+        
             #cmd = f'HaloInfiniteResearchTools tags list -d "{halo_inf_deploy}" -t "mode" -o "{export_dir}"' 
-             
+        
             
     elif tag_type == "scenario_structure_bsp":
         export_dir = export_dir + "\\HaloInfinite_level_report.txt"
@@ -16301,6 +16439,8 @@ def HIRT_Report(export_dir, tag_type, halo_ver):
     else:
         print("unsupported tag type for HIRT Report")
 
+    
+    
     
 
     hirt_path = bpy.context.preferences.addons[__name__].preferences.hirt_path
@@ -16378,6 +16518,8 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
     hirt_path = bpy.context.preferences.addons[__name__].preferences.hirt_path
     img_format = bpy.context.scene.image_format_dropdown
 
+    og_export_dir = bpy.context.preferences.addons[__name__].preferences.export_path
+
     if (img_format == ".png"):
         img_format = "PNG"
     elif (img_format == ".tif"):
@@ -16419,7 +16561,7 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
             # WILL CREATE NEW FOLDER with tag_file within the name so go there and grab the .fbx and move it back to Export Assets Here and then import it
 
             #CMD for dumping JSON file of mode tag (need to do the same later for JSON dump of all mat tags and their referenced bitm tags)
-            tag_json_cmd = f'HaloInfiniteResearchTools tags export onpath -d "{map_path}" -o "{tex_dir}" -ti "{tag_id}" -tif true -jp false -co true'  
+            #tag_json_cmd = f'HaloInfiniteResearchTools tags export onpath -d "{map_path}" -o "{tex_dir}" -ti "{tag_id}" -tif true -jp false -co true'  
             
 
         try:
@@ -16560,7 +16702,38 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
                 if os.path.exists(mode_folder):
                     shutil.rmtree(mode_folder)
 
-            
+            elif (tag_type == "particle_model"): 
+
+
+                #grab all bitm IDs from all mat ID JSONs     MAKE SURE THE FOLDER NAME "mat " doesn't mess things up!!!
+                bitm_id_list = get_pmdf_bitm_list(tag_id, export_dir)
+                
+                #remove any duplicate texture ID from list
+                bitm_id_list = remove_duplicates(bitm_id_list)
+                
+                for bitm_id in bitm_id_list:
+                    #build bitm_json_cmd
+                    bitm_export_cmd = f'HaloInfiniteResearchTools texture export -d "{map_path}" -ti "{bitm_id}" -o "{tex_dir}" -e "{img_format}"'
+
+                    #run bitm_export_cmd
+                    result = subprocess.run(bitm_export_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True, shell=True)
+
+                    # Print the output
+                    #print(result.stdout)
+                    print("------------------------------------")
+                    print("Exporting Bitmap ID: " + f'{bitm_id}')
+                    print("------------------------------------")
+                
+                # Delete the 'mat' and 'mode' folders if they exist
+                # mat_folder = os.path.join(tex_dir, "mat")
+                # matt_folder = os.path.join(tex_dir, "mat ")
+                # mode_folder = os.path.join(tex_dir, "mode")
+                # if os.path.exists(mat_folder):
+                    # shutil.rmtree(mat_folder)
+                # if os.path.exists(matt_folder):
+                    # shutil.rmtree(matt_folder)
+                # if os.path.exists(mode_folder):
+                    # shutil.rmtree(mode_folder)
 
         except Exception as e:
             print(f'HIRT did not like the command it was sent: {str(e)}')
@@ -16739,9 +16912,45 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
                 if os.path.exists(mode_folder):
                     shutil.rmtree(mode_folder)
 
+            elif (tag_type == "particle_model"): 
+                
+
+                #grab all bitm IDs from all mat ID JSONs     MAKE SURE THE FOLDER NAME "mat " doesn't mess things up!!!
+                bitm_id_list = get_pmdf_bitm_list(tag_id, og_export_dir)
+                
+                #remove any duplicate texture ID from list
+                bitm_id_list = remove_duplicates(bitm_id_list)
+                
+                for bitm_id in bitm_id_list:
+                    #build bitm_json_cmd
+                    bitm_export_cmd = f'HaloInfiniteResearchTools texture export -d "{map_path}" -ti "{bitm_id}" -o "{tex_dir}" -e "{img_format}"'
+
+                    #run bitm_export_cmd
+                    result = subprocess.run(bitm_export_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True, shell=True)
+
+                    # Print the output
+                    #print(result.stdout)
+                    print("------------------------------------")
+                    print("Exporting Bitmap ID: " + f'{bitm_id}')
+                    print("------------------------------------")
+                
+                # Delete the 'mat' and 'mode' folders if they exist
+                # mat_folder = os.path.join(tex_dir, "mat")
+                # matt_folder = os.path.join(tex_dir, "mat ")
+                # mode_folder = os.path.join(tex_dir, "mode")
+                # if os.path.exists(mat_folder):
+                    # shutil.rmtree(mat_folder)
+                # if os.path.exists(matt_folder):
+                    # shutil.rmtree(matt_folder)
+                # if os.path.exists(mode_folder):
+                    # shutil.rmtree(mode_folder)
+
+
             print("----------------------------------------------------")
             print("Finished Exporting Model and/or Textures for " + f'{tag_id}')
             print("----------------------------------------------------")
+
+            
 
         except Exception as e:
             print(f'HIRT did not like the command it was sent: {str(e)}')
@@ -18212,6 +18421,39 @@ class CR4B_CreateModelReport(bpy.types.Operator):
             HIRT_Report(export_dir, "render_model", halo_ver)
             
             print(report_dir)
+            
+            
+            #PRT3 and PMDF Report
+            # now that a prt3 report is created we need to iterate through each line of the report and create JSONs of each one somewhere
+
+# COMMENT THIS OUT BEFORE RELEASE            
+            #scan list and create tons of JSONs (THIS TAKES FOREVER. DO NOT MAKE USERS DO THIS)
+
+# ONLY USE EACH SEASON SINCE IT TAKES HOURS
+#            scan_prt3_list(export_dir)
+
+            #go through each JSON file for each prt3 tag and grab needed texture references
+
+# ONLY USE EACH SEASON SINCE IT TAKES HOURS
+#            create_new_prt3_list(export_dir)
+            
+# COMMENT THIS OUT BEFORE EACH RELEASE
+
+            
+            print(report_dir)
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             #if HaloInfiniteS2TagList.txt exists then use it to make new reports 
             if os.path.exists(report_dir + "\\HaloInfiniteS2TagList.txt"):
