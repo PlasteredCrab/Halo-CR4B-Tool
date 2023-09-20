@@ -15014,7 +15014,7 @@ def get_file_format_items(self, context):
         ]
     if context.scene.halo_version_dropdown in ("Halo Infinite"):
         return [
-            ("fbx", "fbx", "fbx format")
+            ("dae", "dae", "Collada format")
         ]
     else:
         return [
@@ -15091,14 +15091,14 @@ class CR4B_ScanScenarioStructureBSP(bpy.types.Operator):
                 item.name = modified_file_name # Use the modified file name
                 item.path = file_path
         
-        elif (file_format == "fbx" and halo_title == "HaloInfinite"):
+        elif (file_format == "dae" and halo_title == "HaloInfinite"):
             export_dir = bpy.context.preferences.addons[__name__].preferences.export_path
             
             print("Trying to read the level list for " + halo_title)
             
             tags_report_path = os.path.join(export_dir + "Reports\\", halo_title + '_level_report.txt')
             
-            print("Loading levels available for fbx")
+            print("Loading levels available for dae")
             with open(tags_report_path, 'r') as f:
                 lines = f.readlines()
             #loop through final version of the tags_report.txt file created to generate list of models and their paths
@@ -15111,11 +15111,11 @@ class CR4B_ScanScenarioStructureBSP(bpy.types.Operator):
                 item = context.scene.cr4b_file_list.add()
                 file_name_without_extension = os.path.splitext(os.path.basename(tag))[0]
                 modified_file_name = file_name_without_extension # Call the modify function
-                print("before: " + modified_file_name)
+                #print("before: " + modified_file_name)
                 modified_file_name = CheckOldSeasonNames(modified_file_name, "sbsp", export_dir)
-                print("after: " + modified_file_name)
+                #print("after: " + modified_file_name)
                 modified_file_name = modify_filename(modified_file_name, tag) # Call the modify function
-                print("after2: " + modified_file_name)
+                #print("after2: " + modified_file_name)
                 item.name = modified_file_name # Use the modified file name
                 item.path = tag
         
@@ -15236,7 +15236,7 @@ class CR4B_ScanRenderModel(bpy.types.Operator):
                 item.name = modified_file_name # Use the modified file name
                 item.path = file_path
         
-        elif (file_format == "fbx" and halo_title == "HaloInfinite"):
+        elif (file_format == "dae" and halo_title == "HaloInfinite"):
             export_dir = bpy.context.preferences.addons[__name__].preferences.export_path
             
             print("Trying to read the model list for " + halo_title)
@@ -15249,7 +15249,7 @@ class CR4B_ScanRenderModel(bpy.types.Operator):
                 tags_report_path = os.path.join(export_dir + "Reports\\", halo_title + '_pmdf_report.txt')
             
             
-            print("Loading models available for fbx")
+            print("Loading models available for dae")
             with open(tags_report_path, 'r') as f:
                 lines = f.readlines()
             #loop through final version of the tags_report.txt file created to generate list of models and their paths
@@ -15341,13 +15341,13 @@ class CR4B_ScanRenderModel(bpy.types.Operator):
                     item.path = tag
                 
    
-        if (hirt_model_type == "Render Model"):
+        if (hirt_model_type == "Render Model" and bpy.context.scene.halo_version_dropdown == "Halo Infinite"):
             context.scene.cr4b_header_suffix = " Render Models"
                     
-        elif (hirt_model_type == "Runtime Geometry"):
+        elif (hirt_model_type == "Runtime Geometry" and bpy.context.scene.halo_version_dropdown == "Halo Infinite"):
             context.scene.cr4b_header_suffix = " Runtime Geo Models"    
                     
-        elif (hirt_model_type == "Particle Model"):
+        elif (hirt_model_type == "Particle Model" and bpy.context.scene.halo_version_dropdown == "Halo Infinite"):
             context.scene.cr4b_header_suffix = " Particle Models"
         
         else:
@@ -15409,14 +15409,20 @@ def CheckOldSeasonNames(input_str, tag_type, export_dir):
                     return new_base_name
 
 
-    # If no matches found, return starting string back
-    new_input_str = (input_str + " - (Season 3+ model)")
-    return new_input_str
+    temp_str = input_str
+    new_input_str = get_infinite_level_names(input_str, line)
+
+    if new_input_str == temp_str:
+        # If no matches found, return starting string back
+        new_input_str = (input_str + " - (Season 3+ model)")
+        return new_input_str
+    else:
+        return new_input_str
 
 #add additional context to just Halo Infinite level names in the UI list
 def get_infinite_level_names(new_base_name, file_path):
     
-    print(file_path)
+    #print(file_path)
     
     #Campaign
     if ("dungeons" in file_path and "dungeon_banished_ship" in file_path):
@@ -15468,13 +15474,253 @@ def get_infinite_level_names(new_base_name, file_path):
         new_base_name = new_base_name + " - (Behemoth)"
     elif ("va_launchsite" in file_path):
         new_base_name = new_base_name + " - (Launch Site)"
-    elif ("mainmenu" in file_path):
-        new_base_name = new_base_name + " - (Main Menu)"
+    #elif ("mainmenu" in file_path):
+    #    new_base_name = new_base_name + " - (Main Menu)"
+    elif ("25405762" in new_base_name):
+        new_base_name = new_base_name + " - (Academy Drills Cutscene Area)"
+    elif ("-989102645" in new_base_name):
+        new_base_name = new_base_name + " - (Lone Wolves Cutscene Area (Inside))"
+    elif ("2063684228" in new_base_name):
+        new_base_name = new_base_name + " - (Lone Wolves Cutscene Area (Inside 2))"
+    elif ("1100239039" in new_base_name):
+        new_base_name = new_base_name + " - (Lone Wolves Cutscene Area (Outside))"
+    elif ("-855617726" in new_base_name):
+        new_base_name = new_base_name + " - (Season 4 Main Menu Multiplayer Lobby)"
+    elif ("1758680057" in new_base_name):
+        new_base_name = new_base_name + " - (Season 4 Main Menu)"
+    elif ("2093702047" in new_base_name):
+        new_base_name = new_base_name + " - (Season 4 Main Menu Armor Hall)"
+    elif ("-2035931243" in new_base_name):
+        new_base_name = new_base_name + " - (Cliffhanger (Skybox))"
+    elif ("-998734218" in new_base_name):
+        new_base_name = new_base_name + " - (Forge Canvas Mires)"
+    elif ("-1207430960" in new_base_name):
+        new_base_name = new_base_name + " - (Forge Canvas Seafloor)"
+    elif ("-465085666" in new_base_name):
+        new_base_name = new_base_name + " - (Forge Canvas Seafloor (Skybox))"
+    elif ("1243340838" in new_base_name):
+        new_base_name = new_base_name + " - (S4 main menu empty level (maybe old mainmenu levels))"
+    elif ("450713883" in new_base_name):
+        new_base_name = new_base_name + " - (Forge Canvas Institute)"
+    elif ("-1247619257" in new_base_name):
+        new_base_name = new_base_name + " - (Oasis (skybox))"
+    elif ("649403489" in new_base_name):
+        new_base_name = new_base_name + " - (Forge Canvas Ecliptic (Skybox))"
+    elif ("-741982466" in new_base_name):
+        new_base_name = new_base_name + " - (S4 mainmenu unknown shadowbox (maybe old mainmenu levels))"
+    elif ("1059349800" in new_base_name):
+        new_base_name = new_base_name + " - (Scarr (Skybox))"
+    elif ("-555322122" in new_base_name):
+        new_base_name = new_base_name + " - (Forest (Skybox))"
+    elif ("723744743" in new_base_name):
+        new_base_name = new_base_name + " - (Forge Canvas Ecliptic)"
+    elif ("-869520184" in new_base_name):
+        new_base_name = new_base_name + " - (Forge Canvas Mires (Skybox))"
+    elif ("1597539944" in new_base_name):
+        new_base_name = new_base_name + " - (Cliffhanger)"
+    elif ("440977018" in new_base_name):
+        new_base_name = new_base_name + " - (Oasis)"
+    elif ("61041685" in new_base_name):
+        new_base_name = new_base_name + " - (Scarr)"
+    elif ("-1414230524" in new_base_name):
+        new_base_name = new_base_name + " - (S4 mainmenu ui empty level (maybe old mainmenu levels))"
+    elif ("1105658437" in new_base_name):
+        new_base_name = new_base_name + " - (Forge Canvas Blank (DOES NOT WORK))"
+    elif ("1874407689" in new_base_name):
+        new_base_name = new_base_name + " - (Forge Canvas Arid)"
+    elif ("-1415845146" in new_base_name):
+        new_base_name = new_base_name + " - (Forge Canvas Institute (Skybox))"
+    elif ("1235605894" in new_base_name):
+        new_base_name = new_base_name + " - (Forge Canvas Arid)"
+    elif ("-159770995" in new_base_name):
+        new_base_name = new_base_name + " - (Forest)"
+    elif ("380679983" in new_base_name):
+        new_base_name = new_base_name + " - (Forge Canvas Blank)"
+    elif ("-1620331557" in new_base_name):
+        new_base_name = new_base_name + " - (S4 Mainmenu UI unknown empty level (maybe old mainmenu levels))"
+    elif ("-914357896" in new_base_name):
+        new_base_name = new_base_name + " - (Chasm)"
+    elif ("1325220593" in new_base_name):
+        new_base_name = new_base_name + " - (mp narrative composition scene)"
+        #void is empty forge canvas
+        #arid is desert forge canvas with hex pillars with ring in skybox
+
+    #print("filepath: " + file_path)
+    
+    # SEASON 4 Flight Maps (Cut / Unreleased)
+    elif ("-272450978" in new_base_name):
+        new_base_name = new_base_name + " - (Beltways)"
+    elif ("-1992794715" in new_base_name):
+        new_base_name = new_base_name + " - (Design_12)"
+    elif ("99849150" in new_base_name):
+        new_base_name = new_base_name + " - (Design 12)"
+    elif ("1563718832" in new_base_name):
+        new_base_name = new_base_name + " - (Design 18)"
+    elif ("-213192195" in new_base_name):
+        new_base_name = new_base_name + " - (Design 18)"
+    elif ("821891532" in new_base_name):
+        new_base_name = new_base_name + " - (Design 18)"
+    elif ("-993233072" in new_base_name):
+        new_base_name = new_base_name + " - (Design 1)"
+    elif ("-19710502" in new_base_name):
+        new_base_name = new_base_name + " - (Design 1)"
+    elif ("-1430445980" in new_base_name):
+        new_base_name = new_base_name + " - (Design 1)"
+    elif ("197485590" in new_base_name):
+        new_base_name = new_base_name + " - (Bridge)"
+    elif ("98705598" in new_base_name):
+        new_base_name = new_base_name + " - (Bridge)"
+    elif ("1504830739" in new_base_name):
+        new_base_name = new_base_name + " - (Bridge again)"
+    elif ("-272450978" in new_base_name):
+        new_base_name = new_base_name + " - (Beltways)"
+    elif ("-1090318888" in new_base_name):
+        new_base_name = new_base_name + " - (Beltways)"
+    elif ("-366065428" in new_base_name):
+        new_base_name = new_base_name + " - (Design 7)"
+    elif ("902584600" in new_base_name):
+        new_base_name = new_base_name + " - (Design 7)"
+    elif ("1750971278" in new_base_name):
+        new_base_name = new_base_name + " - (Design 7)"
+    elif ("10253378" in new_base_name):
+        new_base_name = new_base_name + " - (Design 19)"
+    elif ("1707556883" in new_base_name):
+        new_base_name = new_base_name + " - (Design 22)"
+    elif ("-1705944150" in new_base_name):
+        new_base_name = new_base_name + " - (Design 22)"
+    elif ("1309541769" in new_base_name):
+        new_base_name = new_base_name + " - (Design 22)"
+    elif ("-1333985358" in new_base_name):
+        new_base_name = new_base_name + " - (Houndstooth)"
+    elif ("-347439019" in new_base_name):
+        new_base_name = new_base_name + " - (Forge Canvas 'Deadland')"
+    elif ("-347112375" in new_base_name):
+        new_base_name = new_base_name + " - (Forge Canvas 'Deadland')"
+    elif ("-848078606" in new_base_name):
+        new_base_name = new_base_name + " - (Gauntlet)"
+    elif ("-1414230524" in new_base_name):
+        new_base_name = new_base_name + " - (Gauntlet)"
+    elif ("-1052030575" in new_base_name):
+        new_base_name = new_base_name + " - (Gauntlet)"
+    elif ("-1072855571" in new_base_name):
+        new_base_name = new_base_name + " - (Design 27)"
+    elif ("204881818" in new_base_name):
+        new_base_name = new_base_name + " - (Rockridge)"
+    elif ("1578206197" in new_base_name):
+        new_base_name = new_base_name + " - (Design 8)"
+    elif ("-1953272809" in new_base_name):
+        new_base_name = new_base_name + " - (Forbidden)"
+    elif ("-122446256" in new_base_name):
+        new_base_name = new_base_name + " - (Forbidden)"
+    elif ("-1745473254" in new_base_name):
+        new_base_name = new_base_name + " - (Forbidden)"
+    elif ("-1415633728" in new_base_name):
+        new_base_name = new_base_name + " - (Illusion)"
+    elif ("-407228969" in new_base_name):
+        new_base_name = new_base_name + " - (Illusion)"
+    elif ("374025092" in new_base_name):
+        new_base_name = new_base_name + " - (Design 10)"
+    elif ("2027828443" in new_base_name):
+        new_base_name = new_base_name + " - (Design 10)"
+    elif ("-500890773" in new_base_name):
+        new_base_name = new_base_name + " - (Design 10)"
+    elif ("-1876249030" in new_base_name):
+        new_base_name = new_base_name + " - (Forge World)"
+    elif ("21847601" in new_base_name):
+        new_base_name = new_base_name + " - (Forge World)"
+    elif ("-1518462479" in new_base_name):
+        new_base_name = new_base_name + " - (Crystal Caves)"
+    elif ("-765391055" in new_base_name):
+        new_base_name = new_base_name + " - (Crystal Caves)"
+    elif ("-1303787779" in new_base_name):
+        new_base_name = new_base_name + " - (Design 14)"
+    elif ("1990723241" in new_base_name):
+        new_base_name = new_base_name + " - (Design 14)"
+    elif ("1324308213" in new_base_name):
+        new_base_name = new_base_name + " - (Harbor)"
+    elif ("-305099458" in new_base_name):
+        new_base_name = new_base_name + " - (Harbor)"
+    elif ("-1472802090" in new_base_name):
+        new_base_name = new_base_name + " - (Harbor)"
+    elif ("1387364918" in new_base_name):
+        new_base_name = new_base_name + " - (Harbor)"
+    elif ("796697680" in new_base_name):
+        new_base_name = new_base_name + " - (Harbor)"
+    elif ("-318821191" in new_base_name):
+        new_base_name = new_base_name + " - (Harbor)"
+    elif ("498479745" in new_base_name):
+        new_base_name = new_base_name + " - (Design 19)"
+    elif ("-1558202205" in new_base_name):
+        new_base_name = new_base_name + " - (Design 19)"
+    elif ("-1229470226" in new_base_name):
+        new_base_name = new_base_name + " - (Design 12)"
+    elif ("-1470679796" in new_base_name):
+        new_base_name = new_base_name + " - (Beltways)"
+    elif ("-1904315448" in new_base_name):
+        new_base_name = new_base_name + " - (va_desert level)"
+    elif ("-1770970443" in new_base_name):
+        new_base_name = new_base_name + " - (va_desert level)"
+    elif ("63300577" in new_base_name):
+        new_base_name = new_base_name + " - (va_desert level)"
+    elif ("-485430108" in new_base_name):
+        new_base_name = new_base_name + " - (Design 8)"
+    elif ("-1277361004" in new_base_name):
+        new_base_name = new_base_name + " - (Design 8)"
+    elif ("1781942073" in new_base_name):
+        new_base_name = new_base_name + " - (Design 27)"
+    elif ("138364918" in new_base_name):
+        new_base_name = new_base_name + " - (Design 27)"
+    elif ("142697422" in new_base_name):
+        new_base_name = new_base_name + " - (Ruins)"
+    elif ("-1770970443" in new_base_name):
+        new_base_name = new_base_name + " - (Ruins)"
+    elif ("488520702" in new_base_name):
+        new_base_name = new_base_name + " - (Ruins)"
+    elif ("351646053" in new_base_name):
+        new_base_name = new_base_name + " - (Ruins)"
+    elif ("1812197438" in new_base_name):
+        new_base_name = new_base_name + " - (Design 14)"    
+        
+    
+    # 
+    # bridge 
+    # btb_engine           (Scarr)
+    # btb_exiled           (Oasis)
+    # btb_rockridge
+    # ctf_forbidden
+    # ctf_illusion
+    # design_01
+    # design_07
+    # design_08
+    # design_10
+    # design_12
+    # design_14
+    # design_18
+    # design_19
+    # design_22
+    # design_27
+    # fo12_world
+    # gauntlet
+    # houndstooth
+    # ridgeline       (Cliffhanger)
+    # sgh_beltway
+    # sgh_blueprint ??
+    # sgh_crystalcaves
+    # sgh_ruins
+    # va_desert
+    # va_harbor
+    
+    
+    
+    
+    
+    
+    
     
     
     return new_base_name    
     
-    
+     
 # Functions for file extraction
 def Tool_Ass_Extract(files):
     # Process the files and return a new directory list
@@ -16249,20 +16495,68 @@ def Get_Mat_ID(path):
             return ref_id_int_list
     return []
 
-# function to return master list of all bitm IDs from all mat JSON files
-def Get_Bitm_ID(path):
+def Get_RTGO_Mat_ID(geo_mesh_ref_str, json_file_path):
+    json_file_path = json_file_path + "\\Reports\\sbsp_ref_list.json"
+    
+    # Convert the provided string to integer
+    geo_mesh_ref_int = int(geo_mesh_ref_str)
+
+    # Load the JSON data from the file
+    with open(json_file_path, 'r') as file:
+        data = json.load(file)
+
+    # Use a set for efficient deduplication
+    material_ids_set = set()
+
+    # Iterate through each entry in the data
+    for entry in data:
+        for instance in entry['instances']:
+            if instance['geo_mesh_ref'] == geo_mesh_ref_int:
+                # Extend the set with material IDs from the current instance
+                material_ids_set.update(instance['material_ids'])
+
+    # Convert the set back to a list and then to strings
+    material_ids_list = [str(id) for id in material_ids_set]
+
+    return material_ids_list
+
+
+# return list of all Bitmap IDs needed by all Mat files AND create master list json file
+def Get_Bitm_ID(path, tex_dir):
     master_ref_id_list = []
+    
+    # Dictionary to store Mat ID -> Bitmap Ref_id_int mapping
+    mat_id_dict = {}
+
     for filename in os.listdir(path):
         if filename.endswith('.json'):
             full_path = os.path.join(path, filename)
+            
             with open(full_path, 'r') as json_file:
                 json_data = json.load(json_file)
+
+                # Extract Mat ID from filename (assuming filename format: MatID.json)
+                mat_id = filename.split('.')[0]
+                
+                # Create a list for the mat_id in the dictionary if not already present
+                if mat_id not in mat_id_dict:
+                    mat_id_dict[mat_id] = []
+
                 for postprocess in json_data.get('postprocess definition', []):
                     for texture in postprocess.get('textures', []):
                         value = texture.get('bitmap reference', {}).get('Value', {})
                         ref_id_int = value.get('Ref_id_int', None)
                         if ref_id_int is not None:
                             master_ref_id_list.append(ref_id_int)
+                            
+                            # Add the ref_id_int to the corresponding mat_id's list
+                            if ref_id_int not in mat_id_dict[mat_id]:
+                                mat_id_dict[mat_id].append(ref_id_int)
+    
+    # Write the mat_id_dict to mode_mat_dict.json
+    with open(os.path.join(tex_dir, 'mode_mat_dict.json'), 'w') as out_file:
+        json.dump(mat_id_dict, out_file, indent=4)
+    
     return master_ref_id_list
 
 #returns list of all bitmap IDs used by a pmdf tag ID
@@ -16362,7 +16656,7 @@ def scan_prt3_list(export_dir):
     #prt3_JSON_dir = os.path.join(export_dir, "HaloInfinite_prt3_JSON")
     halo_inf_deploy = bpy.context.preferences.addons[__name__].preferences.haloinfinite_map_path
     halo_inf_deploy = remove_ending_backslash(halo_inf_deploy)
-    
+    export_dir = remove_ending_backslash(export_dir)
     
     # Check if the file exists
     if not os.path.exists(prt3_list_dir):
@@ -16399,6 +16693,107 @@ def scan_prt3_list(export_dir):
                 pass 
             pass
 
+#create JSON dumps of all sbsp files (TAKES FOREVER BEWARE)
+def scan_sbsp_list(export_dir):
+    hirt_path = bpy.context.preferences.addons[__name__].preferences.hirt_path
+    sbsp_list_dir = os.path.join(export_dir, "HaloInfinite_level_report.txt")
+    halo_inf_deploy = bpy.context.preferences.addons[__name__].preferences.haloinfinite_map_path
+    halo_inf_deploy = remove_ending_backslash(halo_inf_deploy)
+    export_dir = remove_ending_backslash(export_dir)
+    
+    # Check if the file exists
+    if not os.path.exists(sbsp_list_dir):
+        print(f"The file {sbsp_list_dir} does not exist!")
+        return
+
+    # Read the sbsp file and create JSON files for each one (THIS TAKES FOREVER)
+    with open(sbsp_list_dir, 'r') as file:
+        for line in file:
+            # Split by '_' and then split the second part by '.'
+            parts = line.strip().split('_')
+            if len(parts) > 1:
+                sbsp_id = parts[1].split('.')[0]               
+
+                cmd = f'HaloInfiniteResearchTools tags export onpath -d "{halo_inf_deploy}" -o "{export_dir}" -ti "{sbsp_id}" -tif true -jp false -co true'
+
+            try:
+                print("Trying to run sbsp JSON CMD: " + cmd)
+                
+                # Change to the directory of the tool
+                os.chdir(os.path.dirname(hirt_path))
+            
+                final_path = ""
+            
+                # Run the command and capture the output
+                result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
+
+                # Print the output
+                print(result.stdout)
+                
+            except Exception as e:
+                print(f'HIRT did not like the command it was sent: {str(e)}')
+                
+                pass 
+            pass
+#make new sbsp reference list json file
+def create_new_sbsp_list(export_dir):
+    sbsp_dir = os.path.join(export_dir, "sbsp")
+    new_sbsp_file = os.path.join(export_dir, "sbsp_ref_list.json")
+    
+    json_files = scan_directory_for_jsons(sbsp_dir)
+
+    processed_data = []
+    for filepath in json_files:
+        result = process_sbsp_json_file(filepath)
+        if result:
+            processed_data.append(result)
+
+    with open(new_sbsp_file, 'w') as f:
+        json.dump(processed_data, f, indent=4)
+
+#make new json file from bulk sbsp files
+def process_sbsp_json_file(filepath):
+    try:
+        with open(filepath, 'r') as f:
+            data = json.load(f)
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON in {filepath}: {str(e)}")
+        return None
+    
+    with open(filepath, 'r') as f:
+        data = json.load(f)
+
+    if "instanced geometry instances" not in data:
+        return None
+
+    geometry_instances = data["instanced geometry instances"]
+    
+    # Set to track seen geo_mesh_ref entries
+    seen_geo_mesh_refs = set()
+
+    instance_data = []
+    for instance in geometry_instances:
+        geo_mesh_ref = instance.get("Runtime geo mesh reference", {}).get("Value", {}).get("Ref_id_int", -1)
+        
+        # Skip if this geo_mesh_ref is already seen
+        if geo_mesh_ref in seen_geo_mesh_refs:
+            continue
+        
+        materials = instance.get("material override data", {}).get("per Instance Material Block", [])
+        material_ids = [mat["material"]["Value"]["Ref_id_int"] for mat in materials if "Ref_id_int" in mat["material"]["Value"]]
+
+        instance_data.append({
+            "geo_mesh_ref": geo_mesh_ref,
+            "material_ids": material_ids
+        })
+
+        # Mark this geo_mesh_ref as seen
+        seen_geo_mesh_refs.add(geo_mesh_ref)
+
+    return {
+        'filename': os.path.basename(filepath),
+        'instances': instance_data
+    }
 
 #build model report using HIRT
 def HIRT_Report(export_dir, tag_type, halo_ver):
@@ -16528,7 +16923,25 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
     #strip the .mode off of mode_name to be just ID
     tag_id = tag_name.split('.')[0]
     
-    print("tag_type: " + tag_type)
+    #print("folder_string: " + folder_string)
+    
+    #grab hex value of ID
+    hex_id = folder_string.split("_")[0]
+    
+    #print("hex_id: " + hex_id)
+    
+    #get reverse endian version of hex 
+    hex_id = reverse_endianness(hex_id)
+    
+    format = "dae"
+    #print("hex_id: " + hex_id)
+    
+    #turn into hex numeric value
+    tag_hex_id = int(hex_id, 16)
+    
+    #print("tag_hex_id: " + str(tag_hex_id))
+    
+    #print("tag_type: " + tag_type)
     
     #### IMPORT BUTTON
     if (bpy.context.scene.import_export_button == "Import"):
@@ -16539,7 +16952,8 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
             os.makedirs(export_dir + f"\\{item_name} Textures")
     
         if (tag_type == "render_model"):
-            cmd = f'HaloInfiniteResearchTools model export -d "{map_path}" -mn "{tag_id}" -o "{export_dir}"'
+            #cmd = f'HaloInfiniteResearchTools model export -d "{map_path}" -mn "{tag_id}" -o "{export_dir}"'
+            cmd = f'HaloInfiniteResearchTools tags export_rg onpath -d "{map_path}" -o "{export_dir}" -ti "{tag_id}" -tif "true" -ef "dae"'
             # WILL CREATE NEW FOLDER with tag_file within the name so go there and grab the .fbx and move it back to Export Assets Here and then import it
    
             #CMD for dumping JSON file of mode tag (need to do the same later for JSON dump of all mat tags and their referenced bitm tags)
@@ -16548,7 +16962,7 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
             #print("Trying to run CMD: " + cmd)
         elif (tag_type == "runtime_geo"):
             print("inside runtime_geo if")
-            cmd = f'HaloInfiniteResearchTools tags export_rg onpath -d "{map_path}" -ti "{tag_id}" -tif "true" -o "{export_dir}" -ft false -tp " "'
+            cmd = f'HaloInfiniteResearchTools tags export_rg onpath -d "{map_path}" -ti "{tag_id}" -tif "true" -o "{export_dir}" -ef "dae"'
             # WILL CREATE NEW FOLDER with tag_file within the name so go there and grab the .fbx and move it back to Export Assets Here and then import it
 
             #CMD for dumping JSON file of mode tag (need to do the same later for JSON dump of all mat tags and their referenced bitm tags)
@@ -16557,12 +16971,19 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
             #print("Trying to run CMD: " + cmd)
         elif (tag_type == "particle_model"):
             print("inside particle_model if")
-            cmd = f'HaloInfiniteResearchTools tags export_rg onpath -d "{map_path}" -ti "{tag_id}" -tif "true" -o "{export_dir}" -ft false -tp " "'
+            cmd = f'HaloInfiniteResearchTools tags export_rg onpath -d "{map_path}" -ti "{tag_id}" -tif "true" -o "{export_dir}" -ef "dae"'
             # WILL CREATE NEW FOLDER with tag_file within the name so go there and grab the .fbx and move it back to Export Assets Here and then import it
 
             #CMD for dumping JSON file of mode tag (need to do the same later for JSON dump of all mat tags and their referenced bitm tags)
             #tag_json_cmd = f'HaloInfiniteResearchTools tags export onpath -d "{map_path}" -o "{tex_dir}" -ti "{tag_id}" -tif true -jp false -co true'  
+        
+        elif (tag_type == "scenario_structure_bsp"):
+            print("inside scenario_structure if")
+            format = "dae"
+            #dae_output_dir = export_dir + "\\" + item_name + ".dae"
             
+            #build CMD for exporting level geo using Infinite Explorer
+            cmd = f'HaloInfiniteResearchTools tags export_sbps onpath -d "{map_path}" -ti "{tag_id}" -tif "true" -o "{export_dir}"'    
 
         try:
             
@@ -16580,7 +17001,7 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
             #result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
             result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True, shell=True)
             print("-----------------------------------------------")
-            print("Exporting FBX model of Mode ID: " + f'{tag_id}')
+            print("Exporting DAE model of Mode ID: " + f'{tag_id}')
             print("-----------------------------------------------")
             # Print the output
             #print(result.stdout)
@@ -16588,7 +17009,7 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
             
             # Search for the folder within export_dir with folder_string in its name
             for folder in os.listdir(export_dir):
-                print(f"Trying to find folder that contains: {folder_string}")
+                print(f"Trying to find folder that contains: {folder_string} within {export_dir}")
                 if folder_string in folder:
                     target_folder = os.path.join(export_dir, folder)
                     break
@@ -16597,14 +17018,23 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
                 print("Target folder not found.")
                 return
 
-            # Look for the .fbx file in the target folder
-            for file in os.listdir(target_folder):
-                if file.endswith('.fbx'):
-                    fbx_file = os.path.join(target_folder, file)
-                    break
+            if format == "dae":
+                # Look for the .fbx file in the target folder
+                for file in os.listdir(target_folder):
+                    if file.endswith('.dae'):
+                        fbx_file = os.path.join(target_folder, file)
+                        break
+            elif format == "dae":
+                # Look for the .fbx file in the target folder
+                for file in os.listdir(target_folder):
+                    if file.endswith('.dae'):
+                        fbx_file = os.path.join(target_folder, file)
+                        break
+                        
+                        
 
             if fbx_file is None:
-                print("FBX file not found.")
+                print("DAE file not found.")
                 return
 
             # Move the .fbx file to export_dir
@@ -16612,68 +17042,95 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
 
             # Getting the path to the moved file
             moved_fbx_path = os.path.join(export_dir, os.path.basename(fbx_file))
+            
+            if format == "dae":
+                # Renaming the file to item_name with .fbx extension
+                new_fbx_path = os.path.join(export_dir, f"{item_name}.dae")
+                os.rename(moved_fbx_path, new_fbx_path)
 
-            # Renaming the file to item_name with .fbx extension
-            new_fbx_path = os.path.join(export_dir, f"{item_name}.fbx")
-            os.rename(moved_fbx_path, new_fbx_path)
+            elif format == "dae":
+                # Renaming the file to item_name with .fbx extension
+                new_fbx_path = os.path.join(export_dir, f"{item_name}.dae")
+                os.rename(moved_fbx_path, new_fbx_path)
+
 
             # Delete the target folder
             shutil.rmtree(target_folder)
             
-            print("FBX file moved and target folder deleted.")
+            print("DAE file moved and target folder deleted.")
+
+            # if (tag_type != "scenario_structure_bsp"):
+                # # Move the .fbx file to export_dir
+                # shutil.move(fbx_file, os.path.join(export_dir, os.path.basename(fbx_file)))
+
+                # # Getting the path to the moved file
+                # moved_fbx_path = os.path.join(export_dir, os.path.basename(fbx_file))
+
+                # # Renaming the file to item_name with .fbx extension
+                # new_fbx_path = os.path.join(export_dir, f"{item_name}.fbx")
+                # os.rename(moved_fbx_path, new_fbx_path)
+
+                # # Delete the target folder
+                # shutil.rmtree(target_folder)
+                
+                # print("FBX file moved and target folder deleted.")
             
             
             if (tag_type == "render_model"):
-                
-                #import time
-                #time.sleep(5)  # waits for 5 seconds
+                #whether or not to grab textures   
+                if bpy.context.scene.cr4b_get_textures:
+                    #import time
+                    #time.sleep(5)  # waits for 5 seconds
 
-                print("Running HIRT JSON export CMD: " + tag_json_cmd)
-                # Run the mode JSON command and capture the output
-                #result = subprocess.run(mode_json_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
-                result = subprocess.run(tag_json_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True, shell=True)
+                    print("Running HIRT JSON export CMD: " + tag_json_cmd)
+                    # Run the mode JSON command and capture the output
+                    #result = subprocess.run(mode_json_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
+                    result = subprocess.run(tag_json_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True, shell=True)
 
-                print("Exporting JSON of Mode ID: " + f'{tag_id}')
-                
-
-                #create list of mat IDs from the mode tag in a list
-                mat_ids_list = Get_Mat_ID(tex_dir + "\\mode\\")
-
-                #create JSON files for each mat ID found in mode JSON
-                for mat_id in mat_ids_list:
-                    #build cmd for each mat ID
-                    mat_json_cmd = f'HaloInfiniteResearchTools tags export onpath -d "{map_path}" -o "{tex_dir}" -ti "{mat_id}" -tif true -jp false -co true'
-
-                    #run mat_json_cmd
-                    result = subprocess.run(mat_json_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
+                    print("Exporting JSON of Mode ID: " + f'{tag_id}')
                     
-                    
-                    print("Exporting JSON of Mat ID: " + f'{mat_id}')
-                   
-                
-                if os.path.exists(tex_dir + "\\mat \\"):
-                    os.rename(tex_dir + "\\mat \\", tex_dir + "\\mat\\")
-                
-                #grab all bitm IDs from all mat ID JSONs     MAKE SURE THE FOLDER NAME "mat " doesn't mess things up!!!
-                bitm_id_list = Get_Bitm_ID(tex_dir + "\\mat\\")
-                
-                #remove any duplicate texture ID from list
-                bitm_id_list = remove_duplicates(bitm_id_list)
-                
-                for bitm_id in bitm_id_list:
-                    #build bitm_json_cmd
-                    bitm_export_cmd = f'HaloInfiniteResearchTools texture export -d "{map_path}" -ti "{bitm_id}" -o "{tex_dir}" -e "{img_format}"'
 
-                    #run bitm_export_cmd
-                    result = subprocess.run(bitm_export_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True, shell=True)
+                    #create list of mat IDs from the mode tag in a list
+                    mat_ids_list = Get_Mat_ID(tex_dir + "\\mode\\")
 
-                    # Print the output
-                    #print(result.stdout)
-                    print("------------------------------------")
-                    print("Exporting Bitmap ID: " + f'{bitm_id}')
-                    print("------------------------------------")
+                    #create JSON files for each mat ID found in mode JSON
+                    for mat_id in mat_ids_list:
+                        #build cmd for each mat ID
+                        mat_json_cmd = f'HaloInfiniteResearchTools tags export onpath -d "{map_path}" -o "{tex_dir}" -ti "{mat_id}" -tif true -jp false -co true'
+
+                        #run mat_json_cmd
+                        result = subprocess.run(mat_json_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
+                        
+                        
+                        print("Exporting JSON of Mat ID: " + f'{mat_id}')
+                       
+                    
+                    if os.path.exists(tex_dir + "\\mat \\"):
+                        os.rename(tex_dir + "\\mat \\", tex_dir + "\\mat\\")
+                    
+                    #grab all bitm IDs from all mat ID JSONs     MAKE SURE THE FOLDER NAME "mat " doesn't mess things up!!!
+                    bitm_id_list = Get_Bitm_ID(tex_dir + "\\mat\\", tex_dir)
+                    
+                    #remove any duplicate texture ID from list
+                    bitm_id_list = remove_duplicates(bitm_id_list)
+                    
+                    for bitm_id in bitm_id_list:
+                        #build bitm_json_cmd
+                        bitm_export_cmd = f'HaloInfiniteResearchTools texture export -d "{map_path}" -ti "{bitm_id}" -o "{tex_dir}" -e "{img_format}"'
+
+                        #run bitm_export_cmd
+                        result = subprocess.run(bitm_export_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True, shell=True)
+
+                        # Print the output
+                        #print(result.stdout)
+                        print("------------------------------------")
+                        print("Exporting Bitmap ID: " + f'{bitm_id}')
+                        print("------------------------------------")
                     
                 
+                #create master mat json file for object
+                
+              
 
                 # ITERATE THROUGH EACH MAT tag JSON and get all RUC tag IDs and generate JSON for each of those
                 #as well as region name and base intention
@@ -16692,39 +17149,6 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
                 
                 
                 # Delete the 'mat' and 'mode' folders if they exist
-                mat_folder = os.path.join(tex_dir, "mat")
-                matt_folder = os.path.join(tex_dir, "mat ")
-                mode_folder = os.path.join(tex_dir, "mode")
-                if os.path.exists(mat_folder):
-                    shutil.rmtree(mat_folder)
-                if os.path.exists(matt_folder):
-                    shutil.rmtree(matt_folder)
-                if os.path.exists(mode_folder):
-                    shutil.rmtree(mode_folder)
-
-            elif (tag_type == "particle_model"): 
-
-
-                #grab all bitm IDs from all mat ID JSONs     MAKE SURE THE FOLDER NAME "mat " doesn't mess things up!!!
-                bitm_id_list = get_pmdf_bitm_list(tag_id, export_dir)
-                
-                #remove any duplicate texture ID from list
-                bitm_id_list = remove_duplicates(bitm_id_list)
-                
-                for bitm_id in bitm_id_list:
-                    #build bitm_json_cmd
-                    bitm_export_cmd = f'HaloInfiniteResearchTools texture export -d "{map_path}" -ti "{bitm_id}" -o "{tex_dir}" -e "{img_format}"'
-
-                    #run bitm_export_cmd
-                    result = subprocess.run(bitm_export_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True, shell=True)
-
-                    # Print the output
-                    #print(result.stdout)
-                    print("------------------------------------")
-                    print("Exporting Bitmap ID: " + f'{bitm_id}')
-                    print("------------------------------------")
-                
-                # Delete the 'mat' and 'mode' folders if they exist
                 # mat_folder = os.path.join(tex_dir, "mat")
                 # matt_folder = os.path.join(tex_dir, "mat ")
                 # mode_folder = os.path.join(tex_dir, "mode")
@@ -16734,18 +17158,94 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
                     # shutil.rmtree(matt_folder)
                 # if os.path.exists(mode_folder):
                     # shutil.rmtree(mode_folder)
+            elif (tag_type == "runtime_geo"): 
+                #whether or not to grab textures
+                if bpy.context.scene.cr4b_get_textures:
+                    
+                    #create list of mat IDs from the mode tag in a list
+                    mat_ids_list = Get_RTGO_Mat_ID(tag_id, export_dir)
+
+                    #create JSON files for each mat ID found in mode JSON
+                    for mat_id in mat_ids_list:
+                        #build cmd for each mat ID
+                        mat_json_cmd = f'HaloInfiniteResearchTools tags export onpath -d "{map_path}" -o "{tex_dir}" -ti "{mat_id}" -tif true -jp false -co true'
+
+                        #run mat_json_cmd
+                        result = subprocess.run(mat_json_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
+                        
+                        
+                        print("Exporting JSON of Mat ID: " + f'{mat_id}')
+                       
+                    
+                    if os.path.exists(tex_dir + "\\mat \\"):
+                        os.rename(tex_dir + "\\mat \\", tex_dir + "\\mat\\")
+                    
+                    #grab all bitm IDs from all mat ID JSONs     MAKE SURE THE FOLDER NAME "mat " doesn't mess things up!!!
+                    bitm_id_list = Get_Bitm_ID(tex_dir + "\\mat\\", tex_dir)
+                    
+                    #remove any duplicate texture ID from list
+                    bitm_id_list = remove_duplicates(bitm_id_list)
+                    
+                    for bitm_id in bitm_id_list:
+                        #build bitm_json_cmd
+                        bitm_export_cmd = f'HaloInfiniteResearchTools texture export -d "{map_path}" -ti "{bitm_id}" -o "{tex_dir}" -e "{img_format}"'
+
+                        #run bitm_export_cmd
+                        result = subprocess.run(bitm_export_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True, shell=True)
+
+                        # Print the output
+                        #print(result.stdout)
+                        print("------------------------------------")
+                        print("Exporting Bitmap ID: " + f'{bitm_id}')
+                        print("------------------------------------")
+
+            elif (tag_type == "particle_model"): 
+                #whether or not to grab textures
+                if bpy.context.scene.cr4b_get_textures:
+
+                    #grab all bitm IDs from all mat ID JSONs     MAKE SURE THE FOLDER NAME "mat " doesn't mess things up!!!
+                    bitm_id_list = get_pmdf_bitm_list(tag_id, export_dir)
+                    
+                    #remove any duplicate texture ID from list
+                    bitm_id_list = remove_duplicates(bitm_id_list)
+                    
+                    for bitm_id in bitm_id_list:
+                        #build bitm_json_cmd
+                        bitm_export_cmd = f'HaloInfiniteResearchTools texture export -d "{map_path}" -ti "{bitm_id}" -o "{tex_dir}" -e "{img_format}"'
+
+                        #run bitm_export_cmd
+                        result = subprocess.run(bitm_export_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True, shell=True)
+
+                        # Print the output
+                        #print(result.stdout)
+                        print("------------------------------------")
+                        print("Exporting Bitmap ID: " + f'{bitm_id}')
+                        print("------------------------------------")
+                    
+                    # Delete the 'mat' and 'mode' folders if they exist
+                    # mat_folder = os.path.join(tex_dir, "mat")
+                    # matt_folder = os.path.join(tex_dir, "mat ")
+                    # mode_folder = os.path.join(tex_dir, "mode")
+                    # if os.path.exists(mat_folder):
+                        # shutil.rmtree(mat_folder)
+                    # if os.path.exists(matt_folder):
+                        # shutil.rmtree(matt_folder)
+                    # if os.path.exists(mode_folder):
+                        # shutil.rmtree(mode_folder)
 
         except Exception as e:
             print(f'HIRT did not like the command it was sent: {str(e)}')
             
             pass 
-        pass
+        return tex_dir
+        #pass
 
     ##### EXPORT BUTTON
     elif (bpy.context.scene.import_export_button == "Export"):
     
         if (tag_type == "render_model"):
-            cmd = f'HaloInfiniteResearchTools model export -d "{map_path}" -mn "{tag_id}" -o "{export_dir}"'
+            #cmd = f'HaloInfiniteResearchTools model export -d "{map_path}" -mn "{tag_id}" -o "{export_dir}"'
+            cmd = f'HaloInfiniteResearchTools tags export_rg onpath -d "{map_path}" -o "{export_dir}" -ti "{tag_id}" -tif "true" -ef "dae"'
             # WILL CREATE NEW FOLDER with tag_file within the name so go there and grab the .fbx and move it back to Export Assets Here and then import it
             
             #CMD for dumping JSON file of mode tag (need to do the same later for JSON dump of all mat tags and their referenced bitm tags)
@@ -16754,7 +17254,7 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
             #print("Trying to run CMD: " + cmd)
         elif (tag_type == "runtime_geo"):
             print("inside runtime_geo if")
-            cmd = f'HaloInfiniteResearchTools tags export_rg onpath -d "{map_path}" -ti "{tag_id}" -tif "true" -o "{export_dir}" -ft false -tp " "'
+            cmd = f'HaloInfiniteResearchTools tags export_rg onpath -d "{map_path}" -ti "{tag_id}" -tif "true" -o "{export_dir}" -ef "dae"'
             # WILL CREATE NEW FOLDER with tag_file within the name so go there and grab the .fbx and move it back to Export Assets Here and then import it            
             
             #CMD for dumping JSON file of mode tag (need to do the same later for JSON dump of all mat tags and their referenced bitm tags)
@@ -16763,13 +17263,19 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
             #print("Trying to run CMD: " + cmd)
         elif (tag_type == "particle_model"):
             print("inside particle_model if")
-            cmd = f'HaloInfiniteResearchTools tags export_rg onpath -d "{map_path}" -ti "{tag_id}" -tif "true" -o "{export_dir}" -ft false -tp " "'
+            cmd = f'HaloInfiniteResearchTools tags export_rg onpath -d "{map_path}" -ti "{tag_id}" -tif "true" -o "{export_dir}" -ef "dae"'
             # WILL CREATE NEW FOLDER with tag_file within the name so go there and grab the .fbx and move it back to Export Assets Here and then import it
             
             
             #CMD for dumping JSON file of mode tag (need to do the same later for JSON dump of all mat tags and their referenced bitm tags)
             tag_json_cmd = f'HaloInfiniteResearchTools tags export onpath -d "{map_path}" -o "{tex_dir}" -ti "{tag_id}" -tif true -jp false -co true'  
            
+        elif (tag_type == "scenario_structure_bsp"):
+            print("inside scenario_structure if")
+            
+            #build CMD for exporting level geo using Infinite Explorer
+            cmd = f'HaloInfiniteResearchTools tags export_sbps onpath -d "{map_path}" -ti "{tag_id}" -tif "true" -o "{export_dir}"'
+        
         
         try:
             
@@ -16787,12 +17293,12 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
             #result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
             result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True, shell=True)
             print("-----------------------------------------------")
-            print("Exporting FBX model of Tag ID: " + f'{tag_id}')
+            print("Exporting DAE model of Tag ID: " + f'{tag_id}')
             print("-----------------------------------------------")
             # Print the output
             #print(result.stdout)
             
-            
+            #if (tag_type != "scenario_structure_bsp"):
             # Search for the folder within export_dir with folder_string in its name
             print("export dir: " + export_dir)
             for folder in os.listdir(export_dir):
@@ -16807,12 +17313,12 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
 
             # Look for the .fbx file in the target folder
             for file in os.listdir(target_folder):
-                if file.endswith('.fbx'):
+                if file.endswith('.dae'):
                     fbx_file = os.path.join(target_folder, file)
                     break
 
             if fbx_file is None:
-                print("FBX file not found.")
+                print("DAE file not found.")
                 return
 
             # Move the .fbx file to export_dir
@@ -16822,128 +17328,132 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
             moved_fbx_path = os.path.join(export_dir, os.path.basename(fbx_file))
 
             # Renaming the file to item_name with .fbx extension
-            new_fbx_path = os.path.join(export_dir, f"{item_name}.fbx")
+            new_fbx_path = os.path.join(export_dir, f"{item_name}.dae")
             os.rename(moved_fbx_path, new_fbx_path)
 
             # Delete the target folder
             shutil.rmtree(target_folder)
             
-            print("FBX file moved and target folder deleted.")
+            print("DAE file moved and target folder deleted.")
             
             if (tag_type == "render_model"):
-                #import time
-                #time.sleep(5)  # waits for 5 seconds
+                #whether or not to grab textures
+                if bpy.context.scene.cr4b_get_textures:
+                    
+                    #import time
+                    #time.sleep(5)  # waits for 5 seconds
 
-                print("Running HIRT JSON export CMD: " + tag_json_cmd)
-                # Run the mode JSON command and capture the output
-                #result = subprocess.run(mode_json_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
-                result = subprocess.run(tag_json_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True, shell=True)
+                    print("Running HIRT JSON export CMD: " + tag_json_cmd)
+                    # Run the mode JSON command and capture the output
+                    #result = subprocess.run(mode_json_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
+                    result = subprocess.run(tag_json_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True, shell=True)
 
-                print("Exporting JSON of Mode ID: " + f'{tag_id}')
-                
-                #time.sleep(5)  # waits for 5 seconds
-
-                # Print the output
-                #print(result.stdout)
-
-                #create list of mat IDs from the mode tag in a list
-                mat_ids_list = Get_Mat_ID(export_dir + "\\mode\\")
-
-                #create JSON files for each mat ID found in mode JSON
-                for mat_id in mat_ids_list:
-                    #build cmd for each mat ID
-                    mat_json_cmd = f'HaloInfiniteResearchTools tags export onpath -d "{map_path}" -o "{export_dir}" -ti "{mat_id}" -tif true -jp false -co true'
-
-                    #run mat_json_cmd
-                    result = subprocess.run(mat_json_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
+                    print("Exporting JSON of Mode ID: " + f'{tag_id}')
                     
                     #time.sleep(5)  # waits for 5 seconds
 
                     # Print the output
                     #print(result.stdout)
+
+                    #create list of mat IDs from the mode tag in a list
+                    mat_ids_list = Get_Mat_ID(export_dir + "\\mode\\")
+
+                    #create JSON files for each mat ID found in mode JSON
+                    for mat_id in mat_ids_list:
+                        #build cmd for each mat ID
+                        mat_json_cmd = f'HaloInfiniteResearchTools tags export onpath -d "{map_path}" -o "{export_dir}" -ti "{mat_id}" -tif true -jp false -co true'
+
+                        #run mat_json_cmd
+                        result = subprocess.run(mat_json_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
+                        
+                        #time.sleep(5)  # waits for 5 seconds
+
+                        # Print the output
+                        #print(result.stdout)
+                        
+                        print("Exporting JSON of Mat ID: " + f'{mat_id}')
+                       
+                    #rename "mat " folder to "mat" to make Windows happy
+                    # Renaming the folder with the name "\\mat \\" to "\\mat\\"
+                    #old_mat_folder = os.path.join(export_dir, "\\mat \\")
+                    #new_mat_folder = os.path.join(export_dir, "\\mat\\")
                     
-                    print("Exporting JSON of Mat ID: " + f'{mat_id}')
-                   
-                #rename "mat " folder to "mat" to make Windows happy
-                # Renaming the folder with the name "\\mat \\" to "\\mat\\"
-                #old_mat_folder = os.path.join(export_dir, "\\mat \\")
-                #new_mat_folder = os.path.join(export_dir, "\\mat\\")
-                
-                if os.path.exists(export_dir + "\\mat \\"):
-                    os.rename(export_dir + "\\mat \\", export_dir + "\\mat\\")
-                
-                #grab all bitm IDs from all mat ID JSONs     MAKE SURE THE FOLDER NAME "mat " doesn't mess things up!!!
-                bitm_id_list = Get_Bitm_ID(export_dir + "\\mat\\")
-                
-                #remove any duplicate texture ID from list
-                bitm_id_list = remove_duplicates(bitm_id_list)
-                
-                for bitm_id in bitm_id_list:
-                    #build bitm_json_cmd
-                    bitm_export_cmd = f'HaloInfiniteResearchTools texture export -d "{map_path}" -ti "{bitm_id}" -o "{export_dir}" -e "{img_format}"'
-
-                    #run bitm_export_cmd
-                    result = subprocess.run(bitm_export_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True, shell=True)
-
-                    # Print the output
-                    #print(result.stdout)
-                    print("------------------------------------")
-                    print("Exporting Bitmap ID: " + f'{bitm_id}')
-                    print("------------------------------------")
+                    if os.path.exists(export_dir + "\\mat \\"):
+                        os.rename(export_dir + "\\mat \\", export_dir + "\\mat\\")
                     
+                    #grab all bitm IDs from all mat ID JSONs     MAKE SURE THE FOLDER NAME "mat " doesn't mess things up!!!
+                    bitm_id_list = Get_Bitm_ID(export_dir + "\\mat\\", export_dir)
                     
-                #read the JSON file to get list of bitm IDs to be extracted and send them to the right folder
-                #for bitm_id in json_file:
+                    #remove any duplicate texture ID from list
+                    bitm_id_list = remove_duplicates(bitm_id_list)
                     
-                    #bitm_cmd = f'HaloInfiniteResearchTools texture export -d "{map_path}" -ti "{bitm_id}" -o "{export_dir}" -e "{img_format}"'
+                    for bitm_id in bitm_id_list:
+                        #build bitm_json_cmd
+                        bitm_export_cmd = f'HaloInfiniteResearchTools texture export -d "{map_path}" -ti "{bitm_id}" -o "{export_dir}" -e "{img_format}"'
+
+                        #run bitm_export_cmd
+                        result = subprocess.run(bitm_export_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True, shell=True)
+
+                        # Print the output
+                        #print(result.stdout)
+                        print("------------------------------------")
+                        print("Exporting Bitmap ID: " + f'{bitm_id}')
+                        print("------------------------------------")
+                        
+                        
+                    #read the JSON file to get list of bitm IDs to be extracted and send them to the right folder
+                    #for bitm_id in json_file:
+                        
+                        #bitm_cmd = f'HaloInfiniteResearchTools texture export -d "{map_path}" -ti "{bitm_id}" -o "{export_dir}" -e "{img_format}"'
 
 
-                
+                    
 
-                
-                # Delete the 'mat' and 'mode' folders if they exist
-                mat_folder = os.path.join(export_dir, "mat")
-                matt_folder = os.path.join(export_dir, "mat ")
-                mode_folder = os.path.join(export_dir, "mode")
-                if os.path.exists(mat_folder):
-                    shutil.rmtree(mat_folder)
-                if os.path.exists(matt_folder):
-                    shutil.rmtree(matt_folder)
-                if os.path.exists(mode_folder):
-                    shutil.rmtree(mode_folder)
+                    
+                    # Delete the 'mat' and 'mode' folders if they exist
+                    mat_folder = os.path.join(export_dir, "mat")
+                    matt_folder = os.path.join(export_dir, "mat ")
+                    mode_folder = os.path.join(export_dir, "mode")
+                    if os.path.exists(mat_folder):
+                        shutil.rmtree(mat_folder)
+                    if os.path.exists(matt_folder):
+                        shutil.rmtree(matt_folder)
+                    if os.path.exists(mode_folder):
+                        shutil.rmtree(mode_folder)
 
             elif (tag_type == "particle_model"): 
-                
+                #whether or not to grab textures
+                if bpy.context.scene.cr4b_get_textures:
 
-                #grab all bitm IDs from all mat ID JSONs     MAKE SURE THE FOLDER NAME "mat " doesn't mess things up!!!
-                bitm_id_list = get_pmdf_bitm_list(tag_id, og_export_dir)
-                
-                #remove any duplicate texture ID from list
-                bitm_id_list = remove_duplicates(bitm_id_list)
-                
-                for bitm_id in bitm_id_list:
-                    #build bitm_json_cmd
-                    bitm_export_cmd = f'HaloInfiniteResearchTools texture export -d "{map_path}" -ti "{bitm_id}" -o "{tex_dir}" -e "{img_format}"'
+                    #grab all bitm IDs from all mat ID JSONs     MAKE SURE THE FOLDER NAME "mat " doesn't mess things up!!!
+                    bitm_id_list = get_pmdf_bitm_list(tag_id, og_export_dir)
+                    
+                    #remove any duplicate texture ID from list
+                    bitm_id_list = remove_duplicates(bitm_id_list)
+                    
+                    for bitm_id in bitm_id_list:
+                        #build bitm_json_cmd
+                        bitm_export_cmd = f'HaloInfiniteResearchTools texture export -d "{map_path}" -ti "{bitm_id}" -o "{tex_dir}" -e "{img_format}"'
 
-                    #run bitm_export_cmd
-                    result = subprocess.run(bitm_export_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True, shell=True)
+                        #run bitm_export_cmd
+                        result = subprocess.run(bitm_export_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True, shell=True)
 
-                    # Print the output
-                    #print(result.stdout)
-                    print("------------------------------------")
-                    print("Exporting Bitmap ID: " + f'{bitm_id}')
-                    print("------------------------------------")
-                
-                # Delete the 'mat' and 'mode' folders if they exist
-                # mat_folder = os.path.join(tex_dir, "mat")
-                # matt_folder = os.path.join(tex_dir, "mat ")
-                # mode_folder = os.path.join(tex_dir, "mode")
-                # if os.path.exists(mat_folder):
-                    # shutil.rmtree(mat_folder)
-                # if os.path.exists(matt_folder):
-                    # shutil.rmtree(matt_folder)
-                # if os.path.exists(mode_folder):
-                    # shutil.rmtree(mode_folder)
+                        # Print the output
+                        #print(result.stdout)
+                        print("------------------------------------")
+                        print("Exporting Bitmap ID: " + f'{bitm_id}')
+                        print("------------------------------------")
+                    
+                    # Delete the 'mat' and 'mode' folders if they exist
+                    # mat_folder = os.path.join(tex_dir, "mat")
+                    # matt_folder = os.path.join(tex_dir, "mat ")
+                    # mode_folder = os.path.join(tex_dir, "mode")
+                    # if os.path.exists(mat_folder):
+                        # shutil.rmtree(mat_folder)
+                    # if os.path.exists(matt_folder):
+                        # shutil.rmtree(matt_folder)
+                    # if os.path.exists(mode_folder):
+                        # shutil.rmtree(mode_folder)
 
 
             print("----------------------------------------------------")
@@ -16956,7 +17466,20 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
             print(f'HIRT did not like the command it was sent: {str(e)}')
             
             pass 
-        pass
+        
+        return tex_dir        
+        #pass
+
+def reverse_endianness(hex_str):
+    # Ensure that the string has an even number of characters
+    if len(hex_str) % 2 != 0:
+        raise ValueError("Invalid hex string length")
+
+    # Split the string into byte-sized chunks
+    bytes_list = [hex_str[i:i+2] for i in range(0, len(hex_str), 2)]
+
+    # Reverse the byte order, join them back together, and prepend with "0x"
+    return '0x' + ''.join(reversed(bytes_list))
 
 #remove duplicate entries in bitm_ID list
 def remove_duplicates(input_list):
@@ -17168,7 +17691,7 @@ class CR4B_ExportFile(bpy.types.Operator):
                 new_files = Tool_Ass_Extract(selected_files)
                 import_type = "ass"
                 
-            elif format_type == "fbx" and halo_ver == "Halo Infinite":
+            elif format_type == "dae" and halo_ver == "Halo Infinite":
                 for item in selected_items_hirt:
                     map_path = bpy.context.preferences.addons[__name__].preferences.haloinfinite_map_path
                     tag_file = item['path'] #looking like "mode\123131231_-123123123.sbsp"
@@ -17182,8 +17705,8 @@ class CR4B_ExportFile(bpy.types.Operator):
                         print("making new export directory")
                         os.makedirs(new_export_dir)
                     
-                    HIRT_Export(map_path, tag_file, export_dir + export_folder_name + f"{tag_name}\\", "scenario_structure_bsp", tag_name)
-                    import_type = "fbx"
+                    tex_dir = HIRT_Export(map_path, tag_file, export_dir + export_folder_name + f"{tag_name}\\", "scenario_structure_bsp", tag_name)
+                    import_type = "dae"
                     
                     #new_file = tag_file[5:] #removes the "mode\" from the string
                     #parts = new_file.split(".")
@@ -17283,7 +17806,7 @@ class CR4B_ExportFile(bpy.types.Operator):
                 import_type = "jms"
             
             #talk to HIRT to get the model
-            elif format_type == "fbx" and halo_ver == "Halo Infinite":
+            elif format_type == "dae" and halo_ver == "Halo Infinite":
                 created_files = []
                 
                 #export the models that are selected
@@ -17301,15 +17824,15 @@ class CR4B_ExportFile(bpy.types.Operator):
                         os.makedirs(new_export_dir)
                     
                     if hirt_model_type == "Render Model":
-                        HIRT_Export(map_path, tag_file, export_dir + export_folder_name + f"{tag_name}\\", "render_model", tag_name)
+                        tex_dir = HIRT_Export(map_path, tag_file, export_dir + export_folder_name + f"{tag_name}\\", "render_model", tag_name)
                     
                     elif hirt_model_type == "Runtime Geometry":
-                        HIRT_Export(map_path, tag_file, export_dir + export_folder_name + f"{tag_name}\\", "runtime_geo", tag_name)
+                        tex_dir = HIRT_Export(map_path, tag_file, export_dir + export_folder_name + f"{tag_name}\\", "runtime_geo", tag_name)
                         
                     elif hirt_model_type == "Particle Model":
-                        HIRT_Export(map_path, tag_file, export_dir + export_folder_name + f"{tag_name}\\", "particle_model", tag_name)    
+                        tex_dir = HIRT_Export(map_path, tag_file, export_dir + export_folder_name + f"{tag_name}\\", "particle_model", tag_name)    
                         
-                    import_type = "fbx"
+                    import_type = "dae"
                     
                     new_file = tag_file[5:] #removes the "mode\" from the string
                     parts = new_file.split(".")
@@ -17458,14 +17981,16 @@ class CR4B_ImportFile(bpy.types.Operator):
                 new_files = Tool_Ass_Extract(selected_files)
                 import_type = "ass"
                 
-            elif format_type == "fbx" and halo_ver == "Halo Infinite":
+            elif format_type == "dae" and halo_ver == "Halo Infinite":
+                created_files = []
+                
                 for item in selected_items_hirt:
                     map_path = bpy.context.preferences.addons[__name__].preferences.haloinfinite_map_path
                     tag_file = item['path'] #looking like "mode\123131231_-123123123.sbsp"
                     tag_name = item['name']
                     
-                    HIRT_Export(map_path, tag_file, export_dir, "scenario_structure_bsp", tag_name)
-                    import_type = "fbx"
+                    tex_dir = HIRT_Export(map_path, tag_file, export_dir, "scenario_structure_bsp", tag_name)
+                    import_type = "dae"
                     
                     new_file = tag_file[5:] #removes the "mode\" from the string
                     parts = new_file.split(".")
@@ -17557,8 +18082,9 @@ class CR4B_ImportFile(bpy.types.Operator):
                 import_type = "jms"
             
             #talk to HIRT to get the model
-            elif format_type == "fbx" and halo_ver == "Halo Infinite":
+            elif format_type == "dae" and halo_ver == "Halo Infinite":
                 created_files = []
+                tex_dir = ""
                 
                 #export the models that are selected
                 for item in selected_items_hirt:
@@ -17567,15 +18093,15 @@ class CR4B_ImportFile(bpy.types.Operator):
                     tag_name = item['name']
                     
                     if hirt_model_type == "Render Model":
-                        HIRT_Export(map_path, tag_file, export_dir, "render_model", tag_name)
+                        tex_dir = HIRT_Export(map_path, tag_file, export_dir, "render_model", tag_name)
                     
                     elif hirt_model_type == "Runtime Geometry":
-                        HIRT_Export(map_path, tag_file, export_dir, "runtime_geo", tag_name)
+                        tex_dir = HIRT_Export(map_path, tag_file, export_dir, "runtime_geo", tag_name)
                         
                     elif hirt_model_type == "Particle Model":
-                        HIRT_Export(map_path, tag_file, export_dir, "particle_model", tag_name)
+                        tex_dir = HIRT_Export(map_path, tag_file, export_dir, "particle_model", tag_name)
                         
-                    import_type = "fbx"
+                    import_type = "dae"
                     
                     new_file = tag_file[5:] #removes the "mode\" from the string
                     parts = new_file.split(".")
@@ -17726,49 +18252,108 @@ class CR4B_ImportFile(bpy.types.Operator):
                         log_to_file(f"Blender Toolset Could Not Import the file!") 
         
         #use Blender's import code for fbx
-        elif format_type == "fbx" and halo_ver == "Halo Infinite":
-            log_to_file("Using Blender's fbx import code")
-            for file in created_files:
-                try:    
-                    file_path = None                
+        elif format_type == "dae" and halo_ver == "Halo Infinite":
+            log_to_file("Using Blender's dae import code")
+            if import_type == "dae":    
+                for file in created_files:
+                    try:    
+                        file_path = None                
+                        
+                        # Search for the .fbx file within export_dir whose filename contains the string in 'file'
+                        for candidate_file in os.listdir(export_dir):
+                            if file in candidate_file and candidate_file.endswith('.dae'):
+                                file_path = os.path.join(export_dir, candidate_file)
+                                break
+                                
+                        if file_path is None:
+                            print(f"No DAE file found containing the string: {file}")
+                            continue
+                        
+                        print("Trying to import: " + file_path)
+                        
+                        #using Blender's fbx importer
+                        #bpy.ops.wm.fbx_import(filepath=file_path)
+                        bpy.ops.wm.collada_import(filepath=file_path)
                     
-                    # Search for the .fbx file within export_dir whose filename contains the string in 'file'
-                    for candidate_file in os.listdir(export_dir):
-                        if file in candidate_file and candidate_file.endswith('.fbx'):
-                            file_path = os.path.join(export_dir, candidate_file)
-                            break
+                        # Update list of objects after import
+                        objects_after_import = set(bpy.context.scene.objects)
+                        
+                        # Calculate newly imported objects
+                        new_objects = objects_after_import - objects_before_import
+
+                        # Update objects_before_import for the next iteration
+                        objects_before_import = objects_after_import.copy()
+                        
+                        # Select all newly imported objects
+                        for obj in new_objects:
+                            obj.select_set(True)
+
+                        # Create a new collection and move the object there
+                        collection_name = os.path.splitext(os.path.basename(file_path))[0]
+                        self.create_and_move_to_collection(collection_name, new_objects)
+                    
+                    
+                        # Ensure one of the new objects is set as the active object
+                        bpy.context.view_layer.objects.active = list(new_objects)[0]
+
+                        # Now, apply the rotation
+                        bpy.ops.transform.rotate(value=math.radians(90), orient_axis='X')
+
+                        # Scale the selected objects by a factor of 3 to get to Blender scale
+                        bpy.ops.transform.resize(value=(3, 3, 3))
+                        
+                        #send objects to function to iterate through all the materials for it to try to grab all needed textures
+                        try:
+                            print(tex_dir)
+                            apply_textures_from_json(new_objects, collection_name, os.path.join(tex_dir, 'mode_mat_dict.json'))
+                        except Exception as e:
+                            print("mat_dict.json not found for imported model")
                             
-                    if file_path is None:
-                        print(f"No FBX file found containing the string: {file}")
-                        continue
-                    
-                    print("Trying to import: " + file_path)
-                    
-                    #using Blender's fbx importer
-                    #bpy.ops.wm.fbx_import(filepath=file_path)
-                    bpy.ops.import_scene.fbx(filepath=file_path)
-                
-                    # Update list of objects after import
-                    objects_after_import = set(bpy.context.scene.objects)
-                    
-                    # Calculate newly imported objects
-                    new_objects = objects_after_import - objects_before_import
-
-                    # Update objects_before_import for the next iteration
-                    objects_before_import = objects_after_import.copy()
-                    
-                    # Select all newly imported objects
-                    for obj in new_objects:
-                        obj.select_set(True)
-
-                    # Create a new collection and move the object there
-                    collection_name = os.path.splitext(os.path.basename(file_path))[0]
-                    self.create_and_move_to_collection(collection_name, new_objects)
-                
-                except Exception as e:
-                    log_to_file(f"Blender Fbx Could Not Import the file!")
+                    except Exception as e:
+                        log_to_file(f"Blender DAE Could Not Import the file!")
         
-        
+            elif import_type == "dae":
+                for file in created_files:
+                    try:    
+                        file_path = None                
+                        
+                        # Search for the .fbx file within export_dir whose filename contains the string in 'file'
+                        for candidate_file in os.listdir(export_dir):
+                            if file in candidate_file and candidate_file.endswith('.dae'):
+                                file_path = os.path.join(export_dir, candidate_file)
+                                break
+                                
+                        if file_path is None:
+                            print(f"No Dae file found containing the string: {file}")
+                            continue
+                        
+                        print("Trying to import: " + file_path)
+                        
+                        #using Blender's fbx importer
+                        #bpy.ops.wm.fbx_import(filepath=file_path)
+                        bpy.ops.wm.collada_import(filepath=file_path)
+                    
+                        # Update list of objects after import
+                        objects_after_import = set(bpy.context.scene.objects)
+                        
+                        # Calculate newly imported objects
+                        new_objects = objects_after_import - objects_before_import
+
+                        # Update objects_before_import for the next iteration
+                        objects_before_import = objects_after_import.copy()
+                        
+                        # Select all newly imported objects
+                        for obj in new_objects:
+                            obj.select_set(True)
+
+                        # Create a new collection and move the object there
+                        collection_name = os.path.splitext(os.path.basename(file_path))[0]
+                        self.create_and_move_to_collection(collection_name, new_objects)
+                    
+                    except Exception as e:
+                        log_to_file(f"Blender Dae Could Not Import the file!")
+            
+            
         #use Gravemind's amf importer
         elif format_type == "amf":
             log_to_file("Using Gravemind's amf import code")
@@ -17865,6 +18450,52 @@ class CR4B_ImportFile(bpy.types.Operator):
         
         
         return {'FINISHED'}
+
+#read JSON file to apply needed textures to Mat ID slots for imported Halo Infinite models
+def apply_textures_from_json(selected_objects, collection_name, path_to_json):
+    # Load mode_mat_dict.json
+    with open(path_to_json, 'r') as json_file:
+        mat_dict = json.load(json_file)
+
+    for obj in selected_objects:
+        for mat_slot in obj.material_slots:
+            mat_name = mat_slot.name.split('.')[0]  # remove .001, .002, etc.
+            
+            print("Searching for matching Mat ID in JSON: " + mat_name)
+            if mat_name in mat_dict:
+                
+                print("matching Mat ID found in JSON!")
+                mat = mat_slot.material
+                mat.use_nodes = True
+                nodes = mat.node_tree.nodes
+
+                # Clear default nodes
+                for node in nodes:
+                    nodes.remove(node)
+
+                # Start position for placing image texture nodes
+                x_pos = 0
+
+                for bitmap_id in mat_dict[mat_name]:
+                    print("Looking for Bitmap ID: " + str(bitmap_id))
+                    # Search for the texture file
+                    texture_file = None
+                    for candidate_file in os.listdir(os.path.dirname(path_to_json)):
+                        if str(bitmap_id) in candidate_file and (candidate_file.endswith('.tif') or candidate_file.endswith('.png')):
+                            texture_file = os.path.join(os.path.dirname(path_to_json), candidate_file)
+                            break
+
+                    if texture_file:
+                        print("making new texture node for matching bitmap")
+                        # Create an image texture node
+                        tex_node = nodes.new('ShaderNodeTexImage')
+                        tex_node.image = bpy.data.images.load(texture_file)
+                        tex_node.location = (x_pos, 0)
+                        
+                        # Increment x_pos for next texture (if any)
+                        x_pos += 300  # adjust this value as per your requirements
+
+
 
 #export Halo 5 bitmaps to new folder
 def Halo5_Bitmap_Export(bitmap_path, img_format, export_dir):
@@ -18430,17 +19061,19 @@ class CR4B_CreateModelReport(bpy.types.Operator):
             #scan list and create tons of JSONs (THIS TAKES FOREVER. DO NOT MAKE USERS DO THIS)
 
 # ONLY USE EACH SEASON SINCE IT TAKES HOURS
-#            scan_prt3_list(export_dir)
+#            scan_prt3_list(export_dir) #make JSON for each prt3 tag
+#            scan_sbsp_list(export_dir) #make JSON for each sbsp tag
 
             #go through each JSON file for each prt3 tag and grab needed texture references
 
 # ONLY USE EACH SEASON SINCE IT TAKES HOURS
 #            create_new_prt3_list(export_dir)
+#            create_new_sbsp_list(export_dir) 
             
 # COMMENT THIS OUT BEFORE EACH RELEASE
 
             
-            print(report_dir)
+            #print(report_dir)
             
             
             
@@ -18598,11 +19231,13 @@ class CR4BImportPanel(bpy.types.Panel):
                 layout.row().label(text="Needs: Halo Asset Blender Toolset", icon='INFO')
             elif (context.scene.file_format_dropdown == "amf"):
                 layout.row().label(text="Needs: CLI Reclaimer + Amf Importer", icon='INFO')
-            elif (context.scene.file_format_dropdown == "fbx" and context.scene.halo_version_dropdown == "Halo Infinite"):
+            elif (context.scene.file_format_dropdown == "dae" and context.scene.halo_version_dropdown == "Halo Infinite"):
                 layout.row().label(text="Needs: CLI HIRT", icon='INFO')
-                row = layout.row(align=True)
-                row.label(text="HIRT Type:")
-                row.prop(context.scene, "hirt_type_dropdown", text="")
+                
+                if (context.scene.cr4b_last_button == "render_model"):
+                    row = layout.row(align=True)
+                    row.label(text="HIRT Type:")
+                    row.prop(context.scene, "hirt_type_dropdown", text="")
             else:
                 layout.row().label(text="Needs: CLI Reclaimer", icon='INFO')
             
@@ -18631,6 +19266,7 @@ class CR4BImportPanel(bpy.types.Panel):
             )
             
             row = layout.row()
+            layout.prop(context.scene, "cr4b_get_textures")
             row.operator("cr4b.select_all_files", text="Toggle Select All")
             layout.operator("cr4b.export_file", text="Export to Folder")
             layout.operator("cr4b.import_file", text="Import to Blender")
@@ -18954,6 +19590,12 @@ def register():
         name="Show model import menu",
         default=False
     )
+    
+    # Checkbox property for having textures export with imported model
+    bpy.types.Scene.cr4b_get_textures = bpy.props.BoolProperty(
+        name="Import/Export with textures",
+        default=True
+    )
 
     bpy.types.Scene.cr4b_last_tag = bpy.props.StringProperty(name="Last Selected Tag")
 
@@ -19072,6 +19714,9 @@ def unregister():
 
     # Checkbox property for showing .ass/jms import menu
     del bpy.types.Scene.cr4b_show_import_menu
+
+    # Checkbox property for exporting/importing textures
+    del bpy.types.Scene.cr4b_get_textures
 
     del bpy.types.Scene.cr4b_last_tag
 

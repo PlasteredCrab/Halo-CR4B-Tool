@@ -48,7 +48,7 @@ class SimpleOperator(bpy.types.Operator):
         haloreach_map_path = "D:\\Halo Map Files\\Halo Reach\\"
         halo4_map_path = "D:\\Halo Map Files\\Halo 4\\"
         halo5_mod_path = "G:\\Halo Builds\\Halo 5\\halo-5-x1\\halo-5-x1\\deploy\\"
-        haloinfinite_map_path = "G:\\SteamLibrary\\steamapps\\common\\Halo Infinite\\deploy\\"
+        haloinfinite_map_path = "D:\\SteamLibrary\\steamapps\\common\\Halo Infinite\\deploy\\"
 
         # Name of the current version of CR4BTool
         addon_name = "CR4B_Tool_v21"
