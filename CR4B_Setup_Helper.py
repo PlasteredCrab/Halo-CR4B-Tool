@@ -51,7 +51,7 @@ class SimpleOperator(bpy.types.Operator):
         haloinfinite_map_path = "D:\\SteamLibrary\\steamapps\\common\\Halo Infinite\\deploy\\"
 
         # Name of the current version of CR4BTool
-        addon_name = "CR4B_Tool_v21"
+        addon_name = "CR4B_Tool_v22"
         
         # Accessing preferences from another addon
         bpy.context.preferences.addons[addon_name].preferences.export_path = export_path_value
