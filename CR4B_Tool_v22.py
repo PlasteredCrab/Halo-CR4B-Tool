@@ -4333,23 +4333,11 @@ def Start_CR4B_Tool():
     
        
 
-
-
-
-    def clean_material_names(materials):
-        for material in materials:
-            if re.match('.*.\d{3}$', material.name):
-                base_name = material.name[:-4]
-                if base_name not in bpy.data.materials:
-                    material.name = base_name
-
+    #MERGE DUPLICATE MATERIAL NAMES
     def merge_materials_on_objects(objects, materials):
         # Sort materials by name
         materials_sorted = sorted(materials, key=lambda m: m.name)
 
-        # Clean material names
-        clean_material_names(materials)
-        
         # Find materials with the same name and merge them
         for obj in objects:
             material_slots = [slot for slot in obj.material_slots if slot.material is not None and not slot.is_property_readonly('material')]
@@ -4359,9 +4347,9 @@ def Start_CR4B_Tool():
                 material_name_escaped = re.escape(material_name)
                 material_cond = re.compile('^' + material_name_escaped + '$|^' + material_name_escaped + '.\d{3}$')
                 material_to_change = next(iter([m for m in materials_sorted if re.match(material_cond, m.name)]), None)
-                
                 if material_to_change and material != material_to_change:
                     slot.material = material_to_change
+
 
     # Execute the functions
     merge_materials_on_objects(bpy.data.objects, bpy.data.materials)
@@ -14985,7 +14973,579 @@ def modify_filename(file_name, Tag_Root):
         elif("proto_arc_charger" in file_name):
             file_name = file_name + " - (Cut Forerunner Pistol)"    
             
+        # List given by GrizzlyTheSmith on Discord
+        elif("-1005164778" in file_name):
+            file_name = file_name + " - (Weapon charm)"
+
+        elif("-1264418641" in file_name):
+            file_name = file_name + " - (Half circle structure, Double Door)"
+
+        elif("-1585206972" in file_name):
+            file_name = file_name + " - (Weapon charm)"
+
+        elif("-646179377" in file_name):
+            file_name = file_name + " - (Dead malcovich Spartan)"
+
+        elif("-1129180324" in file_name):
+            file_name = file_name + " - (Doorways?)"
+
+        elif("-1018835636" in file_name):
+            file_name = file_name + " - (Air duct/Exhaust)"
+
+        elif("-907782962" in file_name):
+            file_name = file_name + " - (mechanical armature)"
+
+        elif("-261333470" in file_name):
+            file_name = file_name + " - (compliance protocol Chimera core)"
+
+        elif("-1184315238" in file_name):
+            file_name = file_name + " - (cone)"
+
+        elif("-47940875" in file_name):
+            file_name = file_name + " - (weapon charm)"
+
+        elif("-153353541" in file_name):
+            file_name = file_name + " - (Rectangular wall structure forerunner style)"
+
+        elif("-1001750108" in file_name):
+            file_name = file_name + " - (forerunner door)"
+
+        elif("-939034002" in file_name):
+            file_name = file_name + " - (Mr. Bones chest armor, Mk Vii)"
+
+        elif("1636562309" in file_name):
+            file_name = file_name + " - (UTIL/Project Ra ZPEC , Mirage)"
+
+        elif("-1776443406" in file_name):
+            file_name = file_name + " - (weapon charm)"
+
+        elif("-596100749" in file_name):
+            file_name = file_name + " - (ramp, forerunner style)"
+
+        elif("-812811381" in file_name):
+            file_name = file_name + " - (Left Heirloom PLate hip attachment yoroi core)"
+
+        elif("-1810996615" in file_name):
+            file_name = file_name + " - (weapon charm)"
+
+        elif("-1408454431" in file_name):
+            file_name = file_name + " - (⅛ circle structure forerunner style)"
+
+        elif("-915634016" in file_name):
+            file_name = file_name + " - (UA/M560 Plate chest armor mkvii)"
+
+        elif("1992241196" in file_name):
+            file_name = file_name + " - (Weapon charm)"
+
+        elif("730204709" in file_name):
+            file_name = file_name + " - (Rectangular wall UNSC)"
+
+        elif("18770683" in file_name):
+            file_name = file_name + " - (Large line of barricades UNSC)"
+
+        elif("1012839515" in file_name):
+            file_name = file_name + " - (Ecotech Sampler Hazmat Core)"
+
+        elif("1097858439" in file_name):
+            file_name = file_name + " - (Weapon Charm)"
+
+        elif("1742856959" in file_name):
+            file_name = file_name + " - (Weapon Charm)"
+
+        elif("898651946" in file_name):
+            file_name = file_name + " - (Heavens Valor, hip attachment, Yoroi core)"
+
+        elif("1538014895" in file_name):
+            file_name = file_name + " - (Weapon charm)"
+
+        elif("1692337622" in file_name):
+            file_name = file_name + " - (Weapon Charm)"
+
+        elif("-1151265023" in file_name):
+            file_name = file_name + " - (Bladed Gaurd left hip yoroi core)"
+
+        elif("-1833918493" in file_name):
+            file_name = file_name + " - (Weapon charm)"
+
+        elif("-1181379537" in file_name):
+            file_name = file_name + " - (Fiberwave chest armor Hazmat core)"
+
+        elif("-306663103" in file_name):
+            file_name = file_name + " - (Savior Protocol chest armor chimera core)"
+
+        elif("-506161683" in file_name):
+            file_name = file_name + " - (Lacquered Heartwood chest armor yoroi armor)"
+
+        elif("-599393278" in file_name):
+            file_name = file_name + " - (Tall wall Industrial UNSC)"
+
+        elif("-1014871110" in file_name):
+            file_name = file_name + " - (Weapon Charm)"
+
+        elif("92399" in file_name):
+            file_name = file_name + " - (unknown forerunner gun?)"
+
+        elif("-593133596" in file_name):
+            file_name = file_name + " - (Platform corner)"
+
+        elif("-194623084" in file_name):
+            file_name = file_name + " - (Cylindrical Pillar UNSC)"
+
+        elif("-958669012" in file_name):
+            file_name = file_name + " - (“+” shaped structure unsc)"
+
+        elif("-191290096" in file_name):
+            file_name = file_name + " - (¼ circle structure unsc)"
+
+        elif("-1940036367" in file_name):
+            file_name = file_name + " - (Defiance Protocol Chest armor chimera core)"
+
+        elif("1340618636" in file_name):
+            file_name = file_name + " - (Dumpster Fire Weapon Charm)"
+
+        elif("-6165056" in file_name):
+            file_name = file_name + " - (Tomorrows fortune hip attachment yoroi core)"
+
+        elif("1482107956" in file_name):
+            file_name = file_name + " - (PostAmp Utility Hip attachment chimera core)"
+
+        elif("-1190470461" in file_name):
+            file_name = file_name + " - (Halfmask weapon charm)"
+
+        elif("2101788770" in file_name):
+            file_name = file_name + " - (Weapon Charm)"
+
+        elif("-981941034" in file_name):
+            file_name = file_name + " - (Kai-125 Weapon Charm)"
+
+        elif("788263010" in file_name):
+            file_name = file_name + " - (TAC/Aegis Puck Chest armor mirage core)"
+
+        elif("-231652915" in file_name):
+            file_name = file_name + " - (Generator core)"
+
+        elif("-1135034889" in file_name):
+            file_name = file_name + " - (deformed metal bar)"
+
+        elif("-683954959" in file_name):
+            file_name = file_name + " - (Angus Box Hip attachment mirage core)"
+
+        elif("-494259357" in file_name):
+            file_name = file_name + " - (Big Base door UNSC)"
+
+        elif("-210945510" in file_name):
+            file_name = file_name + " - (Large octagonal pillar unsc)"
+
+        elif("-757503402" in file_name):
+            file_name = file_name + " - (Cor-Bit Wrist attachment hazmat core)"
+        
+        elif("-868969351" in file_name):
+            file_name = file_name + " - (Brink Plugin Wrist attachment chimera core)"
+        
+        elif("1410981735" in file_name):
+            file_name = file_name + " - (UNSC wall)"
+
+        elif("-2144783619" in file_name):
+            file_name = file_name + " - (Weapon Charm)"
+
+        elif("-1858091656" in file_name):
+            file_name = file_name + " - (Weapon Charm)"
+
+        elif("1295841816" in file_name):
+            file_name = file_name + " - (Stardust Adaptation Helmet attachment chimera core)"
+
+        elif("-1028439925" in file_name):
+            file_name = file_name + " - (weapon charm)"
+
+        elif("-1302560675" in file_name):
+            file_name = file_name + " - (Decimation Adaptation helmet attachment chimera core)"
+
+        elif("992597578" in file_name):
+            file_name = file_name + " - (Large electrical wired)"
+
+        elif("-1285589279" in file_name):
+            file_name = file_name + " - (Rs[3]/Wolftooth helmet attachment mk vii)"
+
+        elif("2078028297" in file_name):
+            file_name = file_name + " - (Crysknife Utility hip attachment chimera core)"
+
+        elif("-507133380" in file_name):
+            file_name = file_name + " - (45 degree staircase)"
+
+        elif("-2114485787" in file_name):
+            file_name = file_name + " - (Box of thorns weapon charm)"
+
+        elif("1348876760" in file_name):
+            file_name = file_name + " - (Keelbug Companion weapon charm)"
+
+        elif("-912194482" in file_name):
+            file_name = file_name + " - (Maka Macrobinocs hip attachment mirage core)"
+
+        elif("2033911488" in file_name):
+            file_name = file_name + " - (Heavens gift chest attachment yoroi core)"
+
+        elif("313661920" in file_name):
+            file_name = file_name + " - (Power Switch UNSC)"
+
+        elif("-1896806808" in file_name):
+            file_name = file_name + " - (TAG Plugin wrist attachment chimera core)"
+
+        elif("-614344224" in file_name):
+            file_name = file_name + " - (UTIL/Superhub Custom chest attachment Mirage core)"
+
+        elif("-1915123941" in file_name):
+            file_name = file_name + " - (Weapon Charm)"
+
+        elif("-2119301970" in file_name):
+            file_name = file_name + " - (Multivis BCG helmet attachment Hazmat core)"
+
+        elif("1369928672" in file_name):
+            file_name = file_name + " - (Pillar UNSC)"
             
+        elif("-76887695" in file_name):
+            file_name = file_name + " - (Weapon Charm)"
+        elif("1671945496" in file_name):
+            file_name = file_name + " - (Signaltech deepeye helmet attachment hazmat core)"
+        elif("-1576676561" in file_name):
+            file_name = file_name + " - (Fire Extinguisher)"
+        elif("1721523706" in file_name):
+            file_name = file_name + " - (Weapon Charm)"
+        elif("-1714505717" in file_name):
+            file_name = file_name + " - (Weapon Charm)"
+        elif("-1340307877" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("1430209093" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("-255381969" in file_name):
+            file_name = file_name + " - (Crestsworn wrist attachment yoroi core)"
+        elif("-2023045087" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("1573185552" in file_name):
+            file_name = file_name + " - (In the chat weapon charm)"
+        elif("-35943972" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("-927272497" in file_name):
+            file_name = file_name + " - (Bundle of cables)"
+        elif("-1183714907" in file_name):
+            file_name = file_name + " - (Gauss soda weapon charm)"
+        elif("-408401303" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("1978550417" in file_name):
+            file_name = file_name + " - (Techlock Safesource chest attachment hazmat core)"
+        elif("-1429850597" in file_name):
+            file_name = file_name + " - (door hatch)"
+        elif("272011518" in file_name):
+            file_name = file_name + " - (UA/Macrospline chest attachment mk vii core)"
+        elif("-1276587344" in file_name):
+            file_name = file_name + " - (Lethbridge Gravitics weapon charm)"
+        elif("-1685393495" in file_name):
+            file_name = file_name + " - (Scantek 6300MIL hip attachment hazmat core)"
+        elif("901741968" in file_name):
+            file_name = file_name + " - (UTIL/ECell Carrier wrist attachment mk vii)"
+        elif("-997629404" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("167225947" in file_name):
+            file_name = file_name + " - (UTIL/Battle Buddy wrist attachment mk vii)"
+        elif("23791701" in file_name):
+            file_name = file_name + " - (wood plank pile)"
+        elif("-1360126112" in file_name):
+            file_name = file_name + " - (Voltspark Hub chest attachment hazmat core)"
+        elif("1873722585" in file_name):
+            file_name = file_name + " - (weapon charm)"    
+        elif("-1410372412" in file_name):
+            file_name = file_name + " - (Combigaurd chest attachment hazmat core)"
+        elif("-388942741" in file_name):
+            file_name = file_name + " - (Trapbox chest attachment hazmat core)"
+        elif("599417829" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("188727930" in file_name):
+            file_name = file_name + " - (Toolmaster wrist attachment hazmat core)"
+        elif("682624697" in file_name):
+            file_name = file_name + " - (Feet First weapon charm)"
+        elif("-1573786916" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("-652945049" in file_name):
+            file_name = file_name + " - (Pro tek custom helmet attachment hazmat core)"
+        elif("-1840263902" in file_name):
+            file_name = file_name + " - (RS[3]/Lockstep helmet attachment mk vii core)"
+        elif("619259440" in file_name):
+            file_name = file_name + " - (Tac/Opticon FMK-60-I chest attachment mirage core)"
+        elif("-1372164431" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("630397760" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("179832061" in file_name):
+            file_name = file_name + " - (Graceful leaves hip attachment yoroi core)"
+        elif("-390386545" in file_name):
+            file_name = file_name + " - (Dualpack Douser hip attachment hazmat core)"
+        elif("-2019328315" in file_name):
+            file_name = file_name + " - (Ambitions crown helmet attachment yoroi core)"
+        elif("-568897664" in file_name):
+            file_name = file_name + " - (UTIL/M8 Flaregun chest attachment mk vii)"
+        elif("79209311" in file_name):
+            file_name = file_name + " - (UA/COG chest attachment mk vii)"
+        elif("2086962928" in file_name):
+            file_name = file_name + " - (First Responder chest attachment hazmat core)"
+        elif("-616180535" in file_name):
+            file_name = file_name + " - (No Fun! Weapon charm)"
+        elif("-1114191959" in file_name):
+            file_name = file_name + " - (UTIL/PGY Pack chest attachment mk vii)"
+        elif("475778252" in file_name):
+            file_name = file_name + " - (TAC/Holodyne Milspec wrist attachment mk vii)"
+        elif("-1780666906" in file_name):
+            file_name = file_name + " - (Pro tek Extender chest attachment hazmat core)"
+        elif("-1494510628" in file_name):
+            file_name = file_name + " - (Satellite dish)"
+        elif("77620787Venezian" in file_name):
+            file_name = file_name + " - (Omnicorder chest attachment hazmat core)"
+        elif("-816699784" in file_name):
+            file_name = file_name + " - (Tac Belt chest attachment mirage core)"
+        elif("-1805114079" in file_name):
+            file_name = file_name + " - (Lifeguard SWT-PRO chest attachment hazmat core)"
+        elif("-29DED63D_1037491753" in file_name):
+            file_name = file_name + " - (Crowbar hip attachment hazmat core)"
+        elif("797602793" in file_name):
+            file_name = file_name + " - (Tac/Multimax chest attachment mirage core)"
+        elif("1008614386" in file_name):
+            file_name = file_name + " - (Viper Shroud helmet attachment mirage core)"
+        elif("107224696" in file_name):
+            file_name = file_name + " - (Unicorn weapon charm)"
+        elif("603824430" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("-1629302508" in file_name):
+            file_name = file_name + " - (TAC/SCM-P wrist attachment mirage core)"
+        elif("2102603300" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("-836676127" in file_name):
+            file_name = file_name + " - (Burger & Fries weapon charm)"
+        elif("598607779" in file_name):
+            file_name = file_name + " - (TAC/Spike Lantern wrist attachment mk vii core)"
+        elif("-1325513230" in file_name):
+            file_name = file_name + " - (AAP/K-ROC Ordinance Pack chest attachment mirage core)"
+        elif("-1391870304" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("-1379948067" in file_name):
+            file_name = file_name + " - (Dead Spartan Sorrel)"
+        elif("1180426268" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("673148261" in file_name):
+            file_name = file_name + " - (TAC/Letter Opener chest attachment mk vii core)"
+        elif("998406551" in file_name):
+            file_name = file_name + " - (Twin Dragons chest attachment yoroi core)"
+        elif("1296235955" in file_name):
+            file_name = file_name + " - (Misriah Maulers weapon charm)"
+        elif("-1983609232" in file_name):
+            file_name = file_name + " - (Epic Builder weapon charm)"
+        elif("-1335586071" in file_name):
+            file_name = file_name + " - (TAS/Netmoon helmet attachment mk vii core)"
+        elif("-1573345214" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("-53917147" in file_name):
+            file_name = file_name + " - (M90B PDM wrist attachment mirage core)"
+        elif("-1723152002" in file_name):
+            file_name = file_name + " - (Quickflush hip attachment hazmat core)"
+        elif("757682210" in file_name):
+            file_name = file_name + " - (Threatwave FTK helmet attachment hazmat core)"
+        elif("-1780052088" in file_name):
+            file_name = file_name + " - (Wild Worthog weapon charm)"
+        elif("32613739" in file_name):
+            file_name = file_name + " - (Siqtar charm weapon charm)"
+        elif("1552441555" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("358240509" in file_name):
+            file_name = file_name + " - (Sequence Process weapon charm)"
+        elif("-1025628031" in file_name):
+            file_name = file_name + " - (AAP/Granit chest attachment mirage core)"    
+        elif("-590290286" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("589449388" in file_name):
+            file_name = file_name + " - (T21-Hex4 hip attachment hazmat core)"
+        elif("-598115139" in file_name):
+            file_name = file_name + " - (Balor Guardplate helmet attachment mirage core)"
+        elif("433408263" in file_name):
+            file_name = file_name + " - (Here and There weapon charm)"
+        elif("1197350601" in file_name):
+            file_name = file_name + " - (Navi Playoff weapon charm)"
+        elif("-25903054" in file_name):
+            file_name = file_name + " - (Gravehound Adaptation helmet attachment Chimera core)"
+        elif("-6856395" in file_name):
+            file_name = file_name + " - (Charmed Vannak 134 weapon charm)"
+        elif("720969809" in file_name):
+            file_name = file_name + " - (Gridlocked weapon charm)"
+        elif("-1596150749" in file_name):
+            file_name = file_name + " - (TAC/Infinity Rig chest attachment mirage core)"
+        elif("1186135401" in file_name):
+            file_name = file_name + " - (Autumn Charm weapon charm)"
+        elif("-469702658" in file_name):
+            file_name = file_name + " - (D20 weapon charm)"
+        elif("734626659" in file_name):
+            file_name = file_name + " - (D-Guard Filterpack helmet attachment hazmat core)"
+        elif("-540470719" in file_name):
+            file_name = file_name + " - (TAC-Tool chest attachment hazmat core)"
+        elif("-581328609" in file_name):
+            file_name = file_name + " - (Anchor Charm weapon charm)"
+        elif("-336807970" in file_name):
+            file_name = file_name + " - (HUL/BNR/ORIGO helmet attachment mirage core)"
+        elif("-411952810" in file_name):
+            file_name = file_name + " - (UTIL/FliSP Mark 89 chest attachment mk vii core)"
+        elif("1492353789" in file_name):
+            file_name = file_name + " - (CBRN/FIM-A helmet attachment mk vii core)"
+        elif("-1916773937" in file_name):
+            file_name = file_name + " - (Korolev Grizzlies weapon charm)"
+        elif("-1434401034" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("1824869820" in file_name):
+            file_name = file_name + " - (UA/Tigerplate chest attachment mk vii core)"
+        elif("35579062" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("323003305" in file_name):
+            file_name = file_name + " - (UA/Front plate hip attachment mirage core)"
+        elif("-1662368534" in file_name):
+            file_name = file_name + " - (Revelation Protocol chest attachment chimera core)"
+        elif("-1312276672" in file_name):
+            file_name = file_name + " - (UTIL/S-Pack hip attachment mk vii core)"
+        elif("-1513645454" in file_name):
+            file_name = file_name + " - (TAC/MX Cutter hip attachment mk vii core)"
+        elif("-1223797896" in file_name):
+            file_name = file_name + " - (HUL[21]/KORDA helmet attachment mirage core)"
+        elif("-1539698792" in file_name):
+            file_name = file_name + " - (Lightbike weapon charm)"
+        elif("-2038624868" in file_name):
+            file_name = file_name + " - (Tengu’s Gift helmet attachment yoroi core)"
+        elif("682359312" in file_name):
+            file_name = file_name + " - (eunited playoff weapon charm)"
+        elif("-393893701" in file_name):
+            file_name = file_name + " - (UTIL/Eyespy-II chest attachment mirage core)"
+        elif("-486476534" in file_name):
+            file_name = file_name + " - (PRO-Tek Buster chest attachment hazmat core)"
+        elif("1890627705" in file_name):
+            file_name = file_name + " - (Faze clan playoff weapon charm)"
+        elif("-1737492253" in file_name):
+            file_name = file_name + " - (Charmed Commando weapon charm)"
+        elif("-2038515661" in file_name):
+            file_name = file_name + " - (Cloud9 Playoff weapon charm)"
+        elif("1270550591" in file_name):
+            file_name = file_name + " - (Charming rat weapon charm)"
+        elif("799723304" in file_name):
+            file_name = file_name + " - (Lifeguard Heartguard chest attachment hazmat core)"
+        elif("219352175" in file_name):
+            file_name = file_name + " - (Erinyes Hymn helmet attachment mirage core)"
+        elif("224578692" in file_name):
+            file_name = file_name + " - (Hul [4x]/ENIT/WitchBranch helmet attachment mk vii core)"
+        elif("1374066605" in file_name):
+            file_name = file_name + " - (Counter Snipe weapon charm)"
+        elif("1830645037" in file_name):
+            file_name = file_name + " - (FNATIC Playoff weapon charm)"
+        elif("1316242182" in file_name):
+            file_name = file_name + " - (Helljumper Charm weapon charm)"
+        elif("470268371" in file_name):
+            file_name = file_name + " - (Nadeshot weapon charm)"
+        elif("-1790992601" in file_name):
+            file_name = file_name + " - (Sweep Success weapon charm)"
+        elif("-449064968" in file_name):
+            file_name = file_name + " - (Green Steel hip attachment hazmat core)"
+        elif("-2019419428" in file_name):
+            file_name = file_name + " - (Charmed Riz-028 weapon charm)"
+        elif("-1366427388" in file_name):
+            file_name = file_name + " - (The Duke weapon charm)"
+        elif("1243857159" in file_name):
+            file_name = file_name + " - (TAC/Laceweb TRM core mirage core)"
+        elif("-730047476" in file_name):
+            file_name = file_name + " - (Cut to the quick hip attachment mk vii core)"
+        elif("-222762168" in file_name):
+            file_name = file_name + " - (Maneki-Neko weapon charm)"
+        elif("724731681" in file_name):
+            file_name = file_name + " - (MMC Filter helmet attachment hazmat core)"
+        elif("973719533" in file_name):
+            file_name = file_name + " - (Dustin Echoes weapon charm)"    
+        elif("1873496053" in file_name):
+            file_name = file_name + " - (Oppressor Mark II helmet attachment mk vii core)"
+        elif("849310110" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("1889428354" in file_name):
+            file_name = file_name + " - (Treat Goblin weapon charm)"
+        elif("1945149396" in file_name):
+            file_name = file_name + " - (Slice of strife weapon charm)"
+        elif("-1671892319" in file_name):
+            file_name = file_name + " - (Pinballer weapon charm)"
+        elif("-1712367896" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("-470459227" in file_name):
+            file_name = file_name + " - (Achilles Spine Charm weapon charm)"
+        elif("1527233153" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("1532352914" in file_name):
+            file_name = file_name + " - (1th Place weapon charm)"
+        elif("-422176561" in file_name):
+            file_name = file_name + " - (Moonbeam helmet attachment hazmat core)"
+        elif("-404856481" in file_name):
+            file_name = file_name + " - (R-107 Scanman wrist attachment mirage core)"
+        elif("-774729356" in file_name):
+            file_name = file_name + " - (Charmed Bandit Weapon Charm)"
+        elif("1789122997" in file_name):
+            file_name = file_name + " - (Threatwave Spes wrist attachment hazmat core)"
+        elif("-945271759" in file_name):
+            file_name = file_name + " - (Shotcaller Weapon Charm)"
+        elif("251381004" in file_name):
+            file_name = file_name + " - (Yield for Shield weapon charm)"
+        elif("-658764858" in file_name):
+            file_name = file_name + " - (Spacestation Gaming Playoff weapon charm)"
+        elif("458377432" in file_name):
+            file_name = file_name + " - (Second Chance chest attachment hazmat core)"
+        elif("-1308055604" in file_name):
+            file_name = file_name + " - (Shockbrace wrist attachment mirage core)"
+        elif("-1058904051" in file_name):
+            file_name = file_name + " - (Cone Star weapon charm)"
+        elif("-183782953" in file_name):
+            file_name = file_name + " - (Koban weapon charm)"
+        elif("-1952901773" in file_name):
+            file_name = file_name + " - (UA/NERA-APS chest attachment mk vii core)"
+        elif("1321693028" in file_name):
+            file_name = file_name + " - (Sentinels Playoff weapon charm)"
+        elif("892271530" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("-1029223524" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("-681863533" in file_name):
+            file_name = file_name + " - (Project Deitywalk wrist attachment mirage core)"
+        elif("1379684475" in file_name):
+            file_name = file_name + " - (Infected Charm weapon charm)"
+        elif("-2082997004" in file_name):
+            file_name = file_name + " - (HUL-I/Lightlink helmet attachment mk vii core)"
+        elif("-1636261314" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("715152248" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("462586759" in file_name):
+            file_name = file_name + " - (Unshed Valor helmet attachment yoroi core)"
+        elif("1997954361" in file_name):
+            file_name = file_name + " - (Lifeguard Doc chest attachment hazmat core)"
+        elif("871654619" in file_name):
+            file_name = file_name + " - (Laconia charm weapon charm)"
+        elif("1351025611" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("795229541" in file_name):
+            file_name = file_name + " - (HaloWC 2023 trophy weapon charm)"
+        elif("297264270" in file_name):
+            file_name = file_name + " - (Torpedo charm weapon charm)"
+        elif("-154285178" in file_name):
+            file_name = file_name + " - (Project Caskloom wrist attachment mk vii core)"
+        elif("478710896" in file_name):
+            file_name = file_name + " - (Halo VHS weapon charm)"
+        elif("1068842146" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("2051219131" in file_name):
+            file_name = file_name + " - (Vacation-052 weapon charm)"
+        elif("-475495494" in file_name):
+            file_name = file_name + " - (Alpha infected hologram)"
+        elif("1620330998" in file_name):
+            file_name = file_name + " - (TAC/RS/TACCAM helmet attachment mirage core)"
+        elif("-22941378" in file_name):
+            file_name = file_name + " - (Extender Gryphos helmet attachment mirage core)"
+        elif("419716317" in file_name):
+            file_name = file_name + " - (weapon charm)"
+        elif("-655589137" in file_name):
+            file_name = file_name + " - (Lucky BloodBlade weapon charm)"
             
             #Halo Infinite Campaign
             
@@ -16658,10 +17218,35 @@ def scan_prt3_list(export_dir):
     halo_inf_deploy = remove_ending_backslash(halo_inf_deploy)
     export_dir = remove_ending_backslash(export_dir)
     
+    old_report_path = os.path.join(export_dir, "HaloInfinite_prt3_report_old.txt")
+    new_report_path = os.path.join(export_dir, "HaloInfinite_prt3_report.txt")
+
+    # Check if old report file exists
+    if not os.path.exists(old_report_path):
+        print(f"The file {old_report_path} does not exist!")
+        return
+    
     # Check if the file exists
     if not os.path.exists(prt3_list_dir):
         print(f"The file {prt3_list_dir} does not exist!")
         return
+
+    # Read the contents of the old and new report files
+    with open(old_report_path, 'r') as file:
+        old_entries = set(line.strip() for line in file if line.strip())
+
+    with open(new_report_path, 'r') as file:
+        new_entries = set(line.strip() for line in file if line.strip())
+
+
+
+    # Remove duplicates and empty lines
+    unique_new_entries = new_entries - old_entries
+
+    # Write the updated entries to the new report file
+    with open(new_report_path, 'w') as file:
+        for entry in unique_new_entries:
+            file.write(f'{entry}\n')
 
     # Read the prt3 file and create JSON files for each one (THIS TAKES FOREVER)
     with open(prt3_list_dir, 'r') as file:
@@ -16701,10 +17286,33 @@ def scan_sbsp_list(export_dir):
     halo_inf_deploy = remove_ending_backslash(halo_inf_deploy)
     export_dir = remove_ending_backslash(export_dir)
     
+    old_report_path = os.path.join(export_dir, "HaloInfinite_level_report_old.txt")
+    new_report_path = os.path.join(export_dir, "HaloInfinite_level_report.txt")
+
+    # Check if old report file exists
+    if not os.path.exists(old_report_path):
+        print(f"The file {old_report_path} does not exist!")
+        return
+    
     # Check if the file exists
     if not os.path.exists(sbsp_list_dir):
         print(f"The file {sbsp_list_dir} does not exist!")
         return
+        
+    # Read the contents of the old and new report files
+    with open(old_report_path, 'r') as file:
+        old_entries = set(line.strip() for line in file if line.strip())    
+
+    with open(new_report_path, 'r') as file:
+        new_entries = set(line.strip() for line in file if line.strip())
+
+    # Remove duplicates and empty lines
+    unique_new_entries = new_entries - old_entries
+
+    # Write the updated entries to the new report file
+    with open(new_report_path, 'w') as file:
+        for entry in unique_new_entries:
+            file.write(f'{entry}\n')
 
     # Read the sbsp file and create JSON files for each one (THIS TAKES FOREVER)
     with open(sbsp_list_dir, 'r') as file:
@@ -16820,10 +17428,34 @@ def scan_mat_list(export_dir):
     halo_inf_deploy = remove_ending_backslash(halo_inf_deploy)
     export_dir = remove_ending_backslash(export_dir)
     
+    old_report_path = os.path.join(export_dir, "HaloInfinite_mat_report_old.txt")
+    new_report_path = os.path.join(export_dir, "HaloInfinite_mat_report.txt")
+
+    # Check if old report file exists
+    if not os.path.exists(old_report_path):
+        print(f"The file {old_report_path} does not exist!")
+        return
+    
     # Check if the file exists
     if not os.path.exists(mat_list_dir):
         print(f"The file {mat_list_dir} does not exist!")
         return
+        
+    # Read the contents of the old and new report files
+    with open(old_report_path, 'r') as file:
+        old_entries = set(line.strip() for line in file if line.strip())    
+        
+    with open(new_report_path, 'r') as file:
+        new_entries = set(line.strip() for line in file if line.strip())    
+        
+    # Remove duplicates and empty lines
+    unique_new_entries = new_entries - old_entries
+
+    # Write the updated entries to the new report file
+    with open(new_report_path, 'w') as file:
+        for entry in unique_new_entries:
+            file.write(f'{entry}\n')    
+        
 
     # Read the mat file and create JSON files for each one (THIS TAKES FOREVER)
     with open(mat_list_dir, 'r') as file:
@@ -17087,6 +17719,8 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
     #turn into hex numeric value
     tag_hex_id = int(hex_id, 16)
     
+    IE_used = False
+    
     #print("tag_hex_id: " + str(tag_hex_id))
     
     #print("tag_type: " + tag_type)
@@ -17130,8 +17764,25 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
             format = "dae"
             #dae_output_dir = export_dir + "\\" + item_name + ".dae"
             
-            #build CMD for exporting level geo using Infinite Explorer
-            cmd = f'HaloInfiniteResearchTools tags export_sbps onpath -d "{map_path}" -ti "{tag_id}" -tif "true" -o "{export_dir}"'    
+            #convert id to int
+            tag_id = int(tag_id)
+            
+            #convert int to hex
+            hex_id = int_to_big_endian_hex(tag_id)
+            
+            new_export_dir = export_dir + "\\" + item_name + ".dae"
+            
+            
+            if bpy.context.scene.cr4b_get_textures:
+                #build CMD for exporting level geo using Infinite Explorer
+                cmd = f'infiniteExplorerCLI -d "{map_path}" -i 0x{hex_id} -e -VV -o "{new_export_dir}" -t "{tex_dir}"'    
+            
+                #mark if IE was used
+                IE_used = True
+            
+            else:
+                #build CMD for exporting level geo using Infinite Explorer
+                cmd = f'infiniteExplorerCLI -d "{map_path}" -i 0x{hex_id} -e -VV -o "{new_export_dir}"'    
 
         try:
             
@@ -17144,67 +17795,74 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
         
             final_path = ""
         
-            print("Running HIRT model export CMD:" + cmd)
+            print("Running HIRT/IE model export CMD:" + cmd)
             # Run the model export command and capture the output
             #result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
+            
+            if IE_used == True:
+                print("--------------------------------------------------------------------------")
+                print("Please Wait! Exporting DAE model and textures of Mode ID: " + f'{tag_id}')
+                print("--------------------------------------------------------------------------")
+                
+            else:
+                print("-----------------------------------------------")
+                print("Exporting DAE model of Mode ID: " + f'{tag_id}')
+                print("-----------------------------------------------")
+            
             result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True, shell=True)
-            print("-----------------------------------------------")
-            print("Exporting DAE model of Mode ID: " + f'{tag_id}')
-            print("-----------------------------------------------")
+            
             # Print the output
             #print(result.stdout)
             
-            
-            # Search for the folder within export_dir with folder_string in its name
-            for folder in os.listdir(export_dir):
-                print(f"Trying to find folder that contains: {folder_string} within {export_dir}")
-                if folder_string in folder:
-                    target_folder = os.path.join(export_dir, folder)
-                    break
-
-            if target_folder is None:
-                print("Target folder not found.")
-                return
-
-            if format == "dae":
-                # Look for the .fbx file in the target folder
-                for file in os.listdir(target_folder):
-                    if file.endswith('.dae'):
-                        fbx_file = os.path.join(target_folder, file)
+            if IE_used == False: 
+                # Search for the folder within export_dir with folder_string in its name
+                for folder in os.listdir(export_dir):
+                    print(f"Trying to find folder that contains: {folder_string} within {export_dir}")
+                    if folder_string in folder:
+                        target_folder = os.path.join(export_dir, folder)
                         break
-            elif format == "dae":
-                # Look for the .fbx file in the target folder
-                for file in os.listdir(target_folder):
-                    if file.endswith('.dae'):
-                        fbx_file = os.path.join(target_folder, file)
-                        break          
-                        
 
-            if fbx_file is None:
-                print("DAE file not found.")
-                return
+                if target_folder is None:
+                    print("Target folder not found.")
+                    return
 
-            # Move the .fbx file to export_dir
-            shutil.move(fbx_file, os.path.join(export_dir, os.path.basename(fbx_file)))
+                if format == "dae":
+                    # Look for the .fbx file in the target folder
+                    for file in os.listdir(target_folder):
+                        if file.endswith('.dae'):
+                            fbx_file = os.path.join(target_folder, file)
+                            break
+                elif format == "dae":
+                    # Look for the .fbx file in the target folder
+                    for file in os.listdir(target_folder):
+                        if file.endswith('.dae'):
+                            fbx_file = os.path.join(target_folder, file)
+                            break          
 
-            # Getting the path to the moved file
-            moved_fbx_path = os.path.join(export_dir, os.path.basename(fbx_file))
+                if fbx_file is None:
+                    print("DAE file not found.")
+                    return
+
+                # Move the .fbx file to export_dir
+                shutil.move(fbx_file, os.path.join(export_dir, os.path.basename(fbx_file)))
+
+                # Getting the path to the moved file
+                moved_fbx_path = os.path.join(export_dir, os.path.basename(fbx_file))
+                
+                if format == "dae":
+                    # Renaming the file to item_name with .fbx extension
+                    new_fbx_path = os.path.join(export_dir, f"{item_name}.dae")
+                    os.rename(moved_fbx_path, new_fbx_path)
+
+                elif format == "dae":
+                    # Renaming the file to item_name with .fbx extension
+                    new_fbx_path = os.path.join(export_dir, f"{item_name}.dae")
+                    os.rename(moved_fbx_path, new_fbx_path)
+
+                # Delete the target folder
+                shutil.rmtree(target_folder)
             
-            if format == "dae":
-                # Renaming the file to item_name with .fbx extension
-                new_fbx_path = os.path.join(export_dir, f"{item_name}.dae")
-                os.rename(moved_fbx_path, new_fbx_path)
-
-            elif format == "dae":
-                # Renaming the file to item_name with .fbx extension
-                new_fbx_path = os.path.join(export_dir, f"{item_name}.dae")
-                os.rename(moved_fbx_path, new_fbx_path)
-
-
-            # Delete the target folder
-            shutil.rmtree(target_folder)
-            
-            print("DAE file moved and target folder deleted.")
+                print("DAE file moved and target folder deleted.")
 
             # if (tag_type != "scenario_structure_bsp"):
                 # # Move the .fbx file to export_dir
@@ -17221,6 +17879,13 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
                 # shutil.rmtree(target_folder)
                 
                 # print("FBX file moved and target folder deleted.")
+            
+            print("IE_used is: " + str(IE_used))
+            if IE_used == True:
+                #rename all textures to how CR4B expects them
+                rename_IE_texture_files(tex_dir)
+                
+            
             
             
             if (tag_type == "render_model"):
@@ -17402,7 +18067,7 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
                         
                         bitm_count += 1
                         
-            elif (tag_type == "scenario_structure_bsp"):
+            elif (tag_type == "1scenario_structure_bsp"): #disabling for now
                 print("sbsp tag type")
                 
                 #whether or not to grab textures
@@ -17686,7 +18351,7 @@ def HIRT_Export(map_path, tag_file, export_dir, tag_type, item_name):
                         shutil.rmtree(mode_folder)
                         
                         
-            elif (tag_type == "scenario_structure_bsp"):
+            elif (tag_type == "1scenario_structure_bsp"): #disabling for now
                 #whether or not to grab textures
                 if bpy.context.scene.cr4b_get_textures:
                     #export_dir = bpy.context.preferences.addons[__name__].preferences.export_path
@@ -18976,16 +19641,61 @@ class CR4B_ImportFile(bpy.types.Operator):
                         # Ensure one of the new objects is set as the active object
                         bpy.context.view_layer.objects.active = list(new_objects)[0]
 
-                        # Now, apply the rotation
-                        bpy.ops.transform.rotate(value=math.radians(90), orient_axis='X')
+                        if tag_type != "scenario_structure_bsp":
+                            # Now, apply the rotation
+                            bpy.ops.transform.rotate(value=math.radians(90), orient_axis='X')
 
-                        # Scale the selected objects by a factor of 3 to get to Blender scale
-                        bpy.ops.transform.resize(value=(3, 3, 3))
+                            # Scale the selected objects by a factor of 3 to get to Blender scale
+                            bpy.ops.transform.resize(value=(3, 3, 3))
+                            
+                            print ("Flipping UVs")
+                            #Flip all UVs of selected objects by the center of their UV plane itself, rather than the center of the bounding box
+                            flip_uvs_by_uv_center(new_objects)
+                            #print ("after UV flip")
                         
-                        print ("before UV flip")
-                        #Flip all UVs of selected objects by the center of their UV plane itself, rather than the center of the bounding box
-                        flip_uvs_by_uv_center(new_objects)
-                        print ("after UV flip")
+                        else:
+                            #iterate through all materials and remove "/mat /" from all of them then capitalize them
+                            for obj in new_objects:
+                                if obj.type == 'MESH':
+                                    for mat_slot in obj.material_slots:
+                                        if mat_slot.material:
+                                            # Remove "/mat /" and split the name by '.'
+                                            split_name = mat_slot.material.name.replace("/mat /", "").split('.')
+                                            
+                                            # Capitalize and reverse endianness of the hex string
+                                            hex_name = split_name[0].upper()
+                                            hex_name = ''.join(reversed([hex_name[i:i+2] for i in range(0, len(hex_name), 2)]))
+                                            
+                                            # Recombine the name
+                                            new_name = hex_name if len(split_name) == 1 else f"{hex_name}.{split_name[1]}"
+                                            
+                                            # Update the material name
+                                            mat_slot.material.name = new_name
+                           
+                        
+                        
+                        
+                        
+                        try:
+                            if new_objects is None:
+                                print("new_objects is None")
+                            else:
+                                print("new_objects is not None")
+                                # Recalculate new_objects to include only those that are still present in the scene
+                                new_objects = set(obj for obj in new_objects if obj is not None and obj.name in bpy.data.objects)
+
+                                
+                            #print("test2")
+                        except Exception as e:
+                            print(f"An exception occurred: {e}")
+                        
+                        #clean up materials so no duplicates exist
+                        print("Cleaning and Merging Duplicate Materials")
+                        merge_materials_on_objects(new_objects)
+                        
+                        
+                        
+                        print(tag_type)
                         
                         #send objects to function to iterate through all the materials for it to try to grab all needed textures
                         if tag_type == "render_model":    
@@ -18999,7 +19709,12 @@ class CR4B_ImportFile(bpy.types.Operator):
                                 print(tex_dir)
                                 apply_sbsp_textures_from_json(tag_id, new_objects, collection_name, export_dir + '\\Reports\\sbsp_ref_list.json', tex_dir)
                             except Exception as e:
-                                print("error with applying textures to sbsp")
+                                print("error with applying textures to sbsp: " + str(e))
+                        
+                        #delete shadow_casters
+                        #function to delete all objects with material name that contains: "EB3E25E1"
+                        print("Removing Shadowcasters")
+                        remove_shadow_casters(new_objects)
                         
                     except Exception as e:
                         log_to_file(f"Blender DAE Could Not Import the file!")
@@ -19143,6 +19858,99 @@ class CR4B_ImportFile(bpy.types.Operator):
         
         return {'FINISHED'}
 
+#rename textures that IE makes to how CR4B expects them to be
+def rename_IE_texture_files(directory):
+    print("Renaming Textures exported from IE")
+    for filename in os.listdir(directory):
+        if filename.endswith(".png") or filename.endswith(".tif"):
+            # Extract the original little-endian hex name without the file extension
+            original_hex_name = os.path.splitext(filename)[0]
+            
+            # Convert to upper-case
+            upper_hex_name = original_hex_name.upper()
+            
+            # Reverse the endianness to get the big-endian form
+            big_endian_hex = ''.join(reversed([upper_hex_name[i:i+2] for i in range(0, len(upper_hex_name), 2)]))
+            
+            # Convert to two's complement signed int using the initial upper-case hex
+            int_value = struct.unpack(">i", bytes.fromhex(upper_hex_name))[0]
+            
+            # Create the new filename
+            new_filename = f"{big_endian_hex}_{int_value}{os.path.splitext(filename)[1]}"
+            
+            # Rename the file
+            os.rename(os.path.join(directory, filename), os.path.join(directory, new_filename))
+
+
+
+
+#convert twos compliment to hex
+def int_to_big_endian_hex(value):
+    packed_data = struct.pack('>i', value)  # Little-endian, 4-byte signed int
+    return packed_data.hex()
+
+
+
+#merge halo infinite materials
+def merge_materials_on_objects(new_objects):
+    # Create an empty list to store materials
+    materials = []
+    
+    # Loop through each object to gather materials
+    for obj in new_objects:
+        try:
+            if obj is None or not obj:
+                print("Skipping invalid object")
+                continue
+            if hasattr(obj, 'material_slots'):
+                for slot in obj.material_slots:
+                    if slot.material is not None:
+                        materials.append(slot.material)
+        except Exception as e:
+            print(f"Exception occurred: {e}. Skipping object: {obj}")
+            continue
+    
+    # Sort the gathered materials by name
+    materials_sorted = sorted(materials, key=lambda m: m.name)
+    
+    # Loop through each object again to merge materials
+    for obj in new_objects:
+        try:
+            if obj is None or not obj:
+                continue
+            material_slots = [slot for slot in obj.material_slots if slot.material is not None and not slot.is_property_readonly('material')]
+            for slot in material_slots:
+                material = slot.material
+                material_name = material.name[:-4] if re.match('.*.\d{3}$', material.name) else material.name
+                material_name_escaped = re.escape(material_name)
+                material_cond = re.compile('^' + material_name_escaped + '$|^' + material_name_escaped + '.\d{3}$')
+                material_to_change = next((m for m in materials_sorted if material_cond.match(m.name)), None)
+                
+                if material_to_change and material != material_to_change:
+                    slot.material = material_to_change
+        except Exception as e:
+            print(f"Exception occurred: {e}. Skipping object: {obj}")
+            continue
+
+def remove_shadow_casters(new_objects):
+    objects_to_delete = []
+    
+    # Iterate through all the objects
+    for obj in new_objects:
+        # Check each material slot
+        for mat_slot in obj.material_slots:
+            mat_name = mat_slot.name
+            
+            # Check if the material name contains the specified strings
+            if "EB3E25E1" in mat_name or "90260000" in mat_name:
+                objects_to_delete.append(obj)
+                break  # No need to check further materials for this object
+                
+    # Delete the objects
+    for obj in objects_to_delete:
+        bpy.data.objects.remove(obj)
+
+
 #read JSON file to apply needed textures to Mat ID slots for imported Halo Infinite models
 def apply_textures_from_json(selected_objects, collection_name, path_to_json, tex_dir):
     # Load mode_mat_dict.json
@@ -19210,7 +20018,7 @@ def flip_uvs_by_uv_center(selected_objects):
             print(f"Skipping non-mesh object: {obj.name}")
             continue  # Skip non-mesh objects
 
-        print(f"Processing object: {obj.name}")
+        #print(f"Processing object: {obj.name}")
 
         # Make the object the active object
         bpy.context.view_layer.objects.active = obj
@@ -19218,7 +20026,7 @@ def flip_uvs_by_uv_center(selected_objects):
         # Check if UV layer exists
         mesh = obj.data
         if not mesh.uv_layers:
-            print(f"No UV layers found for object: {obj.name}")
+            #print(f"No UV layers found for object: {obj.name}")
             continue
 
         try:
@@ -19242,7 +20050,7 @@ def flip_uvs_by_uv_center(selected_objects):
 
             # Calculate the center of the bounding box
             uv_center = mathutils.Vector(((min_u + max_u) / 2, (min_v + max_v) / 2))
-            print(f"Calculated UV center for {obj.name}: {uv_center}")
+            #print(f"Calculated UV center for {obj.name}: {uv_center}")
 
             # Flip UVs across the Y-axis by the UV center
             for poly in mesh.polygons:
@@ -19251,7 +20059,7 @@ def flip_uvs_by_uv_center(selected_objects):
                     delta = uv - uv_center
                     uv_layer[loop_index].uv.y = uv_center.y - delta.y
 
-            print(f"Finished processing object: {obj.name}")
+            #print(f"Finished processing object: {obj.name}")
 
         except Exception as e:
             print(f"An error occurred: {e}")
@@ -19259,96 +20067,84 @@ def flip_uvs_by_uv_center(selected_objects):
 
 
 def apply_sbsp_textures_from_json(tag_id, selected_objects, collection_name, path_to_json, tex_dir):
-    print("tag_id: " + str(tag_id))
-    print("collection_name: " + collection_name)
-    print("path_to_json: " + path_to_json)
-    print("tex_dir: " + tex_dir)
+    print(f"tag_id: {tag_id}")
+    print(f"collection_name: {collection_name}")
+    print(f"path_to_json: {path_to_json}")
+    print(f"tex_dir: {tex_dir}")
 
     # Load sbsp_ref_list.json
     with open(path_to_json, 'r') as json_file:
         sbsp_ref_list = json.load(json_file)
 
-    # Initialize a dict to store all instances data if a match is found
     instances_data_dict = {}
-
-    # Find the entry with a matching sbsp_id
     for entry in sbsp_ref_list:
-        sbsp_id_str = str(entry.get('sbsp_id', ''))
+        if str(entry.get('sbsp_id', '')) == tag_id:
+            instances_data_dict = entry.get('instances', {})
+            break
 
-        if sbsp_id_str != tag_id:
-            continue  # No match, continue to next entry
-
-        # Entry with a matching sbsp_id is found, store instances data
-        instances_data_dict = entry.get('instances', {})
-        break
-
-    # If no matching sbsp_id is found, exit the function
     if not instances_data_dict:
-        print(f"No entry found for tag_id {tag_id}")
+        print(f"No sbsp id entry found for tag_id {tag_id}")
         return
 
-    # Iterate over selected objects and their materials
+    # Cache for bitmap_id -> texture_file
+    texture_cache = {}
+    for candidate_file in os.listdir(tex_dir):
+        if candidate_file.endswith('.tif') or candidate_file.endswith('.png'):
+            bitmap_id = candidate_file.split('_')[-1].split('.')[0]  # Assume bitmap_id is the last part of the filename
+            texture_cache[bitmap_id] = os.path.join(tex_dir, candidate_file)
+
+    # Unique material slots
+    unique_material_slots = {}
     for obj in selected_objects:
         for mat_slot in obj.material_slots:
-            mat_name = mat_slot.name.split('.')[0]  # Get name before the "."
+            mat_name = mat_slot.name.split('.')[0]
 
-            # Perform endianness reversal and two's complement conversion
-            little_endian_hex = "".join(reversed([mat_name[i:i+2] for i in range(0, len(mat_name), 2)]))
-            unsigned_int_value = int(little_endian_hex, 16)
-            packed_data = struct.pack('<I', unsigned_int_value)
-            mat_id_value = struct.unpack('<i', packed_data)[0]
-            mat_id_str = str(mat_id_value)
+            # Little-endian hex to twos-complement int
+            little_endian_hex = "".join(reversed([mat_name[i:i + 2] for i in range(0, len(mat_name), 2)]))
+            unsigned_int_value_le = int(little_endian_hex, 16)
+            packed_data_le = struct.pack('<I', unsigned_int_value_le)
+            mat_id_value_le = struct.unpack('<i', packed_data_le)[0]
+            mat_id_str_le = str(mat_id_value_le)
 
-            # Search for the corresponding material_bitmap_ids among all instances
-            for instance in instances_data_dict:
-                material_bitmap_ids = instance.get('material_bitmap_ids', {}).get(mat_id_str, [])
-                
-                if material_bitmap_ids:
-                    # Apply textures to the material
-                    mat = mat_slot.material
-                    mat.use_nodes = True
-                    nodes = mat.node_tree.nodes
+            # Big-endian hex to twos-complement int
+            big_endian_hex = mat_name  # Since it's already in big-endian format
+            unsigned_int_value_be = int(big_endian_hex, 16)
+            packed_data_be = struct.pack('>I', unsigned_int_value_be)
+            mat_id_value_be = struct.unpack('>i', packed_data_be)[0]
+            mat_id_str_be = str(mat_id_value_be)
 
-                    # Clear default nodes
-                    for node in nodes:
-                        nodes.remove(node)
-
-                    # Start position for placing image texture nodes
-                    x_pos = 0
-
-                    #bitm_num = 0
-                    
-                    for bitmap_id in material_bitmap_ids:
-                        # Search for the texture file
-                        texture_file = None
-                        for candidate_file in os.listdir(tex_dir):
-                            if str(bitmap_id) in candidate_file and (candidate_file.endswith('.tif') or candidate_file.endswith('.png')):
-                                texture_file = os.path.join(tex_dir, candidate_file)
-                                break
-
-                        if texture_file:
-                            # Create an image texture node
-                            tex_node = nodes.new('ShaderNodeTexImage')
-                            tex_node.image = bpy.data.images.load(texture_file)
-                            tex_node.location = (x_pos, 0)
-
-                            # Increment x_pos for next texture (if any)
-                            x_pos += 300  # adjust this value as per your requirements
-
-                            
-                            # # Get the bitmap name from new_materials.json
-                            # bitmap_name = get_bitmap_name_from_json(mat_name, bitm_num, tex_dir)
-                            
-                            # print("Bitmap Name: " + bitmap_name)
-                            
-                            # #name the texture node against the new_material.json file data
-                            # if bitmap_name:
-                                # tex_node.name = bitmap_name  # Set the name of the texture node
-
-                            # #TRY to connect texture to shader in Material
+            unique_material_slots[(mat_id_str_le, mat_id_str_be)] = mat_slot
 
 
-                            # bitm_num += 1
+    # Process unique material slots for both little and big endian twos complement ids
+    for (mat_id_str_le, mat_id_str_be), mat_slot in unique_material_slots.items():
+        for instance in instances_data_dict:
+            material_bitmap_ids_le = instance.get('material_bitmap_ids', {}).get(mat_id_str_le, [])
+            material_bitmap_ids_be = instance.get('material_bitmap_ids', {}).get(mat_id_str_be, [])
+            
+            # Combine both lists
+            material_bitmap_ids = material_bitmap_ids_le + [x for x in material_bitmap_ids_be if x not in material_bitmap_ids_le]
+            
+            if material_bitmap_ids:
+                mat = mat_slot.material
+                mat.use_nodes = True
+                nodes = mat.node_tree.nodes
+                for node in nodes:
+                    nodes.remove(node)
+
+                x_pos = 0
+                for bitmap_id in material_bitmap_ids:
+                    texture_file = texture_cache.get(str(bitmap_id), None)
+
+                    if texture_file:
+                        tex_node = nodes.new('ShaderNodeTexImage')
+                        tex_node.image = bpy.data.images.load(texture_file)
+                        tex_node.location = (x_pos, 0)
+                        x_pos += 300
+
+
+
+
 
 #return bitmap name so it can be assigned to the texture added to the Material in Blender
 def get_bitmap_name_from_json(mat_name, bitm_num, tex_dir):
@@ -19948,17 +20744,17 @@ class CR4B_CreateModelReport(bpy.types.Operator):
             #scan list and create tons of JSONs (WARNING! THIS TAKES FOREVER. DO NOT MAKE USERS DO THIS)
 
 # ONLY USE EACH SEASON SINCE IT TAKES HOURS
-#            scan_prt3_list(export_dir) #make JSON for each prt3 tag
-#            scan_sbsp_list(export_dir) #make JSON for each sbsp tag
-#            time.sleep(30)
-#            scan_mat_list(export_dir) #make JSON for each mat tag
+  #          scan_prt3_list(export_dir) #make JSON for each prt3 tag
+  #          scan_sbsp_list(export_dir) #make JSON for each sbsp tag
+  #          time.sleep(30)
+            scan_mat_list(export_dir) #make JSON for each mat tag
 
             #go through each JSON file for each prt3 tag and grab needed texture references
 
 # ONLY USE EACH SEASON SINCE IT TAKES HOURS
-#            create_new_prt3_list(export_dir)
-#            create_new_mat_list(export_dir)
-#            create_new_sbsp_list(export_dir)
+            create_new_prt3_list(export_dir)
+            create_new_mat_list(export_dir)
+            create_new_sbsp_list(export_dir)
 # COMMENT THIS OUT BEFORE EACH RELEASE
 
             
