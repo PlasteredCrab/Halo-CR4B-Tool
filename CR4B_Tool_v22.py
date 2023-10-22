@@ -20747,14 +20747,14 @@ class CR4B_CreateModelReport(bpy.types.Operator):
   #          scan_prt3_list(export_dir) #make JSON for each prt3 tag
   #          scan_sbsp_list(export_dir) #make JSON for each sbsp tag
   #          time.sleep(30)
-            scan_mat_list(export_dir) #make JSON for each mat tag
+   #         scan_mat_list(export_dir) #make JSON for each mat tag
 
             #go through each JSON file for each prt3 tag and grab needed texture references
 
 # ONLY USE EACH SEASON SINCE IT TAKES HOURS
-            create_new_prt3_list(export_dir)
-            create_new_mat_list(export_dir)
-            create_new_sbsp_list(export_dir)
+   #         create_new_prt3_list(export_dir)
+    #        create_new_mat_list(export_dir)
+    #        create_new_sbsp_list(export_dir)
 # COMMENT THIS OUT BEFORE EACH RELEASE
 
             
